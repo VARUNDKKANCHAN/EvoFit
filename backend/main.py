@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import predict
+from backend.routers import predict
 
 app = FastAPI(
     title="EvoFit API",
