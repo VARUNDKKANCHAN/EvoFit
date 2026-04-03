@@ -1,41 +1,41 @@
 # ========================
 # CORE ML & DATA
 # ========================
-pandas==2.2.2
-numpy==1.26.4
-scikit-learn==1.4.2
-scipy==1.13.1
-matplotlib==3.8.4
-seaborn==0.13.2
+pandas>=2.2.2
+numpy>=1.26.0
+scikit-learn>=1.4.0
+scipy>=1.12.0
+matplotlib>=3.8.0
+seaborn>=0.13.0
 
 # ========================
 # MODEL SAVING
 # ========================
-joblib==1.4.2
+joblib>=1.3.0
 
 # ========================
 # BACKEND (FASTAPI)
 # ========================
-fastapi==0.111.0
-uvicorn==0.30.1
-pydantic==2.7.1
+fastapi>=0.111.0
+uvicorn>=0.30.1
+pydantic>=2.7.1
 
 # ========================
 # DATABASE
 # ========================
-sqlalchemy==2.0.30
-psycopg2-binary==2.9.9
+sqlalchemy>=2.0.30
+psycopg2-binary>=2.9.9
 
 # ========================
 # AUTHENTICATION
 # ========================
-python-jose==3.3.0
-passlib[bcrypt]==1.7.4
+python-jose>=3.3.0
+passlib[bcrypt]>=1.7.4
 
 # ========================
 # FILE UPLOAD SUPPORT
 # ========================
-python-multipart==0.0.9
+python-multipart>=0.0.9
 
 # ========================
 # AI CHATBOT (RAG)
@@ -43,3 +43,8 @@ python-multipart==0.0.9
 langchain
 chromadb
 sentence-transformers
+
+# ========================
+# EXPERIMENT TRACKING
+# ========================
+mlflow>=2.11.0
