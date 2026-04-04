@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import UploadPredict from './pages/UploadPredict';
+import Analytics from './pages/Analytics';
 
 /* ══════════════════════════════════════════════════
    Animated page wrapper — fades + slides on route change
@@ -206,6 +207,18 @@ function UploadPage() {
 }
 
 /* ══════════════════════════════════════════════════
+   Analytics page wrapped with header
+══════════════════════════════════════════════════ */
+function AnalyticsPage() {
+  return (
+    <main style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <PageHeader title="Analytics" />
+      <Analytics />
+    </main>
+  );
+}
+
+/* ══════════════════════════════════════════════════
    App root
 ══════════════════════════════════════════════════ */
 function AppShell() {
@@ -215,17 +228,14 @@ function AppShell() {
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-primary)' }}>
       <Sidebar />
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
-        <AnimatedPage key={location.pathname}>
+        <AnimatedPage>
           <Routes location={location}>
             <Route path="/" element={
               <ComingSoon title="Dashboard" icon="📊"
                 description="Your personal training overview — workout history, streaks, personal records and weekly summaries." />
             } />
             <Route path="/upload"    element={<UploadPage />} />
-            <Route path="/analytics" element={
-              <ComingSoon title="Analytics" icon="📈"
-                description="Deep-dive charts of your accelerometer data, rep velocity trends, and fatigue curves." />
-            } />
+            <Route path="/analytics" element={<AnalyticsPage />} />
             <Route path="/targets"   element={
               <ComingSoon title="Targets" icon="🎯"
                 description="Set weekly, monthly and exercise-specific goals. Track progress toward each target in real time." />

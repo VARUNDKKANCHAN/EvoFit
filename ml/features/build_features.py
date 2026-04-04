@@ -65,7 +65,20 @@ def calculate_set_duration(df: pd.DataFrame) -> pd.DataFrame:
         mask  = df["set"] == s
         start = df[mask].index[0]
         stop  = df[mask].index[-1]
-        df.loc[mask, "duration"] = (stop - start).seconds
+        diff = stop - start
+        if hasattr(diff, "total_seconds"):
+            duration = diff.total_seconds()
+        elif hasattr(diff, "seconds"):
+            duration = diff.seconds
+        else:
+            # Fallback if the index isn't a DatetimeIndex
+            # We assume 5Hz sampling rate by default if it's row indices
+            if diff > 10000:
+                duration = diff / 1000.0  # Assumed epoch in ms
+            else:
+                duration = diff * 0.2     # Assumed rows at 5 Hz
+
+        df.loc[mask, "duration"] = duration
     return df
 
 
