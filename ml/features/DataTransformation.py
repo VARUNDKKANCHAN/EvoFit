@@ -33,7 +33,13 @@ class LowPassFilter:
 
         b, a = butter(order, cut, btype="low", output="ba", analog=False)
         if phase_shift:
-            data_table[col + "_lowpass"] = filtfilt(b, a, data_table[col])
+            # Prevent short-array crashes by capping padlen to array length - 1
+            safe_padlen = min(3 * max(len(a), len(b)), len(data_table) - 1)
+            # If array is somehow too short to filter at all, skip padlen
+            if safe_padlen <= 0:
+                data_table[col + "_lowpass"] = data_table[col]
+            else:
+                data_table[col + "_lowpass"] = filtfilt(b, a, data_table[col], padlen=safe_padlen)
         else:
             data_table[col + "_lowpass"] = lfilter(b, a, data_table[col])
         return data_table

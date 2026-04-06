@@ -190,7 +190,7 @@ export default function Analytics() {
             </div>
             <div style={{ height: '240px', width: '100%' }}>
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={everyRepData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
+                <ComposedChart data={everyRepData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
                   <defs>
                     <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="var(--purple-main)" stopOpacity={0.4}/>
@@ -210,7 +210,7 @@ export default function Analytics() {
                   {activeMetrics.includes('Rhythm') && (
                     <Line type="monotone" dataKey="rhythm" stroke="#3B82F6" strokeWidth={2} dot={false} strokeDasharray="5 5" />
                   )}
-                </AreaChart>
+                </ComposedChart>
               </ResponsiveContainer>
             </div>
           </div>
