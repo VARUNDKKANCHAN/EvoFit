@@ -133,7 +133,7 @@ def predict_exercise(df: pd.DataFrame) -> dict:
     # Use our advanced rep evaluation
     df_reps = df.copy()
     df_reps["label"] = predicted_label
-    rep_count, rep_details_list, rhythm_waveform = evaluate_reps_for_set(df_reps)
+    rep_count, rep_details_list, rhythm_waveform, mean_power = evaluate_reps_for_set(df_reps)
 
     return {
         "predicted_label": predicted_label,
@@ -143,6 +143,7 @@ def predict_exercise(df: pd.DataFrame) -> dict:
         "row_count":       len(df),
         "rep_details":     rep_details_list,
         "rhythm_waveform": rhythm_waveform,
+        "mean_power":      mean_power
     }
 
 
@@ -203,10 +204,17 @@ def predict_from_dataframe(df_raw: pd.DataFrame) -> dict:
     })
     
     total_reps = 0
+    prev_set_end_loc = None
     
     for s in sorted(unique_sets):
         subset = df_feat[df_feat["set"] == s].copy()
         if len(subset) < 5: continue
+        
+        subset_locs = np.where(df_feat["set"] == s)[0]
+        curr_start_loc = subset_locs[0]
+        rest_before_sec = max(0.0, (curr_start_loc - prev_set_end_loc) / 5.0) if prev_set_end_loc is not None else 0.0
+        prev_set_end_loc = subset_locs[-1]
+
         res = predict_exercise(subset)
         label = res["predicted_label"]
         
@@ -214,7 +222,9 @@ def predict_from_dataframe(df_raw: pd.DataFrame) -> dict:
         ex_map[label]["set_details"].append({
             "set_num": int(s),
             "reps": res["rep_count"],
-            "confidence": res["confidence"]
+            "confidence": res["confidence"],
+            "mean_power": round(res.get("mean_power", 0.0), 2),
+            "rest_before_sec": round(rest_before_sec, 1)
         })
         # Append rep details (we need to shift the rep count so they don't all start at 1 if multiple sets)
         curr_rep_base = ex_map[label]["rep_count"] - res["rep_count"]

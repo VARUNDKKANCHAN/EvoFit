@@ -119,33 +119,37 @@ def evaluate_reps(
 
     if use_minima:
         indexes = argrelextrema(signal, np.less)[0]
+        valleys = argrelextrema(signal, np.greater)[0]
     else:
         indexes = argrelextrema(signal, np.greater)[0]
+        valleys = argrelextrema(signal, np.less)[0]
 
     rep_count = len(indexes)
     if rep_count == 0:
-        return 0, [], []
+        return 0, [], [], 0.0
 
     # Extract amplitudes
     amplitudes = signal[indexes]
     median_amp = np.median(amplitudes)
     
     # Extract durations/rhythm (sample distance between peaks)
-    # The first rep duration is estimated as the time from the start until the first peak
     durations = []
     durations.append(indexes[0])
     for i in range(1, rep_count):
         durations.append(indexes[i] - indexes[i-1])
     median_dur = np.median(durations) if durations else 1
 
+    gyr_signal = dataset["gyr_r"].values if "gyr_r" in dataset.columns else np.zeros(len(signal))
+
     rep_details = []
     for i in range(rep_count):
         amp = amplitudes[i]
         dur = durations[i]
+        peak_idx = indexes[i]
+        start_idx = indexes[i-1] if i > 0 else 0
         
         # Form Score (amplitude variance)
         amp_diff = abs(amp - median_amp)
-        # normalize against typical range. Say max expected is median_amp * 2
         form_loss = min((amp_diff / (abs(median_amp) + 1e-6)) * 100 * 2, 50)
         form_score = max(50, 100 - form_loss)
         
@@ -154,11 +158,33 @@ def evaluate_reps(
         rhythm_loss = min((dur_diff / (median_dur + 1e-6)) * 100 * 3, 50)
         rhythm_score = max(50, 100 - rhythm_loss)
         
+        # Wobble Score
+        wobble = 0.0
+        if peak_idx > start_idx + 2:
+            rep_gyr = gyr_signal[int(start_idx):int(peak_idx)]
+            wobble = np.var(rep_gyr)
+
+        # Concentric vs Eccentric (Time Under Tension)
+        valleys_before = valleys[valleys < peak_idx]
+        v_before = valleys_before[-1] if len(valleys_before) > 0 else start_idx
+        
+        valleys_after = valleys[valleys > peak_idx]
+        v_after = valleys_after[0] if len(valleys_after) > 0 else min(len(signal)-1, peak_idx + int(dur/2))
+
+        concentric_samples = max(1, peak_idx - v_before)
+        eccentric_samples = max(1, v_after - peak_idx)
+        
+        concentric_sec = round(concentric_samples / FS, 2)
+        eccentric_sec = round(eccentric_samples / FS, 2)
+        
         rep_details.append({
             "rep": i + 1,
             "score": round(form_score, 1),
             "rhythm": round(rhythm_score, 1),
-            "peak_index": int(indexes[i])
+            "peak_index": int(peak_idx),
+            "wobble": round(float(wobble), 3),
+            "concentric_sec": concentric_sec,
+            "eccentric_sec": eccentric_sec
         })
 
     # Downsample signal to exactly ~60 points for waveform charting
@@ -176,7 +202,7 @@ def evaluate_reps(
                     "actual": point_val
                 })
 
-    return rep_count, rep_details, rhythm_waveform
+    return rep_count, rep_details, rhythm_waveform, float(median_amp)
 
 
 def count_reps_for_set(dataset: pd.DataFrame) -> int:
@@ -202,9 +228,9 @@ def count_reps_for_set(dataset: pd.DataFrame) -> int:
         use_minima = config["use_minima"],
     )
 
-def evaluate_reps_for_set(dataset: pd.DataFrame) -> tuple[int, list, list]:
+def evaluate_reps_for_set(dataset: pd.DataFrame) -> tuple[int, list, list, float]:
     if dataset.empty:
-        return 0, [], []
+        return 0, [], [], 0.0
     label  = dataset["label"].iloc[0].lower()
     config = EXERCISE_CONFIG.get(label, DEFAULT_CONFIG)
     return evaluate_reps(

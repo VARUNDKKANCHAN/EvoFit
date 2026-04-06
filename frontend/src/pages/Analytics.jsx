@@ -4,7 +4,7 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   PieChart, Pie, Cell, BarChart, Bar, ComposedChart, Line
 } from 'recharts';
-import { Activity, Dumbbell, Award, Timer, ChevronLeft, Download, Share2, Sparkles } from 'lucide-react';
+import { Activity, Dumbbell, Award, Timer, ChevronLeft, Share2, Sparkles } from 'lucide-react';
 
 const COLORS = {
   bench: '#7C3AED',
@@ -26,8 +26,11 @@ export default function Analytics() {
   const location = useLocation();
   const navigate = useNavigate();
   const [mounted, setMounted] = useState(false);
+  const reportRef = React.useRef(null);
   
   useEffect(() => { setMounted(true); }, []);
+
+
 
   const [sessionData] = useState(() => {
     try {
@@ -82,10 +85,32 @@ export default function Analytics() {
     const sets = currentExerciseData.set_details || [];
     return sets.map((s) => ({
       name: `Set ${s.set_num}`,
+      set_num: s.set_num,
       reps: s.reps,
-      confidence: s.confidence
+      confidence: s.confidence,
+      rest_before_sec: s.rest_before_sec,
+      mean_power: s.mean_power
     }));
   }, [currentExerciseData]);
+
+  const advancedMetrics = useMemo(() => {
+    if (!everyRepData || everyRepData.length === 0) return { wobble: 0, con: 0, ecc: 0, ratio: '1.0' };
+    let sumW = 0, sumC = 0, sumE = 0;
+    everyRepData.forEach(r => {
+      sumW += (r.wobble || 0);
+      sumC += (r.concentric_sec || 0);
+      sumE += (r.eccentric_sec || 0);
+    });
+    const len = everyRepData.length;
+    const avgC = (sumC/len).toFixed(1);
+    const avgE = (sumE/len).toFixed(1);
+    return {
+      wobble: (sumW/len).toFixed(2),
+      con: avgC,
+      ecc: avgE,
+      ratio: avgE > 0 ? (avgC / avgE).toFixed(1) : '1.0'
+    };
+  }, [everyRepData]);
 
   const pbBins = useMemo(() => {
     let exc = 0, good = 0, focus = 0;
@@ -123,7 +148,7 @@ export default function Analytics() {
   }
 
   return (
-    <div style={{ flex: 1, padding: '32px 40px', overflowY: 'auto', position: 'relative', zIndex: 1 }}>
+    <div ref={reportRef} style={{ flex: 1, padding: '32px 40px', overflowY: 'auto', position: 'relative', zIndex: 1 }}>
       
       {/* ── TOP HEADER ─────────────────────────────────────────────────── */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', animation: mounted ? 'fade-in-up 0.4s ease both' : 'none' }}>
@@ -135,13 +160,7 @@ export default function Analytics() {
             Session Analysis – Today <span style={{ fontSize: '16px', color: 'var(--text-muted)', fontWeight: 500 }}>• {exercisesPerformed} Exercises • {totalReps} Total Reps • {sessionDuration}</span>
           </h2>
         </div>
-        <div style={{ display: 'flex', gap: '12px' }}>
-           <button onClick={() => alert('PDF generation will be available soon!')} style={{ background: 'var(--purple-hover)', color: 'var(--purple-light)', border: '1px solid var(--purple-glow)', padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-             <Download size={16} /> Download Detailed PDF Report
-           </button>
-           <button onClick={() => alert('Share link copied to clipboard!')} style={{ background: 'var(--bg-card)', color: 'var(--text-primary)', border: '1px solid var(--border)', padding: '10px 12px', borderRadius: '8px', cursor: 'pointer' }}>
-             <Share2 size={16} />
-           </button>
+        <div style={{ display: 'flex', gap: '12px', opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease' }}>
         </div>
       </div>
 
@@ -271,7 +290,7 @@ export default function Analytics() {
 
         {/* ── DEEP ANALYSIS ROW ───────────────────────────────────────────── */}
         <h3 style={{ fontSize: '18px', fontWeight: 700, margin: '12px 0 16px', color: 'var(--text-primary)' }}>Deep Analysis</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr', gap: '20px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px' }}>
           
           {/* Form Quality */}
           <div className="card" style={{ padding: '24px' }}>
@@ -322,8 +341,8 @@ export default function Analytics() {
                 <ComposedChart data={rhythmData}>
                    <defs>
                     <linearGradient id="colorWave" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.8}/>
-                      <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#3B82F6" stopOpacity="0.8"/>
+                      <stop offset="95%" stopColor="#3B82F6" stopOpacity="0"/>
                     </linearGradient>
                   </defs>
                   <RechartsTooltip contentStyle={{display: 'none'}} />
@@ -338,24 +357,76 @@ export default function Analytics() {
             </div>
           </div>
 
+          {/* Advanced Physics: Wobble & TUT */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            
+            {/* Wobble / Stability Card */}
+            <div className="card" style={{ padding: '24px', flex: 1, display: 'flex', alignItems: 'center' }}>
+              <div style={{ flex: 1 }}>
+                 <h4 style={{ fontSize: '15px', fontWeight: 700, margin: '0 0 6px' }}>Form Stability (Gyroscope)</h4>
+                 <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '0 0 16px' }}>Barbell rotational wobble</p>
+                 <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px' }}>
+                   <span style={{ fontSize: '32px', fontWeight: 800, color: 'var(--purple-light)', lineHeight: 1 }}>{advancedMetrics.wobble}</span>
+                   <span style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>var/s</span>
+                 </div>
+              </div>
+              <div style={{ width: '80px', height: '80px', borderRadius: '50%', border: '4px solid', borderColor: advancedMetrics.wobble > 2.0 ? '#F87171' : '#34D399', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', color:'var(--text-primary)', fontWeight:700 }}>
+                 {advancedMetrics.wobble > 2.0 ? 'Unstable' : 'Tight'}
+              </div>
+            </div>
+
+            {/* Time Under Tension Card */}
+            <div className="card" style={{ padding: '24px', flex: 1 }}>
+              <h4 style={{ fontSize: '15px', fontWeight: 700, margin: '0 0 6px' }}>Time Under Tension</h4>
+              <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '0 0 16px' }}>Concentric vs Eccentric phases</p>
+              
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '8px' }}>
+                 <span style={{ color: '#FCD34D', fontWeight: 600 }}>Up: {advancedMetrics.con}s</span>
+                 <span style={{ color: '#3B82F6', fontWeight: 600 }}>Down: {advancedMetrics.ecc}s</span>
+              </div>
+              <div style={{ display: 'flex', height: '14px', borderRadius: '7px', overflow: 'hidden', background: 'var(--bg-secondary)' }}>
+                 <div style={{ width: `${(parseFloat(advancedMetrics.con) / (parseFloat(advancedMetrics.con) + parseFloat(advancedMetrics.ecc) || 1)) * 100}%`, background: '#FCD34D' }}></div>
+                 <div style={{ width: `${(parseFloat(advancedMetrics.ecc) / (parseFloat(advancedMetrics.con) + parseFloat(advancedMetrics.ecc) || 1)) * 100}%`, background: '#3B82F6' }}></div>
+              </div>
+              <div style={{ textAlign: 'center', marginTop: '12px', fontSize: '12px', color: 'var(--text-secondary)' }}>
+                 TEMPO RATIO <strong style={{color:'var(--text-primary)'}}>{advancedMetrics.ratio} : 1</strong>
+              </div>
+            </div>
+            
+          </div>
+
           {/* Set-by-Set Performance */}
           <div className="card" style={{ padding: '24px', display: 'flex', flexDirection: 'column' }}>
-            <h4 style={{ fontSize: '15px', fontWeight: 700, margin: '0 0 16px' }}>Set-by-Set</h4>
-            <div style={{ display: 'flex', gap: '12px', height: '120px', alignItems: 'flex-end', justifyContent: 'space-between', flex: 1 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+               <h4 style={{ fontSize: '15px', fontWeight: 700, margin: '0 0 16px' }}>Endurance & Recovery</h4>
+               <span style={{ fontSize: '12px', color: 'var(--text-muted)', paddingTop: '2px' }}>Power Fatigue Curve included</span>
+            </div>
+            <div style={{ display: 'flex', gap: '12px', height: '160px', alignItems: 'flex-end', justifyContent: 'space-between', flex: 1, paddingBottom: '24px', paddingTop: '16px' }}>
                {setBySetData.map((set, i) => {
                  const maxHeight = Math.max(...setBySetData.map(s => s.reps)) || 15;
                  const hPct = `${(set.reps/maxHeight)*100}%`;
                  return (
-                   <div key={set.name} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', flex:1 }}>
-                     <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)' }}>{set.reps}</span>
-                     <div style={{ width: '100%', maxWidth: '30px', height: hPct, background: `linear-gradient(0deg, var(--bg-secondary), ${i===0?'var(--purple-main)':'#3B82F6'})`, borderRadius: '6px' }}></div>
-                     <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>S{i+1}</span>
-                   </div>
+                   <React.Fragment key={set.name}>
+                     {i > 0 && (
+                       <div style={{ alignSelf: 'center', zIndex: 10, margin: '0 -8px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', padding: '2px 6px', borderRadius: '4px', fontSize: '10px', color: 'var(--text-muted)' }}>
+                         {set.rest_before_sec}s
+                       </div>
+                     )}
+                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', flex:1, position: 'relative' }}>
+                       <div style={{ position: 'absolute', top: '-24px', fontSize: '10px', color: '#FCD34D', whiteSpace: 'nowrap', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                          <span>{set.mean_power}G</span>
+                          <span style={{ fontSize: '8px', color: 'var(--text-muted)' }}>Peak Power</span>
+                       </div>
+                       <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)' }}>{set.reps}</span>
+                       <div style={{ width: '100%', maxWidth: '30px', height: hPct, background: `linear-gradient(0deg, var(--bg-secondary), ${i===0?'var(--purple-main)':'#3B82F6'})`, borderRadius: '6px' }}></div>
+                       <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>S{set.set_num}</span>
+                     </div>
+                   </React.Fragment>
                  );
                })}
             </div>
             
-            <div style={{ marginTop: '24px', background: 'var(--bg-secondary)', padding: '16px', borderRadius: '12px' }}>
+            <div style={{ marginTop: '16px', background: 'var(--bg-secondary)', padding: '16px', borderRadius: '12px' }}>
               <h5 style={{ fontSize: '13px', fontWeight: 600, margin: '0 0 8px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <Sparkles size={14} color="#FCD34D" /> Key Observation
               </h5>
@@ -363,7 +434,6 @@ export default function Analytics() {
                 Your strongest recorded performance interval was {bestSetSummary} based on combined volume density.
               </p>
             </div>
-
           </div>
 
         </div>

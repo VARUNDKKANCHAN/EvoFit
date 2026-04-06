@@ -14,6 +14,9 @@ class RepDetail(BaseModel):
     score: float
     rhythm: float
     peak_index: int
+    wobble: Optional[float] = 0.0
+    concentric_sec: Optional[float] = 0.0
+    eccentric_sec: Optional[float] = 0.0
 
 class RhythmWaveform(BaseModel):
     time: int
@@ -24,6 +27,8 @@ class SetDetail(BaseModel):
     set_num: int
     reps: int
     confidence: float
+    mean_power: Optional[float] = 0.0
+    rest_before_sec: Optional[float] = 0.0
 
 class ExerciseBreakdown(BaseModel):
     label: str
