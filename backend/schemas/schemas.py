@@ -6,8 +6,31 @@ These define exactly what the frontend receives as JSON.
 """
 
 from pydantic import BaseModel
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
+
+class RepDetail(BaseModel):
+    rep: int
+    score: float
+    rhythm: float
+    peak_index: int
+
+class RhythmWaveform(BaseModel):
+    time: int
+    ideal: float
+    actual: float
+
+class SetDetail(BaseModel):
+    set_num: int
+    reps: int
+    confidence: float
+
+class ExerciseBreakdown(BaseModel):
+    label: str
+    rep_count: int
+    set_details: List[SetDetail]
+    rep_details: List[RepDetail]
+    rhythm_waveform: List[RhythmWaveform]
 
 class PredictionResponse(BaseModel):
     """Returned by POST /predict/"""
@@ -18,6 +41,7 @@ class PredictionResponse(BaseModel):
     row_count:       int          # number of sensor samples in the CSV
     feature_count:   int          # number of features used by the model
     model_accuracy:  float        # overall model accuracy from training
+    exercise_breakdown: Optional[List[ExerciseBreakdown]] = None
 
 
 class MetricsResponse(BaseModel):

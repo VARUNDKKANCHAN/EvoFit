@@ -92,6 +92,92 @@ def count_reps(
 
     return len(indexes)
 
+def evaluate_reps(
+    dataset:    pd.DataFrame,
+    cutoff:     float = 0.4,
+    order:      int   = 10,
+    column:     str   = "acc_r",
+    use_minima: bool  = False,
+) -> tuple[int, list, list]:
+    """
+    Extends count_reps to also calculate Rep metrics (Form Score, Rhythm).
+    Returns (rep_count, rep_details_list, rhythm_waveform)
+    """
+    if dataset.empty:
+        return 0, [], []
+
+    # Add acc_r / gyr_r if missing
+    if "acc_r" not in dataset.columns:
+        dataset = dataset.copy()
+        dataset["acc_r"] = np.sqrt(dataset["acc_x"]**2 + dataset["acc_y"]**2 + dataset["acc_z"]**2)
+    if "gyr_r" not in dataset.columns:
+        dataset = dataset.copy()
+        dataset["gyr_r"] = np.sqrt(dataset["gyr_x"]**2 + dataset["gyr_y"]**2 + dataset["gyr_z"]**2)
+
+    data = _lowpass.low_pass_filter(dataset.copy(), col=column, sampling_frequency=FS, cutoff_frequency=cutoff, order=order)
+    signal = data[column + "_lowpass"].values
+
+    if use_minima:
+        indexes = argrelextrema(signal, np.less)[0]
+    else:
+        indexes = argrelextrema(signal, np.greater)[0]
+
+    rep_count = len(indexes)
+    if rep_count == 0:
+        return 0, [], []
+
+    # Extract amplitudes
+    amplitudes = signal[indexes]
+    median_amp = np.median(amplitudes)
+    
+    # Extract durations/rhythm (sample distance between peaks)
+    # The first rep duration is estimated as the time from the start until the first peak
+    durations = []
+    durations.append(indexes[0])
+    for i in range(1, rep_count):
+        durations.append(indexes[i] - indexes[i-1])
+    median_dur = np.median(durations) if durations else 1
+
+    rep_details = []
+    for i in range(rep_count):
+        amp = amplitudes[i]
+        dur = durations[i]
+        
+        # Form Score (amplitude variance)
+        amp_diff = abs(amp - median_amp)
+        # normalize against typical range. Say max expected is median_amp * 2
+        form_loss = min((amp_diff / (abs(median_amp) + 1e-6)) * 100 * 2, 50)
+        form_score = max(50, 100 - form_loss)
+        
+        # Rhythm Score (duration variance)
+        dur_diff = abs(dur - median_dur)
+        rhythm_loss = min((dur_diff / (median_dur + 1e-6)) * 100 * 3, 50)
+        rhythm_score = max(50, 100 - rhythm_loss)
+        
+        rep_details.append({
+            "rep": i + 1,
+            "score": round(form_score, 1),
+            "rhythm": round(rhythm_score, 1),
+            "peak_index": int(indexes[i])
+        })
+
+    # Downsample signal to exactly ~60 points for waveform charting
+    n = len(signal)
+    target = 60
+    rhythm_waveform = []
+    if n > 0:
+        step = max(1, n // target)
+        for i in range(0, n, step):
+            if len(rhythm_waveform) < target:
+                point_val = float(signal[i])
+                rhythm_waveform.append({
+                    "time": len(rhythm_waveform),
+                    "ideal": float(median_amp),
+                    "actual": point_val
+                })
+
+    return rep_count, rep_details, rhythm_waveform
+
 
 def count_reps_for_set(dataset: pd.DataFrame) -> int:
     """
@@ -110,6 +196,18 @@ def count_reps_for_set(dataset: pd.DataFrame) -> int:
     config = EXERCISE_CONFIG.get(label, DEFAULT_CONFIG)
 
     return count_reps(
+        dataset,
+        cutoff     = config["cutoff"],
+        column     = config["column"],
+        use_minima = config["use_minima"],
+    )
+
+def evaluate_reps_for_set(dataset: pd.DataFrame) -> tuple[int, list, list]:
+    if dataset.empty:
+        return 0, [], []
+    label  = dataset["label"].iloc[0].lower()
+    config = EXERCISE_CONFIG.get(label, DEFAULT_CONFIG)
+    return evaluate_reps(
         dataset,
         cutoff     = config["cutoff"],
         column     = config["column"],

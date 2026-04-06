@@ -23,7 +23,8 @@ import pandas as pd
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../features"))
 sys.path.insert(0, os.path.dirname(__file__))
 
-from count_repetitions import count_reps_for_set
+from count_repetitions import evaluate_reps_for_set
+from set_splitter import segment_sets_by_inactivity
 
 MODELS_DIR  = os.path.dirname(__file__)
 RF_PATH     = os.path.join(MODELS_DIR, "rf_model.pkl")
@@ -129,10 +130,10 @@ def predict_exercise(df: pd.DataFrame) -> dict:
         for cls, p in zip(rf.classes_, mean_proba)
     }
 
-    # Rep counting — needs a 'label' column in df
+    # Use our advanced rep evaluation
     df_reps = df.copy()
     df_reps["label"] = predicted_label
-    rep_count = count_reps_for_set(df_reps)
+    rep_count, rep_details_list, rhythm_waveform = evaluate_reps_for_set(df_reps)
 
     return {
         "predicted_label": predicted_label,
@@ -140,6 +141,8 @@ def predict_exercise(df: pd.DataFrame) -> dict:
         "probabilities":   probabilities,
         "rep_count":       int(rep_count),
         "row_count":       len(df),
+        "rep_details":     rep_details_list,
+        "rhythm_waveform": rhythm_waveform,
     }
 
 
@@ -157,9 +160,70 @@ def predict_from_dataframe(df_raw: pd.DataFrame) -> dict:
         if col not in df_raw.columns:
             df_raw[col] = default
 
+    # Segment into sets using scalar magnitude inactivity logic
+    df_raw = segment_sets_by_inactivity(df_raw, gap_seconds=3.0, fs=5.0)
+
     print("[predict_model] Running feature engineering …")
-    df_feat = _prepare_features(df_raw.copy())
-    return predict_exercise(df_feat)
+    df_feat = _prepare_features(df_raw)
+    
+    # Predict exercise over the whole session globally (weighted) to find main exercise
+    # and also accumulate per-set details.
+    
+    unique_sets = [s for s in df_feat["set"].unique() if s != 0]
+    
+    # If no valid sets found (e.g. file too short), fallback to processing whole df as 1 set
+    if not unique_sets:
+       df_feat["set"] = 1
+       unique_sets = [1]
+       
+    global_results = predict_exercise(df_feat)
+    
+    # We will accumulate sets per exercise
+    from collections import defaultdict
+    ex_map = defaultdict(lambda: {
+        "rep_count": 0,
+        "set_details": [],
+        "rep_details": [],
+        "rhythm_waveform": []
+    })
+    
+    total_reps = 0
+    
+    for s in sorted(unique_sets):
+        subset = df_feat[df_feat["set"] == s].copy()
+        if len(subset) < 5: continue
+        res = predict_exercise(subset)
+        label = res["predicted_label"]
+        
+        ex_map[label]["rep_count"] += res["rep_count"]
+        ex_map[label]["set_details"].append({
+            "set_num": int(s),
+            "reps": res["rep_count"],
+            "confidence": res["confidence"]
+        })
+        # Append rep details (we need to shift the rep count so they don't all start at 1 if multiple sets)
+        curr_rep_base = ex_map[label]["rep_count"] - res["rep_count"]
+        for r in res.get("rep_details", []):
+            shifted_r = dict(r)
+            shifted_r["rep"] = curr_rep_base + r["rep"]
+            ex_map[label]["rep_details"].append(shifted_r)
+        
+        # We just keep the rhythm waveform of the best/last set for simplicity per exercise
+        ex_map[label]["rhythm_waveform"] = res.get("rhythm_waveform", [])
+        total_reps += res["rep_count"]
+        
+    global_results["rep_count"] = total_reps
+    
+    # Store the breakdown list in global results
+    breakdown_list = []
+    for k, v in ex_map.items():
+        v["label"] = k
+        breakdown_list.append(v)
+        
+    global_results["exercise_breakdown"] = breakdown_list
+    global_results["set_details"] = [] # deprecated root property, now inside breakdown
+    
+    return global_results
 
 
 def predict_from_csv(csv_path: str) -> dict:

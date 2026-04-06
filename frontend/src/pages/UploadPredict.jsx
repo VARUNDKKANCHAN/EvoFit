@@ -131,14 +131,14 @@ export default function UploadPredict() {
     try {
       const form = new FormData();
       form.append('file', file);
-      const res  = await fetch('http://localhost:8001/predict/', { method: 'POST', body: form });
+      const res  = await fetch('http://localhost:8000/predict/', { method: 'POST', body: form });
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || 'Prediction failed');
       // Save to sessionStorage and navigate
       sessionStorage.setItem('lastPrediction', JSON.stringify({ result: data, filename: file.name }));
       navigate('/analytics', { state: { result: data, filename: file.name } });
     } catch (err) {
-      setError(err.message || 'Could not reach the API. Is the backend running on port 8001?');
+      setError(err.message || 'Could not reach the API. Is the backend running on port 8000?');
       setLoading(false); // only stop loading on error, so UI doesn't flash before nav
     }
   };

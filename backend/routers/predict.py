@@ -46,6 +46,7 @@ async def predict_exercise(file: UploadFile = File(...)):
         "rep_count":       result["rep_count"],
         "probabilities":   result["probabilities"],
         "rows_analysed":   result["row_count"],
+        "exercise_breakdown": result.get("exercise_breakdown", []),
     })
 
 
