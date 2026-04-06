@@ -64,6 +64,10 @@ export default function Analytics() {
 
   const totalReps = predictionResult?.rep_count || 0;
   const exercisesPerformed = availableExercises.length || 1;
+  const sessionDuration = predictionResult?.duration || 'Unknown';
+  const sessionTimeRange = predictionResult?.time_range || 'N/A';
+  const overallConsistency = predictionResult?.overall_consistency || '0%';
+  const bestSetSummary = predictionResult?.best_set_summary || 'N/A';
   
   // True Data from backend scoped to Active Tab
   const everyRepData = useMemo(() => currentExerciseData.rep_details || [], [currentExerciseData]);
@@ -82,6 +86,28 @@ export default function Analytics() {
       confidence: s.confidence
     }));
   }, [currentExerciseData]);
+
+  const pbBins = useMemo(() => {
+    let exc = 0, good = 0, focus = 0;
+    const probs = [];
+    everyRepData.forEach(r => {
+      if (r.score >= 85) exc++;
+      else if (r.score >= 70) good++;
+      else {
+        focus++;
+        probs.push(r);
+      }
+    });
+    const t = everyRepData.length || 1;
+    return {
+      bars: [
+        { label: 'Excellent Form', val: `${Math.round((exc/t)*100)}%`, count: exc, color: '#34D399' },
+        { label: 'Good Form', val: `${Math.round((good/t)*100)}%`, count: good, color: '#FCD34D' },
+        { label: 'Needs Focus', val: `${Math.round((focus/t)*100)}%`, count: focus, color: '#F87171' }
+      ],
+      problems: probs.slice(0, 3)
+    };
+  }, [everyRepData]);
 
   if (!predictionResult && mounted) {
     return (
@@ -106,7 +132,7 @@ export default function Analytics() {
             <ChevronLeft size={16} /> Return to Upload & Predict
           </button>
           <h2 style={{ fontSize: '24px', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
-            Session Analysis – Today <span style={{ fontSize: '16px', color: 'var(--text-muted)', fontWeight: 500 }}>• {exercisesPerformed} Exercises • {totalReps} Total Reps • 34 min</span>
+            Session Analysis – Today <span style={{ fontSize: '16px', color: 'var(--text-muted)', fontWeight: 500 }}>• {exercisesPerformed} Exercises • {totalReps} Total Reps • {sessionDuration}</span>
           </h2>
         </div>
         <div style={{ display: 'flex', gap: '12px' }}>
@@ -150,9 +176,9 @@ export default function Analytics() {
             { label: 'Total Reps Context', val: totalReps, sub: 'Entire Session', icon: <Dumbbell size={18} color="#A78BFA" /> },
             { label: 'Exercises Performed', val: exercisesPerformed, sub: 'Auto-detected', icon: null },
             { label: 'Average Form Score', val: `${realConfidence}%`, sub: 'Excellent', icon: <Award size={18} color="#34D399" /> },
-            { label: 'Overall Consistency', val: '89.7%', sub: 'Steady Rhythm', icon: <Activity size={18} color="#60A5FA" /> },
-            { label: 'Session Duration', val: '34 min', sub: '10:54 AM - 11:28 AM', icon: <Timer size={18} color="#F472B6" /> },
-            { label: 'Best Set', val: `${Math.ceil(realReps*0.35)} Reps`, sub: 'Set 2', icon: <Sparkles size={18} color="#FCD34D" /> }
+            { label: 'Overall Consistency', val: overallConsistency, sub: 'Calculated Rhythm', icon: <Activity size={18} color="#60A5FA" /> },
+            { label: 'Session Duration', val: sessionDuration, sub: sessionTimeRange, icon: <Timer size={18} color="#F472B6" /> },
+            { label: 'Best Set', val: bestSetSummary.split(' ')[0] + ' ' + bestSetSummary.split(' ')[1], sub: bestSetSummary.split(' ').slice(2).join(' '), icon: <Sparkles size={18} color="#FCD34D" /> }
           ].map((m, i) => (
             <div key={i} className="card" style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -256,15 +282,11 @@ export default function Analytics() {
             </div>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
-              {[
-                { label: 'Correct Reps', val: '87%', count: 21, color: '#34D399' },
-                { label: 'Too High', val: '9%', count: 2, color: '#FCD34D' },
-                { label: 'No Touch', val: '4%', count: 1, color: '#F87171' }
-              ].map(f => (
+              {pbBins.bars.map(f => (
                 <div key={f.label}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '4px' }}>
                     <span style={{ color: 'var(--text-secondary)' }}>{f.label}: <strong style={{color:'var(--text-primary)'}}>{f.val}</strong></span>
-                    <span style={{ color: 'var(--text-muted)' }}>{f.count}/{realReps}</span>
+                    <span style={{ color: 'var(--text-muted)' }}>{f.count}/{everyRepData.length}</span>
                   </div>
                   <div className="progress-bar" style={{ background: 'var(--bg-secondary)', height: '6px' }}>
                     <div style={{ width: f.val, background: f.color, height: '100%', borderRadius: '3px' }}></div>
@@ -272,23 +294,28 @@ export default function Analytics() {
                 </div>
               ))}
             </div>
-            <div style={{ borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
-               <h5 style={{ fontSize: '13px', color: 'var(--text-primary)', margin: '0 0 8px' }}>Problem Reps Identified</h5>
-               <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr', fontSize: '12px', color: 'var(--text-muted)', gap: '8px' }}>
-                 <span>Rep 22</span>
-                 <span style={{ color: '#FCD34D' }}>Incomplete ROM</span>
-                 <span>Too high</span>
-               </div>
-            </div>
+            
+            {pbBins.problems.length > 0 && (
+              <div style={{ borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
+                 <h5 style={{ fontSize: '13px', color: 'var(--text-primary)', margin: '0 0 8px' }}>Problem Reps Identified</h5>
+                 {pbBins.problems.map((pr, idx) => (
+                   <div key={idx} style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr', fontSize: '12px', color: 'var(--text-muted)', gap: '8px', marginBottom: '4px' }}>
+                     <span>Rep {pr.rep}</span>
+                     <span style={{ color: '#FCD34D' }}>Form Score: {pr.score}</span>
+                     <span>See Chart</span>
+                   </div>
+                 ))}
+              </div>
+            )}
           </div>
 
           {/* Rep Rhythm */}
           <div className="card" style={{ padding: '24px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                <h4 style={{ fontSize: '15px', fontWeight: 700, margin: '0 0 4px' }}>Rep Rhythm & Movement Consistency</h4>
-               <span style={{ fontSize: '12px', fontWeight: 600, color: '#34D399', background: 'rgba(52,211,153,0.1)', padding:'2px 8px', borderRadius:'10px' }}>Consistency: 91.4%</span>
+               <span style={{ fontSize: '12px', fontWeight: 600, color: '#34D399', background: 'rgba(52,211,153,0.1)', padding:'2px 8px', borderRadius:'10px' }}>Consistency: {overallConsistency}</span>
             </div>
-            <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '0 0 16px' }}>Frequency deviation detected in the top 10% of the lift on 4 reps</p>
+            <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '0 0 16px' }}>{overallConsistency === '0%' ? 'No rhythm data recorded' : 'Tracked via peak-to-peak duration variance'}</p>
             
             <div style={{ height: '160px', width: '100%', marginBottom: '16px' }}>
               <ResponsiveContainer width="100%" height="100%">
@@ -315,21 +342,17 @@ export default function Analytics() {
           <div className="card" style={{ padding: '24px', display: 'flex', flexDirection: 'column' }}>
             <h4 style={{ fontSize: '15px', fontWeight: 700, margin: '0 0 16px' }}>Set-by-Set</h4>
             <div style={{ display: 'flex', gap: '12px', height: '120px', alignItems: 'flex-end', justifyContent: 'space-between', flex: 1 }}>
-               {setBySetData.map((set, i) => (
-                 <div key={set.name} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', flex:1 }}>
-                   <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)' }}>{set.reps}</span>
-                   <div style={{ width: '100%', maxWidth: '30px', height: `${(set.reps/15)*100}%`, background: `linear-gradient(0deg, var(--bg-secondary), ${i===0?'var(--purple-main)':'#3B82F6'})`, borderRadius: '6px' }}></div>
-                   <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>S{i+1}</span>
-                 </div>
-               ))}
-               {/* Pad with empty sets to match mockup look */}
-               {[4,5].map(i => (
-                 <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', flex:1 }}>
-                   <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-muted)' }}>-</span>
-                   <div style={{ width: '100%', maxWidth: '30px', height: '20%', background: 'var(--bg-secondary)', borderRadius: '6px' }}></div>
-                   <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>S{i}</span>
-                 </div>
-               ))}
+               {setBySetData.map((set, i) => {
+                 const maxHeight = Math.max(...setBySetData.map(s => s.reps)) || 15;
+                 const hPct = `${(set.reps/maxHeight)*100}%`;
+                 return (
+                   <div key={set.name} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', flex:1 }}>
+                     <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)' }}>{set.reps}</span>
+                     <div style={{ width: '100%', maxWidth: '30px', height: hPct, background: `linear-gradient(0deg, var(--bg-secondary), ${i===0?'var(--purple-main)':'#3B82F6'})`, borderRadius: '6px' }}></div>
+                     <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>S{i+1}</span>
+                   </div>
+                 );
+               })}
             </div>
             
             <div style={{ marginTop: '24px', background: 'var(--bg-secondary)', padding: '16px', borderRadius: '12px' }}>
@@ -337,7 +360,7 @@ export default function Analytics() {
                 <Sparkles size={14} color="#FCD34D" /> Key Observation
               </h5>
               <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
-                Your strongest performance was on Set 1 with highest consistency. Form dropped noticeably in the last set.
+                Your strongest recorded performance interval was {bestSetSummary} based on combined volume density.
               </p>
             </div>
 

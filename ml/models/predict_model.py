@@ -160,6 +160,21 @@ def predict_from_dataframe(df_raw: pd.DataFrame) -> dict:
         if col not in df_raw.columns:
             df_raw[col] = default
 
+    # Extract time metadata from index if exists
+    duration_str = "Unknown"
+    time_range = "N/A"
+    
+    # Mathematical fallback calculation based on 5 Hz frequency
+    duration_sec = int(len(df_raw) / 5.0)
+    if duration_sec > 0:
+        m, s = divmod(duration_sec, 60)
+        duration_str = f"{m} min {s} sec" if m > 0 else f"{s} sec"
+
+    if isinstance(df_raw.index, pd.DatetimeIndex) and len(df_raw) > 0:
+        start_time = df_raw.index[0]
+        end_time = df_raw.index[-1]
+        time_range = f"{start_time.strftime('%I:%M %p')} - {end_time.strftime('%I:%M %p')}"
+
     # Segment into sets using scalar magnitude inactivity logic
     df_raw = segment_sets_by_inactivity(df_raw, gap_seconds=3.0, fs=5.0)
 
@@ -222,6 +237,32 @@ def predict_from_dataframe(df_raw: pd.DataFrame) -> dict:
         
     global_results["exercise_breakdown"] = breakdown_list
     global_results["set_details"] = [] # deprecated root property, now inside breakdown
+    
+    # Calculate global consistency and best set across all extracted rep arrays
+    total_rhythm_sum = 0
+    total_rhythm_count = 0
+    best_set_summary = "N/A"
+    highest_reps = 0
+    best_set_idx = 1
+    
+    for ex in breakdown_list:
+        if "rep_details" in ex:
+             for r in ex["rep_details"]:
+                 total_rhythm_sum += r["rhythm"]
+                 total_rhythm_count += 1
+        if "set_details" in ex:
+             for s in ex["set_details"]:
+                 if s["reps"] > highest_reps:
+                     highest_reps = s["reps"]
+                     best_set_idx = s["set_num"]
+                     best_set_summary = f"Set {best_set_idx} ({highest_reps} reps)"
+
+    overall_consistency = round(total_rhythm_sum / total_rhythm_count, 1) if total_rhythm_count > 0 else 0.0
+
+    global_results["duration"] = duration_str
+    global_results["time_range"] = time_range
+    global_results["overall_consistency"] = f"{overall_consistency}%"
+    global_results["best_set_summary"] = best_set_summary
     
     return global_results
 

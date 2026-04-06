@@ -47,6 +47,10 @@ async def predict_exercise(file: UploadFile = File(...)):
         "probabilities":   result["probabilities"],
         "rows_analysed":   result["row_count"],
         "exercise_breakdown": result.get("exercise_breakdown", []),
+        "duration":        result.get("duration", "Unknown"),
+        "time_range":      result.get("time_range", "N/A"),
+        "overall_consistency": result.get("overall_consistency", "0%"),
+        "best_set_summary": result.get("best_set_summary", "N/A"),
     })
 
 

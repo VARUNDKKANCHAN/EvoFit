@@ -42,6 +42,10 @@ class PredictionResponse(BaseModel):
     feature_count:   int          # number of features used by the model
     model_accuracy:  float        # overall model accuracy from training
     exercise_breakdown: Optional[List[ExerciseBreakdown]] = None
+    duration:        Optional[str] = None
+    time_range:      Optional[str] = None
+    overall_consistency: Optional[str] = None
+    best_set_summary: Optional[str] = None
 
 
 class MetricsResponse(BaseModel):
