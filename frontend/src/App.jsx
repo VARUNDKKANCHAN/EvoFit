@@ -3,10 +3,13 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import Sidebar from './components/Sidebar';
 import UploadPredict from './pages/UploadPredict';
 import Analytics from './pages/Analytics';
+import Targets from './pages/Targets';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 /* ══════════════════════════════════════════════════
    Animated page wrapper — fades + slides on route change
-══════════════════════════════════════════════════ */
+   ══════════════════════════════════════════════════ */
 function AnimatedPage({ children }) {
   const ref = useRef();
   const location = useLocation();
@@ -29,7 +32,7 @@ function AnimatedPage({ children }) {
 
 /* ══════════════════════════════════════════════════
    Shared top header
-══════════════════════════════════════════════════ */
+   ══════════════════════════════════════════════════ */
 function PageHeader({ title }) {
   const today = new Date().toLocaleDateString('en-US', {
     weekday: 'short', month: 'short', day: 'numeric',
@@ -112,7 +115,7 @@ function PageHeader({ title }) {
 
 /* ══════════════════════════════════════════════════
    Coming Soon placeholder
-══════════════════════════════════════════════════ */
+   ══════════════════════════════════════════════════ */
 function ComingSoon({ title, icon, description, accentColor = '#7C3AED' }) {
   const [hovered, setHovered] = useState(false);
 
@@ -196,7 +199,7 @@ function ComingSoon({ title, icon, description, accentColor = '#7C3AED' }) {
 
 /* ══════════════════════════════════════════════════
    Upload page wrapped with header
-══════════════════════════════════════════════════ */
+   ══════════════════════════════════════════════════ */
 function UploadPage() {
   return (
     <main style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
@@ -208,7 +211,7 @@ function UploadPage() {
 
 /* ══════════════════════════════════════════════════
    Analytics page wrapped with header
-══════════════════════════════════════════════════ */
+   ══════════════════════════════════════════════════ */
 function AnalyticsPage() {
   return (
     <main style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
@@ -219,13 +222,37 @@ function AnalyticsPage() {
 }
 
 /* ══════════════════════════════════════════════════
+   Targets page wrapped with header
+   ══════════════════════════════════════════════════ */
+function TargetsPage() {
+  return (
+    <main style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <PageHeader title="Targets & Progress" />
+      <Targets />
+    </main>
+  );
+}
+
+/* ══════════════════════════════════════════════════
    App root
-══════════════════════════════════════════════════ */
+   ══════════════════════════════════════════════════ */
 function AppShell() {
   const location = useLocation();
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-primary)' }}>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
       <Sidebar />
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
         <AnimatedPage>
@@ -236,10 +263,7 @@ function AppShell() {
             } />
             <Route path="/upload"    element={<UploadPage />} />
             <Route path="/analytics" element={<AnalyticsPage />} />
-            <Route path="/targets"   element={
-              <ComingSoon title="Targets" icon="🎯"
-                description="Set weekly, monthly and exercise-specific goals. Track progress toward each target in real time." />
-            } />
+            <Route path="/targets"   element={<TargetsPage />} />
             <Route path="/chatbot"   element={
               <ComingSoon title="AI Chatbot" icon="🤖"
                 description="Ask the EvoFit AI coach anything about your training — powered by RAG on your personal workout data." />

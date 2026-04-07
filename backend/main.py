@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from backend.routers import predict
+from backend.routers import predict, targets
+from backend.database.database import engine, Base
+import backend.database.models as models
 
 app = FastAPI(
     title="EvoFit API",
@@ -17,8 +19,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include the predict router
+
+# Create all database tables on startup if they don't exist
+@app.on_event("startup")
+def startup_event():
+    models.Base.metadata.create_all(bind=engine)
+
+# Include routers
 app.include_router(predict.router)
+app.include_router(targets.router)
 
 @app.get("/")
 async def root():

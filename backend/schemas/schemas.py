@@ -7,6 +7,7 @@ These define exactly what the frontend receives as JSON.
 
 from pydantic import BaseModel
 from typing import Dict, List, Optional
+from datetime import date, datetime
 
 
 class RepDetail(BaseModel):
@@ -62,5 +63,53 @@ class MetricsResponse(BaseModel):
     report:           dict
 
 
+
 class ErrorResponse(BaseModel):
     detail: str
+
+
+# --- TARGETS & PROGRESS SCHEMAS ---
+
+class TargetBase(BaseModel):
+    exercise: str
+    weekly_rep_target: int
+    start_date: date
+    end_date: date
+
+class TargetCreate(BaseModel):
+    exercise: str
+    weekly_rep_target: int
+
+class TargetResponse(TargetBase):
+    id: int
+    user_id: int
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+class AchievementResponse(BaseModel):
+    id: int
+    badge_name: str
+    description: str
+    icon: str
+    unlocked_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class WeeklyExerciseProgress(BaseModel):
+    exercise: str
+    label: str
+    current_reps: int
+    target_reps: int
+    percent_complete: int
+    streak_days: int
+
+class OverallProgressResponse(BaseModel):
+    overall_percent: int
+    total_reps_done: int
+    total_reps_target: int
+    exercise_progress: List[WeeklyExerciseProgress]
+    recent_achievements: List[AchievementResponse]
+    weekly_trend: List[Dict[str, float]] # e.g. [{"week": "Week 1", "completion": 75.0}]

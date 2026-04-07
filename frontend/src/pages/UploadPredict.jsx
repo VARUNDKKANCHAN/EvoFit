@@ -1,5 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const REQUIRED_COLS = ['acc_x', 'acc_y', 'acc_z', 'gyr_x', 'gyr_y', 'gyr_z'];
 const ALLOWED_EXT   = ['.csv', '.pkl'];
@@ -136,7 +137,21 @@ export default function UploadPredict() {
       if (!res.ok) throw new Error(data.detail || 'Prediction failed');
       // Save to sessionStorage and navigate
       sessionStorage.setItem('lastPrediction', JSON.stringify({ result: data, filename: file.name }));
-      navigate('/analytics', { state: { result: data, filename: file.name } });
+
+      // Achievement notifications
+      if (data.new_achievements && data.new_achievements.length > 0) {
+        data.new_achievements.forEach(badge => {
+          toast.success(`🏆 Achievement Unlocked: ${badge}`, {
+            style: { border: '1px solid var(--purple-glow)', background: 'var(--bg-card)', color: '#fff' }
+          });
+        });
+      }
+
+      // Delay navigation slightly if there are achievements so user can see the toast
+      const delay = data.new_achievements?.length > 0 ? 2000 : 0;
+      setTimeout(() => {
+        navigate('/analytics', { state: { result: data, filename: file.name } });
+      }, delay);
     } catch (err) {
       setError(err.message || 'Could not reach the API. Is the backend running on port 8000?');
       setLoading(false); // only stop loading on error, so UI doesn't flash before nav
