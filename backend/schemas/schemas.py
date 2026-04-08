@@ -6,7 +6,7 @@ These define exactly what the frontend receives as JSON.
 """
 
 from pydantic import BaseModel
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 from datetime import date, datetime
 
 
@@ -110,6 +110,8 @@ class OverallProgressResponse(BaseModel):
     overall_percent: int
     total_reps_done: int
     total_reps_target: int
+    current_streak: int
+    overall_form_score: Optional[float] = 0.0
     exercise_progress: List[WeeklyExerciseProgress]
     recent_achievements: List[AchievementResponse]
-    weekly_trend: List[Dict[str, float]] # e.g. [{"week": "Week 1", "completion": 75.0}]
+    weekly_trend: List[Dict[str, Any]] # e.g. [{"week": "Week 1", "completion": 75.0}]
