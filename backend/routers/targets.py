@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from datetime import date, timedelta
 from typing import List, Optional
 from sqlalchemy import func
+import random
 
 from backend.database.database import get_db
 from backend.database.models import Target, WorkoutSession, Achievement
@@ -189,6 +190,17 @@ def get_progress(db: Session = Depends(get_db)):
     achievements = db.query(Achievement).filter(Achievement.user_id == 1).order_by(Achievement.unlocked_at.desc()).limit(3).all()
 
     overall_perc = int((total_reps_done / total_reps_target) * 100) if total_reps_target > 0 else 0
+
+    return OverallProgressResponse(
+        overall_percent=min(overall_perc, 100),
+        total_reps_done=total_reps_done,
+        total_reps_target=total_reps_target,
+        current_streak=overall_streak,
+        overall_form_score=round(float(avg_form), 1),
+        exercise_progress=exercise_progress,
+        recent_achievements=achievements,
+        weekly_trend=weekly_trend
+    )
 
     return OverallProgressResponse(
         overall_percent=min(overall_perc, 100),

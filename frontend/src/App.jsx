@@ -239,6 +239,17 @@ function TargetsPage() {
 function AppShell() {
   const location = useLocation();
 
+  const getPageTitle = (path) => {
+    switch (path) {
+      case '/': return 'Dashboard';
+      case '/upload': return 'Upload & Predict';
+      case '/analytics': return 'Analytics';
+      case '/targets': return 'Targets & Progress';
+      case '/chatbot': return 'AI Chatbot';
+      default: return 'EvoFit';
+    }
+  };
+
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-primary)' }}>
       <ToastContainer
@@ -255,15 +266,16 @@ function AppShell() {
       />
       <Sidebar />
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
+        <PageHeader title={getPageTitle(location.pathname)} />
         <AnimatedPage>
           <Routes location={location}>
             <Route path="/" element={
               <ComingSoon title="Dashboard" icon="📊"
                 description="Your personal training overview — workout history, streaks, personal records and weekly summaries." />
             } />
-            <Route path="/upload"    element={<UploadPage />} />
-            <Route path="/analytics" element={<AnalyticsPage />} />
-            <Route path="/targets"   element={<TargetsPage />} />
+            <Route path="/upload"    element={<UploadPredict />} />
+            <Route path="/analytics" element={<Analytics />} />
+            <Route path="/targets"   element={<Targets />} />
             <Route path="/chatbot"   element={
               <ComingSoon title="AI Chatbot" icon="🤖"
                 description="Ask the EvoFit AI coach anything about your training — powered by RAG on your personal workout data." />
