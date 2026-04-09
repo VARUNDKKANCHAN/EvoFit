@@ -63,105 +63,89 @@ export default function Targets() {
     }
   };
 
-  if (loading) return <div className="flex items-center justify-center h-full"><div className="spinner" /></div>;
+  if (loading) return (
+    <div className="flex items-center justify-center h-full">
+      <div className="w-10 h-10 border-4 border-evofit-border border-t-evofit-purple-main rounded-full animate-spin" />
+    </div>
+  );
 
   return (
-    <div style={{ 
-      flex: 1, 
-      display: 'flex', 
-      flexDirection: 'column',
-      alignItems: 'center',
-      padding: '40px 20px', 
-      overflowY: 'auto', 
-      background: 'var(--bg-primary)',
-      minHeight: '100vh'
-    }}>
+    <div className="flex-1 flex flex-col items-center py-10 px-5 overflow-y-auto bg-evofit-bg-primary min-h-screen font-inter">
       {/* ── CENTRAL ARTBOARD (1440px) ─────────────────────────────────── */}
-      <div style={{ width: '100%', maxWidth: '1440px', animation: mounted ? 'fade-in 0.6s ease both' : 'none' }}>
+      <div className={`w-full max-w-[1440px] transition-opacity duration-600 ${mounted ? 'opacity-100' : 'opacity-0'}`}>
         
         {/* ── TOP HEADER ─────────────────────────────────────────────────── */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
-          <div style={{ animation: 'slide-in-left 0.5s ease both' }}>
-            <h1 style={{ fontSize: '32px', fontWeight: 800, margin: '0 0 8px', letterSpacing: '-1px', color: '#fff' }}>
+        <div className="flex justify-between items-center mb-10">
+          <div className="animate-slide-in-left">
+            <h1 className="text-[32px] font-extrabold m-0 tracking-tight text-white">
               Targets & Progress
             </h1>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '16px', margin: 0 }}>
+            <p className="text-evofit-text-secondary text-base m-0">
               Visualize your fitness milestones and track weekly volume benchmarks.
             </p>
           </div>
           
-          <div style={{ 
-            display: 'flex', alignItems: 'center', gap: '14px', padding: '12px 24px', 
-            background: 'rgba(124, 58, 237, 0.1)', border: '1px solid rgba(124, 58, 237, 0.3)', 
-            borderRadius: '20px', boxShadow: '0 0 25px rgba(124, 58, 237, 0.15)',
-            animation: 'pulse-glow 2.5s infinite' 
-          }}>
-            <Flame size={24} color="#A78BFA" fill="#7C3AED" />
-            <div style={{ textAlign: 'right' }}>
-              <p style={{ margin: 0, fontSize: '11px', fontWeight: 700, color: 'var(--purple-light)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Active Streak</p>
-              <p style={{ margin: 0, fontSize: '20px', fontWeight: 800, color: '#fff' }}>{progressData?.current_streak || 0} Days</p>
+          <div className="flex items-center gap-3.5 px-6 py-3 bg-evofit-purple-main/10 border border-evofit-purple-main/30 rounded-[20px] shadow-[0_0_25px_rgba(124,58,237,0.15)] animate-pulse-glow">
+            <Flame size={24} className="text-evofit-purple-light fill-evofit-purple-main" />
+            <div className="text-right">
+              <p className="m-0 text-[11px] font-bold text-evofit-purple-light uppercase tracking-wider">Active Streak</p>
+              <p className="m-0 text-xl font-extrabold text-white">{progressData?.current_streak || 0} Days</p>
             </div>
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 480px', gap: '28px', marginBottom: '28px' }}>
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_480px] gap-7 mb-7">
           
           {/* ── SET NEW TARGET SECTION ───────────────────────────────────── */}
-          <div className="card" style={{ padding: '32px', borderRadius: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'center', boxShadow: '0 10px 40px rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.05)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '28px' }}>
-              <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: 'rgba(124, 58, 237, 0.15)', border: '1px solid rgba(124, 58, 237, 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 20px rgba(124, 58, 237, 0.2)' }}>
-                <TargetIcon size={22} color="#A78BFA" />
+          <div className="glass-card p-8 flex flex-col justify-center shadow-premium-card">
+            <div className="flex items-center gap-3.5 mb-7">
+              <div className="w-12 h-12 rounded-xl bg-evofit-purple-main/15 border border-evofit-purple-main/30 flex items-center justify-center shadow-[0_0_20px_rgba(124,58,237,0.2)]">
+                <TargetIcon size={22} className="text-evofit-purple-light" />
               </div>
-              <h3 style={{ fontSize: '22px', fontWeight: 700, margin: 0, color: '#fff' }}>Set New Weekly Target</h3>
+              <h3 className="text-[22px] font-bold m-0 text-white">Set New Weekly Target</h3>
             </div>
             
-            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '24px', marginBottom: '32px' }}>
+            <div className="grid grid-cols-1 sm:grid-cols-[1.2fr_1fr] gap-6 mb-8">
               <div>
-                <label style={{ display: 'block', fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '10px', fontWeight: 600 }}>Exercise Perspective</label>
-                <div style={{ position: 'relative' }}>
+                <label className="block text-sm text-evofit-text-secondary mb-2.5 font-semibold">Exercise Perspective</label>
+                <div className="relative">
                   <select 
                     value={selectedExercise}
                     onChange={(e) => setSelectedExercise(e.target.value)}
-                    style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: '14px', padding: '14px 18px', color: '#fff', fontSize: '15px', outline: 'none', appearance: 'none', cursor: 'pointer' }}
+                    className="w-full bg-evofit-bg-secondary border border-evofit-border rounded-xl px-4 py-3.5 text-white text-[15px] outline-none appearance-none cursor-pointer focus:border-evofit-purple-main transition-colors"
                   >
                     {EXERCISE_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
                   </select>
-                  <ChevronRight size={18} color="var(--text-muted)" style={{ position: 'absolute', right: '16px', top: '16px', transform: 'rotate(90deg)' }} />
+                  <ChevronRight size={18} className="text-evofit-text-muted absolute right-4 top-4 rotate-90" />
                 </div>
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '10px', fontWeight: 600 }}>Weekly Rep Target</label>
-                <div style={{ position: 'relative' }}>
+                <label className="block text-sm text-evofit-text-secondary mb-2.5 font-semibold">Weekly Rep Target</label>
+                <div className="relative">
                   <input 
                     type="number"
                     placeholder="e.g. 500"
                     value={repTarget}
                     onChange={(e) => setRepTarget(e.target.value)}
-                    style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: '14px', padding: '14px 14px 14px 44px', color: '#fff', fontSize: '15px', outline: 'none' }}
+                    className="w-full bg-evofit-bg-secondary border border-evofit-border rounded-xl px-3.5 py-3.5 pl-11 text-white text-[15px] outline-none focus:border-evofit-purple-main transition-colors"
                   />
-                  <TrendingUp size={18} color="var(--purple-light)" style={{ position: 'absolute', left: '16px', top: '16px' }} />
+                  <TrendingUp size={18} className="text-evofit-purple-light absolute left-4 top-4" />
                 </div>
               </div>
             </div>
 
             <button 
-              className="btn-primary" 
               onClick={handleSaveTarget}
               disabled={saving}
-              style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', padding: '16px', fontSize: '16px', borderRadius: '14px', textTransform: 'uppercase', letterSpacing: '0.02em' }}
+              className="w-full premium-gradient text-white border-none py-4 rounded-xl font-bold text-base cursor-pointer hover:-translate-y-0.5 transition-all duration-200 uppercase tracking-wide flex items-center justify-center gap-3 disabled:opacity-50 disabled:translate-y-0 shadow-lg"
             >
               {saving ? 'Synchronizing...' : <><Plus size={20} /> Save New Target</>}
             </button>
           </div>
 
           {/* ── OVERALL PROGRESS CENTER ─────────────────────────────────── */}
-          <div className="card" style={{ 
-            padding: '32px', borderRadius: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', 
-            textAlign: 'center', position: 'relative', overflow: 'hidden', 
-            border: '1px solid rgba(124, 58, 237, 0.2)',
-            background: 'radial-gradient(circle at top right, rgba(124, 58, 237, 0.08), transparent)'
-          }}>
-            <div style={{ width: '220px', height: '220px', marginBottom: '28px', position: 'relative', filter: 'drop-shadow(0 0 30px rgba(124, 58, 237, 0.15))' }}>
+          <div className="glass-card p-8 flex flex-col items-center justify-center text-center relative overflow-hidden bg-[radial-gradient(circle_at_top_right,rgba(124,58,237,0.08),transparent)] shadow-premium-card">
+            <div className="w-[220px] h-[220px] mb-7 relative drop-shadow-[0_0_30px_rgba(124,58,237,0.15)]">
                <CircularProgressbar
                   value={progressData?.overall_percent || 0}
                   strokeWidth={10}
@@ -172,113 +156,96 @@ export default function Targets() {
                     pathTransitionDuration: 2.0,
                   })}
                />
-               <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                  <span style={{ fontSize: '48px', fontWeight: 800, color: '#fff', letterSpacing: '-1px' }}>{progressData?.overall_percent}%</span>
-                  <div style={{ width: '40px', height: '2px', background: 'var(--purple-light)', margin: '4px 0' }} />
-                  <span style={{ fontSize: '11px', color: 'var(--purple-light)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>COMPLETE</span>
+               <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="text-5xl font-extrabold text-white tracking-tighter">{progressData?.overall_percent}%</span>
+                  <div className="w-10 h-0.5 bg-evofit-purple-light my-1" />
+                  <span className="text-[11px] text-evofit-purple-light font-extrabold uppercase tracking-widest">COMPLETE</span>
                </div>
             </div>
             
-            <div style={{ animation: 'fade-in 1s ease both' }}>
-              <h4 style={{ margin: '0 0 8px', fontSize: '24px', fontWeight: 800, color: '#fff' }}>
-                {progressData?.total_reps_done.toLocaleString()} reps done <span style={{ color: 'var(--text-muted)', fontSize: '18px', fontWeight: 400 }}>/ {progressData?.total_reps_target.toLocaleString()} total target</span>
+            <div className="animate-fade-in duration-1000">
+              <h4 className="m-0 mb-2 text-2xl font-extrabold text-white">
+                {progressData?.total_reps_done.toLocaleString()} reps done <span className="text-evofit-text-muted text-lg font-normal">/ {progressData?.total_reps_target.toLocaleString()} total target</span>
               </h4>
-              <p style={{ margin: 0, fontSize: '15px', color: 'var(--text-muted)', fontWeight: 500 }}>Overall Goal Completion</p>
+              <p className="m-0 text-[15px] text-evofit-text-muted font-medium">Overall Goal Completion</p>
             </div>
           </div>
         </div>
 
         {/* ── WEEKLY BREAKDOWN GRID ────────────────────────────────────── */}
-        <div style={{ marginBottom: '40px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-            <h2 style={{ fontSize: '24px', fontWeight: 800, margin: 0, color: '#fff' }}>Weekly Breakdown Grid</h2>
-            <div style={{ display: 'flex', gap: '12px' }}>
-               <div style={{ padding: '8px 16px', borderRadius: '12px', background: 'rgba(34, 211, 238, 0.1)', border: '1px solid rgba(34, 211, 238, 0.3)', color: '#22D3EE', fontSize: '12px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <div className="mb-10">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-extrabold m-0 text-white">Weekly Breakdown Grid</h2>
+            <div className="flex gap-3">
+               <div className="px-4 py-2 rounded-xl bg-cyan-400/10 border border-cyan-400/30 text-cyan-400 text-xs font-bold flex items-center gap-1.5">
                   <Sparkles size={14} /> Consistency Score: {progressData?.overall_form_score}%
                </div>
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {progressData?.exercise_progress.map((ex, i) => (
-              <div key={ex.exercise} className="card" style={{ 
-                padding: '28px', borderRadius: '20px', background: 'var(--bg-card)', 
-                animation: 'stagger-in 0.6s ease both', animationDelay: `${0.1 * i}s`,
-                transition: 'transform 0.3s ease, border-color 0.3s ease',
-                position: 'relative', overflow: 'hidden'
-              }}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-6px)'; e.currentTarget.style.borderColor = 'rgba(124, 58, 237, 0.4)'; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'var(--border)'; }}
+              <div key={ex.exercise} 
+                className={`glass-card p-7 animate-stagger-in hover:-translate-y-1.5 hover:border-evofit-purple-main/40 transition-all duration-300 relative overflow-hidden`}
+                style={{ animationDelay: `${0.1 * i}s` }}
               >
                 {/* Subtle Cyan Glow for in-progress items */}
                 {ex.percent_complete > 0 && ex.percent_complete < 100 && (
-                  <div style={{ position: 'absolute', top: 0, right: 0, width: '60px', height: '60px', background: 'radial-gradient(circle at top right, rgba(34, 211, 238, 0.05), transparent)', pointerEvents: 'none' }} />
+                  <div className="absolute top-0 right-0 w-[60px] h-[60px] bg-[radial-gradient(circle_at_top_right,rgba(34,211,238,0.05),transparent)] pointer-events-none" />
                 )}
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px', alignItems: 'center' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                     <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        {ex.exercise === 'dead' ? <Dumbbell size={18} color="#A78BFA" /> : <Activity size={18} color="#A78BFA" />}
+                <div className="flex justify-between mb-6 items-center">
+                  <div className="flex items-center gap-3">
+                     <div className="w-9 h-9 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center">
+                        {ex.exercise === 'dead' ? <Dumbbell size={18} className="text-evofit-purple-light" /> : <Activity size={18} className="text-evofit-purple-light" />}
                      </div>
-                     <span style={{ fontWeight: 800, fontSize: '18px', color: '#fff' }}>{ex.label}</span>
+                     <span className="font-extrabold text-[18px] text-white uppercase">{ex.label}</span>
                   </div>
-                  <div style={{ fontSize: '11px', fontWeight: 800, background: 'rgba(245, 158, 11, 0.12)', color: '#F59E0B', padding: '6px 12px', borderRadius: '20px', display: 'flex', alignItems: 'center', gap: '6px', border: '1px solid rgba(245, 158, 11, 0.2)' }}>
-                    <Flame size={12} fill="#F59E0B" /> {ex.streak_days} DAY STREAK
+                  <div className="text-[11px] font-extrabold bg-amber-500/15 text-amber-500 px-3 py-1.5 rounded-full flex items-center gap-1.5 border border-amber-500/20">
+                    <Flame size={12} className="fill-amber-500" /> {ex.streak_days} DAY STREAK
                   </div>
                 </div>
                 
-                <div style={{ marginBottom: '28px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', marginBottom: '10px' }}>
-                    <span style={{ color: 'var(--purple-light)', fontWeight: 700 }}>{ex.percent_complete}% complete</span>
-                    <span style={{ color: 'var(--text-primary)', fontWeight: 700 }}>{ex.current_reps} <span style={{ color: 'var(--text-muted)' }}>/ {ex.target_reps} reps</span></span>
+                <div className="mb-7">
+                  <div className="flex justify-between text-sm mb-2.5">
+                    <span className="text-evofit-purple-light font-bold">{ex.percent_complete}% complete</span>
+                    <span className="text-evofit-text-primary font-bold">{ex.current_reps} <span className="text-evofit-text-muted">/ {ex.target_reps} reps</span></span>
                   </div>
-                  <div className="progress-bar" style={{ height: '10px', background: 'rgba(255,255,255,0.03)', borderRadius: '5px' }}>
+                  <div className="h-2.5 bg-white/5 rounded-full overflow-hidden">
                      <div 
-                      className="progress-fill" 
-                      style={{ 
-                        width: `${ex.percent_complete}%`, 
-                        background: 'linear-gradient(90deg, #7C3AED, #22D3EE)',
-                        boxShadow: '0 0 15px rgba(124, 58, 237, 0.3)',
-                        animation: 'fill-in 1.2s cubic-bezier(0.4, 0, 0.2, 1) both' 
-                      }} 
+                      className="h-full bg-gradient-to-r from-evofit-purple-main to-cyan-400 shadow-[0_0_15px_rgba(124,58,237,0.3)] animate-fill-in duration-[1200ms] rounded-full" 
+                      style={{ width: `${ex.percent_complete}%` }} 
                      />
                   </div>
-                  <p style={{ margin: '8px 0 0', fontSize: '11px', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Weekly Volume Fill Animation</p>
+                  <p className="m-0 mt-2 text-[10px] text-evofit-text-muted font-bold uppercase tracking-wider">Weekly Volume Progress</p>
                 </div>
   
                 <button 
                   onClick={() => navigate(`/analytics?exercise=${ex.exercise}&session=latest`)}
-                  style={{ 
-                    width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)', 
-                    borderRadius: '12px', padding: '12px', color: 'var(--text-secondary)', 
-                    fontSize: '13px', fontWeight: 700, cursor: 'pointer', transition: 'all 0.3s', 
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' 
-                  }}
-                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(124, 58, 237, 0.1)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = 'rgba(124, 58, 237, 0.3)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.borderColor = 'var(--border)'; }}
+                  className="w-full bg-white/5 border border-evofit-border rounded-xl py-3 text-evofit-text-secondary text-[13px] font-bold cursor-pointer transition-all duration-300 flex items-center justify-center gap-2 hover:bg-evofit-purple-main/10 hover:text-white hover:border-evofit-purple-main/30 group"
                 >
-                  View Detailed Analysis <ChevronRight size={16} />
+                  View Detailed Analysis <ChevronRight size={16} className="transition-transform group-hover:translate-x-0.5" />
                 </button>
               </div>
             ))}
           </div>
         </div>
   
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 380px', gap: '32px', marginBottom: '60px' }}>
+        <div className="grid grid-cols-1 xl:grid-cols-[1fr_380px] gap-8 mb-[60px]">
           
           {/* ── GOAL PERFORMANCE TREND ─────────────────────────────────── */}
-          <div className="card" style={{ padding: '36px', borderRadius: '24px', background: 'var(--bg-card)', boxShadow: '0 15px 45px rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.03)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '32px', alignItems: 'flex-start' }}>
+          <div className="glass-card p-9 shadow-premium-card">
+            <div className="flex justify-between mb-8 items-start">
               <div>
-                <h3 style={{ fontSize: '22px', fontWeight: 800, margin: '0 0 6px', color: '#fff', letterSpacing: '-0.5px' }}>Goal Completion Trend (Last 5 Weeks)</h3>
-                <p style={{ fontSize: '14px', color: 'var(--text-muted)', margin: 0, fontWeight: 500 }}>Historical performance synchronized with Analytics</p>
+                <h3 className="text-[22px] font-extrabold m-0 mb-1.5 text-white tracking-tight">Goal Completion Trend (5 Weeks)</h3>
+                <p className="text-sm text-evofit-text-muted m-0 font-medium">Historical performance synchronized with Analytics</p>
               </div>
-              <div style={{ background: 'rgba(124, 58, 237, 0.1)', padding: '10px', borderRadius: '12px' }}>
-                <TrendingUp size={24} color="#A78BFA" />
+              <div className="bg-evofit-purple-main/10 p-2.5 rounded-xl">
+                <TrendingUp size={24} className="text-evofit-purple-light" />
               </div>
             </div>
   
-            <div style={{ height: '320px', width: '100%', padding: '0 10px' }}>
+            <div className="h-80 w-full px-2.5">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={progressData?.weekly_trend}>
                   <defs>
@@ -328,45 +295,38 @@ export default function Targets() {
           </div>
   
           {/* ── RECENT MILESTONES & BADGES ───────────────────────────────── */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(124, 58, 237, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Award size={18} color="#A78BFA" />
+          <div className="flex flex-col gap-7">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-evofit-purple-main/10 flex items-center justify-center text-evofit-purple-light">
+                <Award size={18} />
               </div>
-              <h3 style={{ fontSize: '20px', fontWeight: 800, margin: 0, color: '#fff', letterSpacing: '-0.5px' }}>Recent Milestones</h3>
+              <h3 className="text-xl font-extrabold m-0 text-white tracking-tight">Recent Milestones</h3>
             </div>
             
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div className="flex flex-col gap-4">
               {progressData?.recent_achievements.length > 0 ? (
                 progressData.recent_achievements.map((ach, i) => (
-                  <div key={ach.id} className="card" style={{ 
-                    padding: '24px', background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.04)',
-                    display: 'flex', gap: '18px', alignItems: 'center', borderRadius: '18px',
-                    animation: 'fade-in-up 0.5s ease both', animationDelay: `${0.5 + i * 0.1}s`
-                  }}>
-                     <div style={{ 
-                       width: '56px', height: '56px', borderRadius: '18px', 
-                       background: 'linear-gradient(135deg, #FFD700, #B8860B)', 
-                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                       boxShadow: '0 0 20px rgba(184, 134, 11, 0.3)', flexShrink: 0
-                     }}>
-                        <Sparkles size={26} color="#fff" strokeWidth={2.5} />
+                  <div key={ach.id} 
+                    className="glass-card p-6 bg-white/[0.02] border-white/[0.04] flex gap-4.5 items-center animate-fade-in-up"
+                    style={{ animationDelay: `${0.5 + i * 0.1}s` }}
+                  >
+                     <div className="w-14 h-14 rounded-[18px] bg-gradient-to-br from-amber-400 to-amber-700 flex items-center justify-center shadow-[0_0_20px_rgba(184,134,11,0.3)] shrink-0">
+                        <Sparkles size={26} className="text-white" strokeWidth={2.5} />
                      </div>
                      <div>
-                       <p style={{ margin: '0 0 4px', fontSize: '15px', fontWeight: 800, color: '#fff' }}>{ach.badge_name}</p>
-                       <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted)', lineHeight: 1.5, fontWeight: 500 }}>{ach.description}</p>
+                       <p className="m-0 mb-1 text-[15px] font-extrabold text-white">{ach.badge_name}</p>
+                       <p className="m-0 text-[13px] text-evofit-text-muted leading-relaxed font-medium">{ach.description}</p>
                      </div>
                   </div>
                 ))
               ) : (
-                <div className="card" style={{ padding: '40px 24px', textAlign: 'center', borderRadius: '18px', background: 'rgba(255,255,255,0.01)' }}>
-                   <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-muted)', fontWeight: 500 }}>No milestones yet. Keep training to unlock badges!</p>
+                <div className="glass-card p-10 text-center bg-white/[0.01]">
+                   <p className="m-0 text-sm text-evofit-text-muted font-medium">No milestones yet. Keep training to unlock badges!</p>
                 </div>
               )}
               
               <button 
-                className="btn-secondary" 
-                style={{ width: '100%', marginTop: '8px', padding: '14px', borderRadius: '14px', fontSize: '14px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}
+                className="w-full bg-transparent text-evofit-text-primary border border-evofit-border py-3.5 rounded-xl font-bold text-sm cursor-pointer hover:border-evofit-purple-main hover:text-evofit-purple-light transition-all duration-200 uppercase tracking-widest mt-2"
               >
                 View All Badges
               </button>
@@ -377,13 +337,13 @@ export default function Targets() {
   
       </div>
       
-      <footer style={{ width: '100%', maxWidth: '1440px', padding: '40px 0', borderTop: '1px solid var(--border)', textAlign: 'center' }}>
-         <div style={{ display: 'flex', justifyContent: 'center', gap: '24px', marginBottom: '16px' }}>
-            <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600 }}>Privacy Policy</span>
-            <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600 }}>Terms of Service</span>
-            <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600 }}>Contact Coach</span>
+      <footer className="w-full max-w-[1440px] py-10 border-t border-evofit-border text-center">
+         <div className="flex justify-center gap-6 mb-4">
+            <span className="text-[12px] text-evofit-text-muted font-semibold cursor-pointer hover:text-evofit-purple-light transition-colors">Privacy Policy</span>
+            <span className="text-[12px] text-evofit-text-muted font-semibold cursor-pointer hover:text-evofit-purple-light transition-colors">Terms of Service</span>
+            <span className="text-[12px] text-evofit-text-muted font-semibold cursor-pointer hover:text-evofit-purple-light transition-colors">Contact Coach</span>
          </div>
-         <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted)', fontWeight: 500 }}>© 2025 EvoFit Analytics · High-Performance Training Systems</p>
+         <p className="m-0 text-[13px] text-evofit-text-muted font-medium">© 2025 EvoFit Analytics · High-Performance Training Systems</p>
       </footer>
     </div>
   );

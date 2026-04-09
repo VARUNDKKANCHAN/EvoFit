@@ -33,3 +33,6 @@ app.include_router(users.router)
 @app.get("/")
 async def root():
     return {"message": "Welcome to the EvoFit AI API. Systems operational."}
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)

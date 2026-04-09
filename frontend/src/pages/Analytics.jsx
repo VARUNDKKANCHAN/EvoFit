@@ -20,8 +20,6 @@ const EXERCISE_LABELS = {
   bench: 'Bench Press', dead: 'Deadlift', squat: 'Squat', ohp: 'Overhead Press', row: 'Barbell Row',
 };
 
-// Dummy generators removed: rep and rhythm data now comes dynamically from backend
-
 export default function Analytics() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -29,8 +27,6 @@ export default function Analytics() {
   const reportRef = React.useRef(null);
   
   useEffect(() => { setMounted(true); }, []);
-
-
 
   const [sessionData] = useState(() => {
     try {
@@ -136,10 +132,10 @@ export default function Analytics() {
 
   if (!predictionResult && mounted) {
     return (
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ textAlign: 'center', padding: '40px', background: 'var(--bg-card)', borderRadius: '16px', border: '1px dashed var(--border)' }}>
-          <p style={{ color: 'var(--text-secondary)', marginBottom: '16px' }}>No active prediction result to display.</p>
-          <button className="btn-primary" onClick={() => navigate('/upload')}>
+      <div className="flex-1 flex items-center justify-center">
+        <div className="text-center p-10 bg-evofit-bg-secondary rounded-2xl border border-dashed border-evofit-border">
+          <p className="text-evofit-text-secondary mb-4">No active prediction result to display.</p>
+          <button className="premium-gradient text-white px-6 py-2.5 rounded-xl font-bold hover:-translate-y-0.5 transition-all shadow-lg" onClick={() => navigate('/upload')}>
             Go to Upload
           </button>
         </div>
@@ -148,38 +144,26 @@ export default function Analytics() {
   }
 
   return (
-    <div ref={reportRef} style={{ flex: 1, padding: '32px 40px', overflowY: 'auto', position: 'relative', zIndex: 1 }}>
+    <div ref={reportRef} className="flex-1 p-8 md:p-10 overflow-y-auto relative z-10 bg-evofit-bg-primary font-inter">
       
       {/* ── TOP HEADER ─────────────────────────────────────────────────── */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', animation: mounted ? 'fade-in-up 0.4s ease both' : 'none' }}>
-        <div>
-          <button onClick={() => navigate('/upload')} style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', cursor: 'pointer', padding: 0, marginBottom: '8px' }}>
-            <ChevronLeft size={16} /> Return to Upload & Predict
-          </button>
-          <h2 style={{ fontSize: '24px', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
-            Session Analysis – Today <span style={{ fontSize: '16px', color: 'var(--text-muted)', fontWeight: 500 }}>• {exercisesPerformed} Exercises • {totalReps} Total Reps • {sessionDuration}</span>
-          </h2>
-        </div>
-        <div style={{ display: 'flex', gap: '12px', opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease' }}>
-        </div>
+      {/* ── RETURN BUTTON ─────────────────────────────────────────────────── */}
+      <div className={`mb-4 transition-all duration-400 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+        <button onClick={() => navigate('/upload')} className="bg-transparent border-none text-evofit-text-secondary flex items-center gap-1.5 text-[13px] cursor-pointer p-0 mb-2 hover:text-white transition-colors">
+          <ChevronLeft size={16} /> Return to Upload & Predict
+        </button>
       </div>
 
       {/* ── TABS ───────────────────────────────────────────────────────── */}
-      <div style={{ display: 'flex', borderBottom: '1px solid var(--border)', marginBottom: '24px', animation: mounted ? 'fade-in-up 0.5s ease both' : 'none' }}>
+      <div className={`flex border-b border-evofit-border mb-6 transition-all duration-500 delay-100 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
         {availableExercises.map(tab => {
           const isActive = activeTab === tab;
           return (
             <div 
               key={tab}
               onClick={() => setActiveTab(tab)}
-              style={{
-                padding: '12px 24px',
-                cursor: 'pointer',
-                color: isActive ? 'var(--purple-light)' : 'var(--text-secondary)',
-                fontWeight: isActive ? 600 : 500,
-                borderBottom: isActive ? '3px solid var(--purple-main)' : '3px solid transparent',
-                transition: 'all 0.2s',
-              }}
+              className={`px-6 py-3 cursor-pointer transition-all duration-200 border-b-[3px] font-semibold text-sm
+                ${isActive ? 'text-evofit-purple-light border-evofit-purple-main' : 'text-evofit-text-secondary border-transparent hover:text-white'}`}
             >
               {EXERCISE_LABELS[tab] || tab}
             </div>
@@ -187,70 +171,72 @@ export default function Analytics() {
         })}
       </div>
 
-      <div style={{ animation: mounted ? 'fade-in-up 0.6s ease both' : 'none' }}>
+      <div className={`transition-all duration-600 delay-200 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
         
         {/* ── KEY METRICS ROW ───────────────────────────────────────────── */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '16px', marginBottom: '24px' }}>
+        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
           {[
-            { label: 'Total Reps Context', val: totalReps, sub: 'Entire Session', icon: <Dumbbell size={18} color="#A78BFA" /> },
+            { label: 'Total Reps Context', val: totalReps, sub: 'Entire Session', icon: <Dumbbell size={18} className="text-evofit-purple-light" /> },
             { label: 'Exercises Performed', val: exercisesPerformed, sub: 'Auto-detected', icon: null },
-            { label: 'Average Form Score', val: `${realConfidence}%`, sub: 'Excellent', icon: <Award size={18} color="#34D399" /> },
-            { label: 'Overall Consistency', val: overallConsistency, sub: 'Calculated Rhythm', icon: <Activity size={18} color="#60A5FA" /> },
-            { label: 'Session Duration', val: sessionDuration, sub: sessionTimeRange, icon: <Timer size={18} color="#F472B6" /> },
-            { label: 'Best Set', val: bestSetSummary.split(' ')[0] + ' ' + bestSetSummary.split(' ')[1], sub: bestSetSummary.split(' ').slice(2).join(' '), icon: <Sparkles size={18} color="#FCD34D" /> }
+            { label: 'Average Form Score', val: `${realConfidence}%`, sub: 'Excellent', icon: <Award size={18} className="text-green-400" /> },
+            { label: 'Overall Consistency', val: overallConsistency, sub: 'Calculated Rhythm', icon: <Activity size={18} className="text-blue-400" /> },
+            { label: 'Session Duration', val: sessionDuration, sub: sessionTimeRange, icon: <Timer size={18} className="text-pink-400" /> },
+            { label: 'Best Set', val: bestSetSummary.split(' ')[0] + ' ' + bestSetSummary.split(' ')[1], sub: bestSetSummary.split(' ').slice(2).join(' '), icon: <Sparkles size={18} className="text-amber-400" /> }
           ].map((m, i) => (
-            <div key={i} className="card" style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0, fontWeight: 500 }}>{m.label}</p>
+            <div key={i} className="glass-card p-5 flex flex-col gap-2 shadow-premium-card">
+              <div className="flex justify-between items-start">
+                <p className="text-[13px] text-evofit-text-secondary m-0 font-medium">{m.label}</p>
                 {m.icon && m.icon}
               </div>
               <div>
-                <p style={{ fontSize: '28px', fontWeight: 800, margin: '4px 0 0', color: 'var(--text-primary)' }}>{m.val}</p>
-                <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '2px 0 0' }}>{m.sub}</p>
+                <p className="text-[28px] font-extrabold m-0 text-white leading-tight">{m.val}</p>
+                <p className="text-[12px] text-evofit-text-muted m-0 mt-0.5">{m.sub}</p>
               </div>
             </div>
           ))}
         </div>
 
         {/* ── MAIN CHARTS ROW ────────────────────────────────────────────── */}
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '20px', marginBottom: '20px' }}>
+        <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-5 mb-5">
           
           {/* Every Rep Breakdown */}
-          <div className="card" style={{ padding: '24px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+          <div className="glass-card p-6 shadow-premium-card">
+            <div className="flex justify-between mb-5 items-center">
               <div>
-                <h3 style={{ fontSize: '16px', fontWeight: 700, margin: '0 0 4px' }}>Every Rep Breakdown</h3>
-                <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: 0 }}>Interactive performance tracking</p>
+                <h3 className="text-base font-bold m-0 text-white">Every Rep Breakdown</h3>
+                <p className="text-[13px] text-evofit-text-muted m-0">Interactive performance tracking</p>
               </div>
-              <div style={{ display: 'flex', gap: '8px' }}>
+              <div className="flex gap-2">
                 {['Form Score', 'Rhythm'].map((t) => {
                   const isActive = activeMetrics.includes(t);
                   return (
-                    <span key={t} onClick={() => toggleMetric(t)} style={{ fontSize: '12px', padding: '4px 10px', background: isActive?'var(--purple-hover)':'transparent', color: isActive?'var(--purple-light)':'var(--text-secondary)', border: `1px solid ${isActive?'var(--purple-glow)':'var(--border)'}`, borderRadius: '14px', cursor: 'pointer', transition: 'all 0.2s' }}>
+                    <span key={t} onClick={() => toggleMetric(t)} 
+                      className={`text-[12px] px-2.5 py-1 rounded-full cursor-pointer transition-all border
+                        ${isActive ? 'bg-evofit-purple-main/20 text-evofit-purple-light border-evofit-purple-main/40 shadow-[0_0_10px_rgba(124,58,237,0.2)]' : 'bg-transparent text-evofit-text-secondary border-evofit-border hover:border-white/20'}`}>
                       {t}
                     </span>
                   );
                 })}
               </div>
             </div>
-            <div style={{ height: '240px', width: '100%' }}>
+            <div className="h-[240px] w-full mt-2">
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart data={everyRepData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
                   <defs>
                     <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="var(--purple-main)" stopOpacity={0.4}/>
-                      <stop offset="95%" stopColor="var(--purple-main)" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#7C3AED" stopOpacity={0.4}/>
+                      <stop offset="95%" stopColor="#7C3AED" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
-                  <XAxis dataKey="rep" stroke="var(--text-muted)" fontSize={12} tickLine={false} axisLine={false} />
-                  <YAxis stroke="var(--text-muted)" fontSize={12} tickLine={false} axisLine={false} domain={[0, 100]} />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.03)" />
+                  <XAxis dataKey="rep" stroke="rgba(255,255,255,0.35)" fontSize={12} tickLine={false} axisLine={false} />
+                  <YAxis stroke="rgba(255,255,255,0.35)" fontSize={12} tickLine={false} axisLine={false} domain={[0, 100]} />
                   <RechartsTooltip 
-                    contentStyle={{ borderRadius: '12px', background: 'var(--bg-secondary)', border: '1px solid var(--border)' }}
+                    contentStyle={{ borderRadius: '12px', background: '#16161F', border: '1px solid #2A2A3A', fontSize: '12px' }}
                     itemStyle={{ color: '#F0F0F5', fontWeight: 'bold' }}
                   />
                   {activeMetrics.includes('Form Score') && (
-                    <Area type="monotone" dataKey="score" stroke="var(--purple-light)" strokeWidth={3} fillOpacity={1} fill="url(#colorScore)" activeDot={{ r: 6, fill: '#fff', stroke: 'var(--purple-main)', strokeWidth: 2 }} />
+                    <Area type="monotone" dataKey="score" stroke="#A78BFA" strokeWidth={3} fillOpacity={1} fill="url(#colorScore)" activeDot={{ r: 6, fill: '#fff', stroke: '#7C3AED', strokeWidth: 2 }} />
                   )}
                   {activeMetrics.includes('Rhythm') && (
                     <Line type="monotone" dataKey="rhythm" stroke="#3B82F6" strokeWidth={2} dot={false} strokeDasharray="5 5" />
@@ -261,26 +247,26 @@ export default function Analytics() {
           </div>
 
           {/* All Exercises Distribution */}
-          <div className="card" style={{ padding: '24px' }}>
-            <h3 style={{ fontSize: '16px', fontWeight: 700, margin: '0 0 4px' }}>All Exercises - Rep Distribution</h3>
-            <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: '0 0 16px' }}>Volume breakdown</p>
-            <div style={{ display: 'flex', alignItems: 'center', height: '200px' }}>
-              <div style={{ width: '50%', height: '100%' }}>
+          <div className="glass-card p-6 shadow-premium-card">
+            <h3 className="text-base font-bold m-0 text-white">All Exercises - Rep Distribution</h3>
+            <p className="text-[13px] text-evofit-text-muted m-0 mb-4">Volume breakdown</p>
+            <div className="flex items-center h-[200px]">
+              <div className="w-1/2 h-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie data={pieData} innerRadius={50} outerRadius={80} paddingAngle={4} dataKey="value" stroke="none">
                       {pieData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.fill} />)}
                     </Pie>
-                    <RechartsTooltip contentStyle={{ borderRadius: '8px', background: '#16161F', border: '1px solid #2A2A3A' }} />
+                    <RechartsTooltip contentStyle={{ borderRadius: '8px', background: '#16161F', border: '1px solid #2A2A3A', fontSize: '12px' }} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
-              <div style={{ width: '50%', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div className="w-1/2 flex flex-col gap-2.5">
                 {pieData.map(d => (
-                  <div key={d.name} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: 'var(--text-secondary)' }}>
-                    <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: d.fill }}></div>
-                    <span style={{flex: 1}}>{d.name}</span>
-                    <span style={{fontWeight: 700, color: 'var(--text-primary)'}}>{d.value}</span>
+                  <div key={d.name} className="flex items-center gap-2 text-[13px] text-evofit-text-secondary">
+                    <div className="w-2.5 h-2.5 rounded-full" style={{ background: d.fill }}></div>
+                    <span className="flex-1 truncate">{d.name}</span>
+                    <span className="font-bold text-white">{d.value}</span>
                   </div>
                 ))}
               </div>
@@ -289,39 +275,39 @@ export default function Analytics() {
         </div>
 
         {/* ── DEEP ANALYSIS ROW ───────────────────────────────────────────── */}
-        <h3 style={{ fontSize: '18px', fontWeight: 700, margin: '12px 0 16px', color: 'var(--text-primary)' }}>Deep Analysis</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px' }}>
+        <h3 className="text-lg font-extrabold mb-4 mt-3 text-white">Deep Analysis</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-10">
           
           {/* Form Quality */}
-          <div className="card" style={{ padding: '24px' }}>
-            <h4 style={{ fontSize: '15px', fontWeight: 700, margin: '0 0 16px' }}>Form Quality Breakdown</h4>
-            <div style={{ display: 'flex', alignItems: 'flex-end', gap: '12px', marginBottom: '24px' }}>
-              <span style={{ fontSize: '42px', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1 }}>{realConfidence}%</span>
-              <span style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '6px' }}>AVG. SCORE</span>
+          <div className="glass-card p-6 shadow-premium-card">
+            <h4 className="text-[15px] font-bold m-0 mb-4 text-white">Form Quality Breakdown</h4>
+            <div className="flex items-end gap-3 mb-6">
+              <span className="text-[42px] font-extrabold text-white leading-none tracking-tighter">{realConfidence}%</span>
+              <span className="text-[12px] text-evofit-text-muted mb-1.5 font-bold uppercase tracking-wider">Avg. Score</span>
             </div>
             
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
+            <div className="flex flex-col gap-3.5 mb-6">
               {pbBins.bars.map(f => (
                 <div key={f.label}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '4px' }}>
-                    <span style={{ color: 'var(--text-secondary)' }}>{f.label}: <strong style={{color:'var(--text-primary)'}}>{f.val}</strong></span>
-                    <span style={{ color: 'var(--text-muted)' }}>{f.count}/{everyRepData.length}</span>
+                  <div className="flex justify-between text-[12px] mb-1.5 font-medium">
+                    <span className="text-evofit-text-secondary">{f.label}: <strong className="text-white ml-1">{f.val}</strong></span>
+                    <span className="text-evofit-text-muted">{f.count}/{everyRepData.length}</span>
                   </div>
-                  <div className="progress-bar" style={{ background: 'var(--bg-secondary)', height: '6px' }}>
-                    <div style={{ width: f.val, background: f.color, height: '100%', borderRadius: '3px' }}></div>
+                  <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+                    <div className="h-full rounded-full transition-all duration-1000 ease-out" style={{ width: f.val, background: f.color }}></div>
                   </div>
                 </div>
               ))}
             </div>
             
             {pbBins.problems.length > 0 && (
-              <div style={{ borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
-                 <h5 style={{ fontSize: '13px', color: 'var(--text-primary)', margin: '0 0 8px' }}>Problem Reps Identified</h5>
+              <div className="border-t border-evofit-border pt-4">
+                 <h5 className="text-[13px] text-white font-bold m-0 mb-2.5">Problem Reps Identified</h5>
                  {pbBins.problems.map((pr, idx) => (
-                   <div key={idx} style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr', fontSize: '12px', color: 'var(--text-muted)', gap: '8px', marginBottom: '4px' }}>
+                   <div key={idx} className="grid grid-cols-[1fr_2fr_1fr] text-[12px] text-evofit-text-muted gap-2 mb-1.5 font-medium">
                      <span>Rep {pr.rep}</span>
-                     <span style={{ color: '#FCD34D' }}>Form Score: {pr.score}</span>
-                     <span>See Chart</span>
+                     <span className="text-amber-400">Form Score: {pr.score}</span>
+                     <span className="text-blue-400 text-right cursor-pointer hover:underline">Analysis</span>
                    </div>
                  ))}
               </div>
@@ -329,108 +315,112 @@ export default function Analytics() {
           </div>
 
           {/* Rep Rhythm */}
-          <div className="card" style={{ padding: '24px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-               <h4 style={{ fontSize: '15px', fontWeight: 700, margin: '0 0 4px' }}>Rep Rhythm & Movement Consistency</h4>
-               <span style={{ fontSize: '12px', fontWeight: 600, color: '#34D399', background: 'rgba(52,211,153,0.1)', padding:'2px 8px', borderRadius:'10px' }}>Consistency: {overallConsistency}</span>
+          <div className="glass-card p-6 shadow-premium-card">
+            <div className="flex justify-between items-center mb-1">
+               <h4 className="text-[15px] font-bold m-0 text-white">Rep Rhythm & Consistency</h4>
+               <span className="text-[12px] font-extrabold text-[#34D399] bg-[#34D399]/10 px-2 py-0.5 rounded-lg border border-[#34D399]/15">Consistency: {overallConsistency}</span>
             </div>
-            <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '0 0 16px' }}>{overallConsistency === '0%' ? 'No rhythm data recorded' : 'Tracked via peak-to-peak duration variance'}</p>
+            <p className="text-[12px] text-evofit-text-muted m-0 mb-5">{overallConsistency === '0%' ? 'No rhythm data recorded' : 'Tracked via peak-to-peak duration variance'}</p>
             
-            <div style={{ height: '160px', width: '100%', marginBottom: '16px' }}>
+            <div className="h-[160px] w-full mt-2 mb-4">
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart data={rhythmData}>
                    <defs>
                     <linearGradient id="colorWave" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#3B82F6" stopOpacity="0.8"/>
-                      <stop offset="95%" stopColor="#3B82F6" stopOpacity="0"/>
+                      <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
                   <RechartsTooltip contentStyle={{display: 'none'}} />
-                  <Area type="monotone" dataKey="actual" fill="url(#colorWave)" stroke="cyan" strokeWidth={2} />
+                  <Area type="monotone" dataKey="actual" fill="url(#colorWave)" stroke="#22D3EE" strokeWidth={2} />
                   <Line type="monotone" dataKey="ideal" stroke="#F472B6" strokeWidth={2} strokeDasharray="3 3" dot={false} />
                 </ComposedChart>
               </ResponsiveContainer>
             </div>
-            <div style={{ display: 'flex', gap: '16px', fontSize: '12px', color: 'var(--text-secondary)', justifyContent: 'center' }}>
-               <span style={{ display:'flex', alignItems:'center', gap:'6px'}}><div style={{width:'8px',height:'2px',background:'#F472B6'}}/> Ideal benchmark</span>
-               <span style={{ display:'flex', alignItems:'center', gap:'6px'}}><div style={{width:'8px',height:'2px',background:'cyan'}}/> Actual session average</span>
+            <div className="flex gap-4 text-[12px] text-evofit-text-secondary justify-center font-bold">
+               <span className="flex items-center gap-1.5"><div className="w-2.5 h-0.5 bg-[#F472B6]"/> Ideal benchmark</span>
+               <span className="flex items-center gap-1.5"><div className="w-2.5 h-0.5 bg-[#22D3EE]"/> Session profile</span>
             </div>
           </div>
 
           {/* Advanced Physics: Wobble & TUT */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div className="flex flex-col gap-5">
             
             {/* Wobble / Stability Card */}
-            <div className="card" style={{ padding: '24px', flex: 1, display: 'flex', alignItems: 'center' }}>
-              <div style={{ flex: 1 }}>
-                 <h4 style={{ fontSize: '15px', fontWeight: 700, margin: '0 0 6px' }}>Form Stability (Gyroscope)</h4>
-                 <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '0 0 16px' }}>Barbell rotational wobble</p>
-                 <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px' }}>
-                   <span style={{ fontSize: '32px', fontWeight: 800, color: 'var(--purple-light)', lineHeight: 1 }}>{advancedMetrics.wobble}</span>
-                   <span style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>var/s</span>
+            <div className="glass-card p-6 flex flex-1 items-center shadow-premium-card">
+              <div className="flex-1">
+                 <h4 className="text-[15px] font-bold m-0 mb-1 text-white">Form Stability (Gyro)</h4>
+                 <p className="text-[12px] text-evofit-text-muted m-0 mb-4">Barbell rotational wobble</p>
+                 <div className="flex items-end gap-2">
+                   <span className="text-[32px] font-extrabold text-evofit-purple-light leading-none tracking-tight">{advancedMetrics.wobble}</span>
+                   <span className="text-[12px] text-evofit-text-secondary mb-1 font-bold">var/s</span>
                  </div>
               </div>
-              <div style={{ width: '80px', height: '80px', borderRadius: '50%', border: '4px solid', borderColor: advancedMetrics.wobble > 2.0 ? '#F87171' : '#34D399', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', color:'var(--text-primary)', fontWeight:700 }}>
+              <div className={`w-20 h-20 rounded-full border-4 flex items-center justify-center text-[12px] text-white font-extrabold shadow-lg
+                  ${advancedMetrics.wobble > 2.0 ? 'border-red-500 shadow-red-500/10' : 'border-green-500 shadow-green-500/10'}`}>
                  {advancedMetrics.wobble > 2.0 ? 'Unstable' : 'Tight'}
               </div>
             </div>
 
             {/* Time Under Tension Card */}
-            <div className="card" style={{ padding: '24px', flex: 1 }}>
-              <h4 style={{ fontSize: '15px', fontWeight: 700, margin: '0 0 6px' }}>Time Under Tension</h4>
-              <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '0 0 16px' }}>Concentric vs Eccentric phases</p>
+            <div className="glass-card p-6 flex-1 shadow-premium-card">
+              <h4 className="text-[15px] font-bold m-0 mb-1 text-white">Time Under Tension</h4>
+              <p className="text-[12px] text-evofit-text-muted m-0 mb-4">Concentric vs Eccentric phases</p>
               
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '8px' }}>
-                 <span style={{ color: '#FCD34D', fontWeight: 600 }}>Up: {advancedMetrics.con}s</span>
-                 <span style={{ color: '#3B82F6', fontWeight: 600 }}>Down: {advancedMetrics.ecc}s</span>
+              <div className="flex justify-between text-[13px] mb-2 font-bold uppercase tracking-wide">
+                 <span className="text-amber-400">Up: {advancedMetrics.con}s</span>
+                 <span className="text-blue-400">Down: {advancedMetrics.ecc}s</span>
               </div>
-              <div style={{ display: 'flex', height: '14px', borderRadius: '7px', overflow: 'hidden', background: 'var(--bg-secondary)' }}>
-                 <div style={{ width: `${(parseFloat(advancedMetrics.con) / (parseFloat(advancedMetrics.con) + parseFloat(advancedMetrics.ecc) || 1)) * 100}%`, background: '#FCD34D' }}></div>
-                 <div style={{ width: `${(parseFloat(advancedMetrics.ecc) / (parseFloat(advancedMetrics.con) + parseFloat(advancedMetrics.ecc) || 1)) * 100}%`, background: '#3B82F6' }}></div>
+              <div className="flex h-2 bg-white/5 rounded-full overflow-hidden">
+                 <div className="bg-amber-400 h-full" style={{ width: `${(parseFloat(advancedMetrics.con) / (parseFloat(advancedMetrics.con) + parseFloat(advancedMetrics.ecc) || 1)) * 100}%` }}></div>
+                 <div className="bg-blue-400 h-full" style={{ width: `${(parseFloat(advancedMetrics.ecc) / (parseFloat(advancedMetrics.con) + parseFloat(advancedMetrics.ecc) || 1)) * 100}%` }}></div>
               </div>
-              <div style={{ textAlign: 'center', marginTop: '12px', fontSize: '12px', color: 'var(--text-secondary)' }}>
-                 TEMPO RATIO <strong style={{color:'var(--text-primary)'}}>{advancedMetrics.ratio} : 1</strong>
+              <div className="text-center mt-3 text-[12px] text-evofit-text-secondary font-bold uppercase tracking-widest">
+                 Tempo Ratio <strong className="text-white ml-1">{advancedMetrics.ratio} : 1</strong>
               </div>
             </div>
             
           </div>
 
           {/* Set-by-Set Performance */}
-          <div className="card" style={{ padding: '24px', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-               <h4 style={{ fontSize: '15px', fontWeight: 700, margin: '0 0 16px' }}>Endurance & Recovery</h4>
-               <span style={{ fontSize: '12px', color: 'var(--text-muted)', paddingTop: '2px' }}>Power Fatigue Curve included</span>
+          <div className="glass-card p-6 flex flex-col shadow-premium-card">
+            <div className="flex justify-between items-center mb-4">
+               <h4 className="text-[15px] font-bold m-0 text-white">Endurance & Recovery</h4>
+               <span className="text-[11px] text-evofit-text-muted font-bold uppercase tracking-wider">Power Fatigue Map</span>
             </div>
-            <div style={{ display: 'flex', gap: '12px', height: '160px', alignItems: 'flex-end', justifyContent: 'space-between', flex: 1, paddingBottom: '24px', paddingTop: '16px' }}>
+            <div className="flex gap-3 h-40 items-flex-end justify-between flex-1 pb-6 pt-4 px-2">
                {setBySetData.map((set, i) => {
                  const maxHeight = Math.max(...setBySetData.map(s => s.reps)) || 15;
                  const hPct = `${(set.reps/maxHeight)*100}%`;
                  return (
                    <React.Fragment key={set.name}>
                      {i > 0 && (
-                       <div style={{ alignSelf: 'center', zIndex: 10, margin: '0 -8px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', padding: '2px 6px', borderRadius: '4px', fontSize: '10px', color: 'var(--text-muted)' }}>
+                       <div className="self-center z-10 -mx-2 bg-evofit-bg-secondary border border-evofit-border px-1.5 py-0.5 rounded text-[9px] text-evofit-text-muted font-bold">
                          {set.rest_before_sec}s
                        </div>
                      )}
-                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', flex:1, position: 'relative' }}>
-                       <div style={{ position: 'absolute', top: '-24px', fontSize: '10px', color: '#FCD34D', whiteSpace: 'nowrap', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                     <div className="flex flex-col items-center gap-2 flex-1 relative h-full justify-end">
+                       <div className="absolute -top-6 text-[10px] text-amber-400 whitespace-nowrap flex flex-col items-center font-bold">
                           <span>{set.mean_power}G</span>
-                          <span style={{ fontSize: '8px', color: 'var(--text-muted)' }}>Peak Power</span>
                        </div>
-                       <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)' }}>{set.reps}</span>
-                       <div style={{ width: '100%', maxWidth: '30px', height: hPct, background: `linear-gradient(0deg, var(--bg-secondary), ${i===0?'var(--purple-main)':'#3B82F6'})`, borderRadius: '6px' }}></div>
-                       <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>S{set.set_num}</span>
+                       <span className="text-[14px] font-extrabold text-white">{set.reps}</span>
+                       <div 
+                        className={`w-full max-w-[30px] rounded-t-lg transition-all duration-1000 ease-out
+                          ${i===0 ? 'bg-gradient-to-t from-evofit-bg-secondary to-evofit-purple-main' : 'bg-gradient-to-t from-evofit-bg-secondary to-blue-500'}`}
+                        style={{ height: hPct }}
+                       ></div>
+                       <span className="text-[11px] text-evofit-text-muted font-bold uppercase">S{set.set_num}</span>
                      </div>
                    </React.Fragment>
                  );
                })}
             </div>
             
-            <div style={{ marginTop: '16px', background: 'var(--bg-secondary)', padding: '16px', borderRadius: '12px' }}>
-              <h5 style={{ fontSize: '13px', fontWeight: 600, margin: '0 0 8px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Sparkles size={14} color="#FCD34D" /> Key Observation
+            <div className="mt-4 bg-white/5 p-4 rounded-xl border border-white/5 shadow-inner">
+              <h5 className="text-[13px] font-extrabold m-0 mb-1.5 text-white flex items-center gap-1.5">
+                <Sparkles size={14} className="text-amber-400" /> Key Observation
               </h5>
-              <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
+              <p className="text-[12px] text-evofit-text-secondary m-0引导 leading-relaxed font-medium">
                 Your strongest recorded performance interval was {bestSetSummary} based on combined volume density.
               </p>
             </div>

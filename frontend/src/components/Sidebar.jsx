@@ -55,33 +55,15 @@ export default function Sidebar() {
   const navigate    = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
 
-  const w = collapsed ? '64px' : '240px';
-
   return (
-    <aside style={{
-      background:     'var(--bg-sidebar)',
-      borderRight:    '1px solid var(--border)',
-      width:          w,
-      minHeight:      '100vh',
-      display:        'flex',
-      flexDirection:  'column',
-      flexShrink:     0,
-      transition:     'width 0.3s cubic-bezier(0.4,0,0.2,1)',
-      overflow:       'hidden',
-    }}>
+    <aside 
+      className={`bg-evofit-bg-sidebar border-r border-evofit-border flex flex-col shrink-0 transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] overflow-hidden min-h-screen`}
+      style={{ width: collapsed ? '64px' : '240px' }}
+    >
 
       {/* ── Logo ─────────────────────────────── */}
-      <div style={{
-        padding:        collapsed ? '24px 0' : '28px 20px 20px',
-        borderBottom:   '1px solid var(--border)',
-        display:        'flex',
-        alignItems:     'center',
-        justifyContent: collapsed ? 'center' : 'flex-start',
-        gap:            '10px',
-        transition:     'padding 0.3s ease',
-        animation:      'slide-in-left 0.4s ease both',
-      }}>
-        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" style={{ flexShrink: 0, filter: 'drop-shadow(0 0 8px rgba(124,58,237,0.5))' }}>
+      <div className={`border-b border-evofit-border flex items-center gap-[10px] animate-slide-in-left transition-[padding] duration-300 ${collapsed ? 'py-6 justify-center' : 'py-7 px-5 pb-5 justify-start'}`}>
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" className="shrink-0 drop-shadow-[0_0_8px_rgba(124,58,237,0.5)]">
           <rect width="28" height="28" rx="8" fill="url(#lg)" />
           <path d="M7 14h4l3-6 4 12 3-6h2" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           <defs>
@@ -91,35 +73,16 @@ export default function Sidebar() {
           </defs>
         </svg>
         {!collapsed && (
-          <span style={{
-            fontSize:     '20px',
-            fontWeight:   800,
-            letterSpacing:'-0.5px',
-            background:   'linear-gradient(135deg, #fff 40%, var(--purple-light))',
-            WebkitBackgroundClip: 'text',
-            backgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            whiteSpace:   'nowrap',
-            animation:    'fade-in 0.25s ease both',
-          }}>
+          <span className="text-[20px] font-extrabold tracking-tight bg-gradient-to-br from-white via-white to-evofit-purple-light bg-clip-text text-transparent whitespace-nowrap animate-fade-in">
             EvoFit
           </span>
         )}
       </div>
 
       {/* ── Navigation ───────────────────────── */}
-      <nav style={{ flex: 1, padding: '12px 0', overflowY: 'auto', overflowX: 'hidden' }}>
+      <nav className="flex-1 py-3 overflow-y-auto overflow-x-hidden">
         {!collapsed && (
-          <p style={{
-            fontSize:       '10px',
-            fontWeight:     700,
-            letterSpacing:  '0.1em',
-            color:          'var(--text-muted)',
-            padding:        '8px 20px 4px',
-            textTransform:  'uppercase',
-            whiteSpace:     'nowrap',
-            animation:      'fade-in 0.3s ease both',
-          }}>
+          <p className="text-[10px] font-bold tracking-[0.1em] text-evofit-text-muted px-5 pt-2 pb-1 uppercase whitespace-nowrap animate-fade-in duration-300">
             Main Menu
           </p>
         )}
@@ -130,67 +93,41 @@ export default function Sidebar() {
             to={to}
             end={to === '/'}
             title={collapsed ? label : undefined}
-            className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
-            style={{
-              justifyContent: collapsed ? 'center' : 'flex-start',
-              padding:        collapsed ? '11px 0'   : '11px 20px',
-              margin:         collapsed ? '2px 6px'  : '2px 10px',
-              animation:      `slide-in-left 0.35s ease both`,
-              animationDelay: `${0.05 * idx}s`,
-            }}
+            className={({ isActive }) => `
+              group flex items-center gap-3 transition-all duration-200 no-underline text-sm font-medium
+              ${collapsed ? 'justify-center py-[11px] px-0 mx-1.5' : 'justify-start py-[11px] px-5 mx-[10px]'}
+              ${isActive 
+                ? 'bg-gradient-to-br from-[#6D28D9] to-[#7C3AED] text-white shadow-purple-glow rounded-xl' 
+                : 'text-evofit-text-secondary hover:bg-white/5 hover:text-evofit-text-primary rounded-xl'}
+              animate-slide-in-left
+            `}
+            style={{ animationDelay: `${0.05 * idx}s` }}
           >
-            <span style={{ flexShrink: 0, transition: 'transform 0.2s ease' }}>{icon}</span>
+            <span className="shrink-0 transition-transform duration-200 group-hover:translate-x-0.5">{icon}</span>
             {!collapsed && (
-              <span style={{ whiteSpace: 'nowrap', animation: 'fade-in 0.2s ease both' }}>{label}</span>
+              <span className="whitespace-nowrap animate-fade-in duration-200">{label}</span>
             )}
           </NavLink>
         ))}
       </nav>
 
       {/* ── Bottom controls ───────────────────── */}
-      <div style={{
-        padding:     collapsed ? '12px 6px 20px' : '12px 10px 20px',
-        borderTop:   '1px solid var(--border)',
-        animation:   'fade-in-up 0.5s ease both',
-        animationDelay: '0.3s',
-      }}>
+      <div className={`border-t border-evofit-border animate-fade-in-up duration-500 delay-300 ${collapsed ? 'p-3 pb-5' : 'p-[10px] pb-5'}`}>
         {/* Collapse / Expand */}
         <button
           id="btn-collapse-sidebar"
           title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           onClick={() => setCollapsed(c => !c)}
-          style={{
-            display:        'flex',
-            alignItems:     'center',
-            justifyContent: collapsed ? 'center' : 'flex-start',
-            gap:            '10px',
-            width:          '100%',
-            padding:        collapsed ? '10px 0' : '10px 10px',
-            margin:         '2px 0',
-            borderRadius:   '10px',
-            background:     'none',
-            border:         'none',
-            cursor:         'pointer',
-            color:          'var(--text-secondary)',
-            fontSize:       '14px',
-            fontWeight:     500,
-            transition:     'background 0.2s, color 0.2s',
-          }}
-          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(124,58,237,0.12)'; e.currentTarget.style.color = 'var(--text-primary)'; }}
-          onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
+          className={`flex items-center gap-[10px] w-full py-[10px] rounded-xl bg-transparent border-none cursor-pointer text-evofit-text-secondary text-sm font-medium transition-colors duration-200 hover:bg-white/10 hover:text-evofit-text-primary ${collapsed ? 'justify-center' : 'justify-start px-[10px]'}`}
         >
           <svg
             width="16" height="16" fill="none" viewBox="0 0 24 24"
             stroke="currentColor" strokeWidth="2"
-            style={{
-              transform:  collapsed ? 'rotate(180deg)' : 'rotate(0deg)',
-              transition: 'transform 0.3s cubic-bezier(0.4,0,0.2,1)',
-              flexShrink: 0,
-            }}
+            className={`shrink-0 transition-transform duration-300 ${collapsed ? 'rotate-180' : 'rotate-0'}`}
           >
             <polyline points="15 18 9 12 15 6" />
           </svg>
-          {!collapsed && <span style={{ animation: 'fade-in 0.2s ease both' }}>Collapse</span>}
+          {!collapsed && <span className="animate-fade-in duration-200">Collapse</span>}
         </button>
 
         {/* Logout */}
@@ -198,34 +135,13 @@ export default function Sidebar() {
           id="btn-logout"
           title="Logout"
           onClick={() => navigate('/')}
-          style={{
-            display:        'flex',
-            alignItems:     'center',
-            justifyContent: collapsed ? 'center' : 'flex-start',
-            gap:            '10px',
-            width:          '100%',
-            padding:        collapsed ? '10px 0' : '10px 10px',
-            margin:         '2px 0',
-            borderRadius:   '10px',
-            background:     'none',
-            border:         'none',
-            cursor:         'pointer',
-            color:          '#F87171',
-            fontSize:       '14px',
-            fontWeight:     500,
-            transition:     'background 0.2s',
-          }}
-          onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.08)'}
-          onMouseLeave={e => e.currentTarget.style.background = 'none'}
+          className={`flex items-center gap-[10px] w-full py-[10px] rounded-xl bg-transparent border-none cursor-pointer text-[#F87171] text-sm font-medium transition-all duration-200 hover:bg-red-500/10 ${collapsed ? 'justify-center' : 'justify-start px-[10px]'}`}
         >
-          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" style={{ flexShrink: 0, transition: 'transform 0.2s ease' }}
-            onMouseEnter={e => e.currentTarget.style.transform = 'translateX(2px)'}
-            onMouseLeave={e => e.currentTarget.style.transform = 'none'}
-          >
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" className="shrink-0 transition-transform duration-200 group-hover:translate-x-0.5">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
             <polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" />
           </svg>
-          {!collapsed && <span style={{ animation: 'fade-in 0.2s ease both' }}>Logout</span>}
+          {!collapsed && <span className="animate-fade-in duration-200">Logout</span>}
         </button>
       </div>
     </aside>

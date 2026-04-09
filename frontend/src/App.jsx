@@ -24,7 +24,7 @@ function AnimatedPage({ children }) {
   }, [location.pathname]);
 
   return (
-    <div ref={ref} style={{ display: 'contents' }}>
+    <div ref={ref} className="contents">
       {children}
     </div>
   );
@@ -40,23 +40,15 @@ function PageHeader({ title }) {
   const [bellHover, setBellHover] = useState(false);
 
   return (
-    <header className="header" style={{ animation: 'fade-in 0.4s ease both' }}>
-      <div style={{ flex: 1 }}>
-        <h1 style={{
-          fontSize: '18px', fontWeight: 700, margin: 0,
-          color: 'var(--text-primary)',
-          animation: 'slide-in-left 0.4s ease both',
-        }}>
+    <header className="bg-evofit-bg-secondary border-b border-evofit-border h-16 flex items-center px-7 gap-4 animate-fade-in shrink-0">
+      <div className="flex-1">
+        <h1 className="text-[18px] font-bold m-0 text-evofit-text-primary animate-slide-in-left">
           {title}
         </h1>
       </div>
 
       {/* Date */}
-      <div style={{
-        display: 'flex', alignItems: 'center', gap: '8px',
-        color: 'var(--text-muted)', fontSize: '13px',
-        animation: 'fade-in 0.5s ease both',
-      }}>
+      <div className="hidden md:flex items-center gap-2 text-evofit-text-muted text-[13px] animate-fade-in">
         <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
           <rect x="3" y="4" width="18" height="18" rx="2" />
           <line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
@@ -65,46 +57,29 @@ function PageHeader({ title }) {
       </div>
 
       {/* Right side */}
-      <div style={{
-        display: 'flex', alignItems: 'center', gap: '14px', marginLeft: '16px',
-        animation: 'fade-in 0.5s ease both', animationDelay: '0.1s',
-      }}>
+      <div className="flex items-center gap-[14px] ml-4 animate-fade-in delay-100">
         {/* Bell */}
         <div
-          style={{ position: 'relative', cursor: 'pointer', transition: 'transform 0.2s ease' }}
-          onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.15)'; setBellHover(true); }}
-          onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; setBellHover(false); }}
+          className="relative cursor-pointer transition-transform duration-200 hover:scale-110"
+          onMouseEnter={() => setBellHover(true)}
+          onMouseLeave={() => setBellHover(false)}
         >
           <svg width="20" height="20" fill="none" viewBox="0 0 24 24"
             stroke={bellHover ? '#A78BFA' : 'var(--text-secondary)'} strokeWidth="2"
-            style={{ transition: 'stroke 0.2s ease' }}>
+            className="transition-colors duration-200">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
             <path d="M13.73 21a2 2 0 0 1-3.46 0" />
           </svg>
-          <span style={{
-            position: 'absolute', top: '-2px', right: '-2px',
-            width: '8px', height: '8px', background: '#EF4444',
-            borderRadius: '50%', border: '1px solid var(--bg-secondary)',
-            animation: 'pulse-glow 2s ease-in-out infinite',
-          }} />
+          <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-[#EF4444] rounded-full border border-evofit-bg-secondary animate-pulse-glow" />
         </div>
 
         {/* User chip */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}
-          onMouseEnter={e => e.currentTarget.querySelector('.avatar').style.boxShadow = '0 0 0 2px #7C3AED'}
-          onMouseLeave={e => e.currentTarget.querySelector('.avatar').style.boxShadow = 'none'}
-        >
-          <div style={{ textAlign: 'right' }}>
-            <p style={{ margin: 0, fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>Alex Johnson</p>
-            <p style={{ margin: 0, fontSize: '11px', color: 'var(--purple-light)' }}>Pro Member</p>
+        <div className="flex items-center gap-[10px] cursor-pointer group">
+          <div className="text-right hidden sm:block">
+            <p className="m-0 text-[13px] font-semibold text-evofit-text-primary">Alex Johnson</p>
+            <p className="m-0 text-[11px] text-evofit-purple-light">Pro Member</p>
           </div>
-          <div className="avatar" style={{
-            width: '36px', height: '36px', borderRadius: '50%',
-            background: 'linear-gradient(135deg,#6D28D9,#A78BFA)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontWeight: 700, fontSize: '14px', color: '#fff',
-            transition: 'box-shadow 0.2s ease',
-          }}>
+          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#6D28D9] to-[#A78BFA] flex items-center justify-center text-[14px] font-bold text-white border border-white/10 group-hover:ring-2 group-hover:ring-evofit-purple-main transition-all duration-200">
             AJ
           </div>
         </div>
@@ -116,119 +91,35 @@ function PageHeader({ title }) {
 /* ══════════════════════════════════════════════════
    Coming Soon placeholder
    ══════════════════════════════════════════════════ */
-function ComingSoon({ title, icon, description, accentColor = '#7C3AED' }) {
+function ComingSoon({ title, icon, description }) {
   const [hovered, setHovered] = useState(false);
 
   return (
-    <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-      <PageHeader title={title} />
-      <div style={{
-        flex: 1, display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'center',
-        gap: '20px', padding: '40px',
-        animation: 'fade-in-up 0.45s ease both',
-      }}>
+    <main className="flex-1 flex flex-col pt-6">
+      <div className="flex-1 flex flex-col items-center justify-center gap-5 p-10 animate-fade-in-up">
         {/* Icon box */}
         <div
-          style={{
-            width: '90px', height: '90px', borderRadius: '22px',
-            background: `rgba(124,58,237,0.10)`,
-            border: `1px solid ${hovered ? 'rgba(124,58,237,0.5)' : 'rgba(124,58,237,0.2)'}`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '40px',
-            boxShadow: hovered ? '0 0 40px rgba(124,58,237,0.25)' : 'none',
-            transition: 'all 0.3s ease',
-            animation: 'float 5s ease-in-out infinite',
-            cursor: 'default',
-          }}
+          className={`w-[100px] h-[100px] rounded-3xl bg-evofit-purple-main/10 border flex items-center justify-center text-4xl transition-all duration-300 cursor-default animate-float
+            ${hovered ? 'border-evofit-purple-main/50 shadow-[0_0_40px_rgba(124,58,237,0.25)]' : 'border-evofit-purple-main/20 shadow-none'}`}
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
         >
           {icon}
         </div>
 
-        <h2 style={{
-          fontSize: '24px', fontWeight: 800, margin: 0,
-          color: 'var(--text-primary)',
-          animation: 'fade-in-up 0.4s ease both', animationDelay: '0.1s',
-        }}>
+        <h2 className="text-2xl font-extrabold m-0 text-evofit-text-primary animate-fade-in-up delay-100">
           {title}
         </h2>
 
-        <p style={{
-          color: 'var(--text-muted)', fontSize: '14px', margin: 0,
-          maxWidth: '360px', textAlign: 'center', lineHeight: 1.7,
-          animation: 'fade-in-up 0.4s ease both', animationDelay: '0.15s',
-        }}>
+        <p className="text-evofit-text-muted text-sm m-0 max-w-[360px] text-center leading-relaxed animate-fade-in-up delay-150">
           {description}
         </p>
 
         {/* Shimmer "Coming Soon" pill */}
-        <div style={{
-          marginTop: '4px',
-          padding: '6px 20px',
-          borderRadius: '20px',
-          border: '1px solid rgba(124,58,237,0.35)',
-          background: 'linear-gradient(90deg, rgba(109,40,217,0.15), rgba(167,139,250,0.25), rgba(109,40,217,0.15))',
-          backgroundSize: '200% auto',
-          animation: 'shimmer 2.5s linear infinite, fade-in-up 0.4s ease both',
-          animationDelay: '0s, 0.2s',
-          fontSize: '12px', fontWeight: 700,
-          color: 'var(--purple-light)',
-          letterSpacing: '0.04em',
-        }}>
+        <div className="mt-1 px-5 py-1.5 rounded-full border border-evofit-purple-main/35 bg-[linear-gradient(90deg,rgba(109,40,217,0.15),rgba(167,139,250,0.25),rgba(109,40,217,0.15))] bg-[length:200%_auto] animate-shimmer-fast animate-fade-in-up delay-200 text-[12px] font-bold text-evofit-purple-light tracking-wide">
           ✦ Coming Soon
         </div>
-
-        {/* Decorative dots */}
-        <div style={{ display: 'flex', gap: '8px', marginTop: '8px', animation: 'fade-in 0.5s ease both', animationDelay: '0.3s' }}>
-          {[0, 1, 2].map(i => (
-            <div key={i} style={{
-              width: '6px', height: '6px', borderRadius: '50%',
-              background: 'var(--purple-main)',
-              opacity: 0.3 + i * 0.2,
-              animation: `float ${3 + i}s ease-in-out infinite`,
-              animationDelay: `${i * 0.3}s`,
-            }} />
-          ))}
-        </div>
       </div>
-    </main>
-  );
-}
-
-/* ══════════════════════════════════════════════════
-   Upload page wrapped with header
-   ══════════════════════════════════════════════════ */
-function UploadPage() {
-  return (
-    <main style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-      <PageHeader title="Upload & Predict" />
-      <UploadPredict />
-    </main>
-  );
-}
-
-/* ══════════════════════════════════════════════════
-   Analytics page wrapped with header
-   ══════════════════════════════════════════════════ */
-function AnalyticsPage() {
-  return (
-    <main style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-      <PageHeader title="Analytics" />
-      <Analytics />
-    </main>
-  );
-}
-
-/* ══════════════════════════════════════════════════
-   Targets page wrapped with header
-   ══════════════════════════════════════════════════ */
-function TargetsPage() {
-  return (
-    <main style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-      <PageHeader title="Targets & Progress" />
-      <Targets />
     </main>
   );
 }
@@ -241,47 +132,41 @@ function AppShell() {
 
   const getPageTitle = (path) => {
     switch (path) {
-      case '/': return 'Dashboard';
-      case '/upload': return 'Upload & Predict';
-      case '/analytics': return 'Analytics';
-      case '/targets': return 'Targets & Progress';
-      case '/chatbot': return 'AI Chatbot';
-      default: return 'EvoFit';
+      case '/': return 'Command Center';
+      case '/upload': return 'AI Dataset Upload';
+      case '/analytics': return 'Performance Analytics';
+      case '/targets': return 'Target Monitoring';
+      case '/chatbot': return 'EvoFit AI Assistant';
+      default: return 'EvoFit Dashboard';
     }
   };
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-primary)' }}>
-      <ToastContainer
-        position="top-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="dark"
-      />
+    <div className="flex min-h-screen bg-evofit-bg-primary font-inter">
       <Sidebar />
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <PageHeader title={getPageTitle(location.pathname)} />
-        <AnimatedPage>
-          <Routes location={location}>
-            <Route path="/" element={
-              <ComingSoon title="Dashboard" icon="📊"
-                description="Your personal training overview — workout history, streaks, personal records and weekly summaries." />
-            } />
-            <Route path="/upload"    element={<UploadPredict />} />
-            <Route path="/analytics" element={<Analytics />} />
-            <Route path="/targets"   element={<Targets />} />
-            <Route path="/chatbot"   element={
-              <ComingSoon title="AI Chatbot" icon="🤖"
-                description="Ask the EvoFit AI coach anything about your training — powered by RAG on your personal workout data." />
-            } />
-          </Routes>
-        </AnimatedPage>
+        <div className="flex-1 overflow-y-auto overflow-x-hidden">
+          <AnimatedPage>
+            <Routes location={location}>
+              <Route path="/" element={
+                <ComingSoon title="Dashboard" icon="📊"
+                  description="Your personal training overview — workout history, streaks, personal records and weekly summaries." />
+              } />
+              <Route path="/dashboard" element={
+                <ComingSoon title="Dashboard" icon="📊"
+                  description="Your personal training overview — workout history, streaks, personal records and weekly summaries." />
+              } />
+              <Route path="/upload"    element={<UploadPredict />} />
+              <Route path="/analytics" element={<Analytics />} />
+              <Route path="/targets"   element={<Targets />} />
+              <Route path="/chatbot"   element={
+                <ComingSoon title="AI Chatbot" icon="🤖"
+                  description="Ask the EvoFit AI coach anything about your training — powered by RAG on your personal workout data." />
+              } />
+            </Routes>
+          </AnimatedPage>
+        </div>
       </div>
     </div>
   );
@@ -291,6 +176,24 @@ export default function App() {
   return (
     <Router>
       <AppShell />
+      <ToastContainer
+        position="bottom-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+        toastStyle={{
+          background: '#16161F',
+          border: '1px solid #2A2A3A',
+          color: '#F0F0F5',
+          borderRadius: '12px'
+        }}
+      />
     </Router>
   );
 }
