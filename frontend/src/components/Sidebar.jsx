@@ -73,7 +73,7 @@ export default function Sidebar() {
           </defs>
         </svg>
         {!collapsed && (
-          <span className="text-[20px] font-extrabold tracking-tight bg-gradient-to-br from-white via-white to-evofit-purple-light bg-clip-text text-transparent whitespace-nowrap animate-fade-in">
+          <span className="text-[20px] font-extrabold tracking-tight text-evofit-text-primary whitespace-nowrap animate-fade-in">
             EvoFit
           </span>
         )}
@@ -97,8 +97,8 @@ export default function Sidebar() {
               group flex items-center gap-3 transition-all duration-200 no-underline text-sm font-medium
               ${collapsed ? 'justify-center py-[11px] px-0 mx-1.5' : 'justify-start py-[11px] px-5 mx-[10px]'}
               ${isActive 
-                ? 'bg-gradient-to-br from-[#6D28D9] to-[#7C3AED] text-white shadow-purple-glow rounded-xl' 
-                : 'text-evofit-text-secondary hover:bg-white/5 hover:text-evofit-text-primary rounded-xl'}
+                ? 'premium-gradient text-white shadow-lg rounded-xl scale-[1.02]' 
+                : 'text-evofit-text-secondary hover:bg-evofit-purple-main/5 hover:text-evofit-purple-main rounded-xl'}
               animate-slide-in-left
             `}
             style={{ animationDelay: `${0.05 * idx}s` }}
@@ -118,7 +118,7 @@ export default function Sidebar() {
           id="btn-collapse-sidebar"
           title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           onClick={() => setCollapsed(c => !c)}
-          className={`flex items-center gap-[10px] w-full py-[10px] rounded-xl bg-transparent border-none cursor-pointer text-evofit-text-secondary text-sm font-medium transition-colors duration-200 hover:bg-white/10 hover:text-evofit-text-primary ${collapsed ? 'justify-center' : 'justify-start px-[10px]'}`}
+          className={`flex items-center gap-[10px] w-full py-[10px] rounded-xl bg-transparent border-none cursor-pointer text-evofit-text-secondary text-sm font-medium transition-colors duration-200 hover:bg-evofit-purple-main/5 hover:text-evofit-purple-main ${collapsed ? 'justify-center' : 'justify-start px-[10px]'}`}
         >
           <svg
             width="16" height="16" fill="none" viewBox="0 0 24 24"
@@ -135,7 +135,7 @@ export default function Sidebar() {
           id="btn-logout"
           title="Logout"
           onClick={() => navigate('/')}
-          className={`flex items-center gap-[10px] w-full py-[10px] rounded-xl bg-transparent border-none cursor-pointer text-[#F87171] text-sm font-medium transition-all duration-200 hover:bg-red-500/10 ${collapsed ? 'justify-center' : 'justify-start px-[10px]'}`}
+          className={`flex items-center gap-[10px] w-full py-[10px] rounded-xl bg-transparent border-none cursor-pointer text-evofit-text-secondary text-sm font-medium transition-all duration-200 hover:bg-red-500/10 hover:text-[#F87171] ${collapsed ? 'justify-center' : 'justify-start px-[10px]'}`}
         >
           <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" className="shrink-0 transition-transform duration-200 group-hover:translate-x-0.5">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />

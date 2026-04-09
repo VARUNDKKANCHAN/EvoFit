@@ -4,6 +4,7 @@ import Sidebar from './components/Sidebar';
 import UploadPredict from './pages/UploadPredict';
 import Analytics from './pages/Analytics';
 import Targets from './pages/Targets';
+import ThemeToggle from './components/ThemeToggle';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -58,6 +59,8 @@ function PageHeader({ title }) {
 
       {/* Right side */}
       <div className="flex items-center gap-[14px] ml-4 animate-fade-in delay-100">
+        <ThemeToggle />
+        
         {/* Bell */}
         <div
           className="relative cursor-pointer transition-transform duration-200 hover:scale-110"
@@ -111,7 +114,7 @@ function ComingSoon({ title, icon, description }) {
           {title}
         </h2>
 
-        <p className="text-evofit-text-muted text-sm m-0 max-w-[360px] text-center leading-relaxed animate-fade-in-up delay-150">
+        <p className="text-evofit-text-secondary text-sm m-0 max-w-[360px] text-center leading-relaxed animate-fade-in-up delay-150">
           {description}
         </p>
 
@@ -132,7 +135,7 @@ function AppShell() {
 
   const getPageTitle = (path) => {
     switch (path) {
-      case '/': return 'Command Center';
+      case '/': return 'Dashboard';
       case '/upload': return 'AI Dataset Upload';
       case '/analytics': return 'Performance Analytics';
       case '/targets': return 'Target Monitoring';

@@ -164,7 +164,7 @@ export default function UploadPredict() {
                 .{fileExt}
               </span>
             </div>
-            <p className="text-lg font-bold text-white m-0 mb-1">
+            <p className="text-lg font-bold text-evofit-text-primary m-0 mb-1">
               📄 {file.name}
             </p>
             <p className="text-[13px] text-evofit-text-muted m-0 mb-8 font-medium">
@@ -180,14 +180,14 @@ export default function UploadPredict() {
               </RippleButton>
               <RippleButton
                 onClick={(e) => { e.stopPropagation(); reset(); }}
-                className="bg-white/5 border border-evofit-border text-evofit-text-primary px-8 py-3.5 rounded-xl font-bold hover:bg-white/10 transition-all">
+                className="bg-evofit-bg-secondary border border-evofit-border text-evofit-text-primary px-8 py-3.5 rounded-xl font-bold hover:bg-evofit-purple-main/5 transition-all">
                 Change File
               </RippleButton>
             </div>
           </div>
         ) : (
           <div className="animate-fade-in">
-            <p className="text-xl font-bold text-white m-0 mb-2">
+            <p className="text-xl font-bold text-evofit-text-primary m-0 mb-2">
               Drop your sensor data here
             </p>
             <p className="text-sm text-evofit-text-secondary m-0 mb-8">
@@ -195,7 +195,7 @@ export default function UploadPredict() {
             </p>
             <RippleButton
               onClick={(e) => { e.stopPropagation(); inputRef.current.click(); }}
-              className="bg-white/5 border border-evofit-border text-evofit-text-primary px-8 py-3.5 rounded-xl font-bold hover:bg-white/10 transition-all">
+              className="bg-evofit-bg-secondary border border-evofit-border text-evofit-text-primary px-8 py-3.5 rounded-xl font-bold hover:bg-evofit-purple-main/5 transition-all">
               Browse Files
             </RippleButton>
           </div>
@@ -234,7 +234,7 @@ export default function UploadPredict() {
               <div className="w-8 h-8 rounded-lg bg-evofit-purple-main text-white font-extrabold flex items-center justify-center text-sm shadow-lg group-hover:animate-bounce-subtle">
                 {n}
               </div>
-              <p className="font-extrabold text-sm m-0 text-white tracking-tight uppercase">{title}</p>
+              <p className="font-extrabold text-sm m-0 text-evofit-text-primary tracking-tight uppercase">{title}</p>
             </div>
             <p className="text-[12px] text-evofit-text-secondary m-0 leading-relaxed font-medium">
               {desc}

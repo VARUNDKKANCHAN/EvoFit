@@ -77,7 +77,7 @@ export default function Targets() {
         {/* ── TOP HEADER ─────────────────────────────────────────────────── */}
         <div className="flex justify-between items-center mb-10">
           <div className="animate-slide-in-left">
-            <h1 className="text-[32px] font-extrabold m-0 tracking-tight text-white">
+            <h1 className="text-[32px] font-extrabold m-0 tracking-tight text-evofit-text-primary">
               Targets & Progress
             </h1>
             <p className="text-evofit-text-secondary text-base m-0">
@@ -89,7 +89,7 @@ export default function Targets() {
             <Flame size={24} className="text-evofit-purple-light fill-evofit-purple-main" />
             <div className="text-right">
               <p className="m-0 text-[11px] font-bold text-evofit-purple-light uppercase tracking-wider">Active Streak</p>
-              <p className="m-0 text-xl font-extrabold text-white">{progressData?.current_streak || 0} Days</p>
+              <p className="m-0 text-xl font-extrabold text-evofit-text-primary">{progressData?.current_streak || 0} Days</p>
             </div>
           </div>
         </div>
@@ -102,7 +102,7 @@ export default function Targets() {
               <div className="w-12 h-12 rounded-xl bg-evofit-purple-main/15 border border-evofit-purple-main/30 flex items-center justify-center shadow-[0_0_20px_rgba(124,58,237,0.2)]">
                 <TargetIcon size={22} className="text-evofit-purple-light" />
               </div>
-              <h3 className="text-[22px] font-bold m-0 text-white">Set New Weekly Target</h3>
+              <h3 className="text-[22px] font-bold m-0 text-evofit-text-primary">Set New Weekly Target</h3>
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-[1.2fr_1fr] gap-6 mb-8">
@@ -112,9 +112,9 @@ export default function Targets() {
                   <select 
                     value={selectedExercise}
                     onChange={(e) => setSelectedExercise(e.target.value)}
-                    className="w-full bg-evofit-bg-secondary border border-evofit-border rounded-xl px-4 py-3.5 text-white text-[15px] outline-none appearance-none cursor-pointer focus:border-evofit-purple-main transition-colors"
+                    className="w-full bg-evofit-bg-secondary border border-evofit-border rounded-xl px-4 py-3.5 text-evofit-text-primary text-[15px] outline-none appearance-none cursor-pointer focus:border-evofit-purple-main transition-colors"
                   >
-                    {EXERCISE_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                    {EXERCISE_OPTIONS.map(opt => <option key={opt.value} className="bg-evofit-bg-secondary text-evofit-text-primary" value={opt.value}>{opt.label}</option>)}
                   </select>
                   <ChevronRight size={18} className="text-evofit-text-muted absolute right-4 top-4 rotate-90" />
                 </div>
@@ -127,7 +127,7 @@ export default function Targets() {
                     placeholder="e.g. 500"
                     value={repTarget}
                     onChange={(e) => setRepTarget(e.target.value)}
-                    className="w-full bg-evofit-bg-secondary border border-evofit-border rounded-xl px-3.5 py-3.5 pl-11 text-white text-[15px] outline-none focus:border-evofit-purple-main transition-colors"
+                    className="w-full bg-evofit-bg-secondary border border-evofit-border rounded-xl px-3.5 py-3.5 pl-11 text-evofit-text-primary text-[15px] outline-none focus:border-evofit-purple-main transition-colors"
                   />
                   <TrendingUp size={18} className="text-evofit-purple-light absolute left-4 top-4" />
                 </div>
@@ -151,23 +151,25 @@ export default function Targets() {
                   strokeWidth={10}
                   styles={buildStyles({
                     pathColor: `#7C3AED`,
-                    trailColor: 'rgba(255,255,255,0.04)',
+                    trailColor: 'var(--border)',
                     strokeLinecap: 'round',
                     pathTransitionDuration: 2.0,
                   })}
                />
                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-5xl font-extrabold text-white tracking-tighter">{progressData?.overall_percent}%</span>
-                  <div className="w-10 h-0.5 bg-evofit-purple-light my-1" />
-                  <span className="text-[11px] text-evofit-purple-light font-extrabold uppercase tracking-widest">COMPLETE</span>
+                   <span className="text-[44px] font-extrabold text-evofit-text-primary leading-none tracking-tighter">
+                      {progressData?.overall_percent || 0}%
+                   </span>
+                   <span className="text-[11px] text-evofit-text-muted mt-1 font-bold uppercase tracking-widest leading-none">Complete</span>
                </div>
             </div>
             
             <div className="animate-fade-in duration-1000">
-              <h4 className="m-0 mb-2 text-2xl font-extrabold text-white">
-                {progressData?.total_reps_done.toLocaleString()} reps done <span className="text-evofit-text-muted text-lg font-normal">/ {progressData?.total_reps_target.toLocaleString()} total target</span>
-              </h4>
-              <p className="m-0 text-[15px] text-evofit-text-muted font-medium">Overall Goal Completion</p>
+              <div className="flex items-center gap-1.5 justify-center mt-6">
+                <span className="text-3xl font-extrabold text-evofit-text-primary tracking-tight">{(progressData?.total_reps_done || 0).toLocaleString()}</span>
+                <span className="text-sm text-evofit-text-muted font-medium mb-1.5">/ {(progressData?.total_reps_target || 0).toLocaleString()} reps done</span>
+              </div>
+              <p className="text-[13px] text-evofit-text-secondary mt-1 font-medium">Overall Goal Completion</p>
             </div>
           </div>
         </div>
@@ -175,7 +177,8 @@ export default function Targets() {
         {/* ── WEEKLY BREAKDOWN GRID ────────────────────────────────────── */}
         <div className="mb-10">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-extrabold m-0 text-white">Weekly Breakdown Grid</h2>
+            <h3 className="text-base font-bold m-0 text-evofit-text-primary">Weekly Breakdown Grid</h3>
+            <p className="text-[13px] text-evofit-text-muted m-0">Performance by Exercise</p>
             <div className="flex gap-3">
                <div className="px-4 py-2 rounded-xl bg-cyan-400/10 border border-cyan-400/30 text-cyan-400 text-xs font-bold flex items-center gap-1.5">
                   <Sparkles size={14} /> Consistency Score: {progressData?.overall_form_score}%
@@ -184,7 +187,7 @@ export default function Targets() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {progressData?.exercise_progress.map((ex, i) => (
+            {progressData?.exercise_progress?.map((ex, i) => (
               <div key={ex.exercise} 
                 className={`glass-card p-7 animate-stagger-in hover:-translate-y-1.5 hover:border-evofit-purple-main/40 transition-all duration-300 relative overflow-hidden`}
                 style={{ animationDelay: `${0.1 * i}s` }}
@@ -199,7 +202,7 @@ export default function Targets() {
                      <div className="w-9 h-9 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center">
                         {ex.exercise === 'dead' ? <Dumbbell size={18} className="text-evofit-purple-light" /> : <Activity size={18} className="text-evofit-purple-light" />}
                      </div>
-                     <span className="font-extrabold text-[18px] text-white uppercase">{ex.label}</span>
+                     <span className="font-extrabold text-[18px] text-evofit-text-primary uppercase">{ex.label}</span>
                   </div>
                   <div className="text-[11px] font-extrabold bg-amber-500/15 text-amber-500 px-3 py-1.5 rounded-full flex items-center gap-1.5 border border-amber-500/20">
                     <Flame size={12} className="fill-amber-500" /> {ex.streak_days} DAY STREAK
@@ -211,7 +214,7 @@ export default function Targets() {
                     <span className="text-evofit-purple-light font-bold">{ex.percent_complete}% complete</span>
                     <span className="text-evofit-text-primary font-bold">{ex.current_reps} <span className="text-evofit-text-muted">/ {ex.target_reps} reps</span></span>
                   </div>
-                  <div className="h-2.5 bg-white/5 rounded-full overflow-hidden">
+                  <div className="h-2.5 bg-evofit-bg-secondary rounded-full overflow-hidden">
                      <div 
                       className="h-full bg-gradient-to-r from-evofit-purple-main to-cyan-400 shadow-[0_0_15px_rgba(124,58,237,0.3)] animate-fill-in duration-[1200ms] rounded-full" 
                       style={{ width: `${ex.percent_complete}%` }} 
@@ -237,7 +240,7 @@ export default function Targets() {
           <div className="glass-card p-9 shadow-premium-card">
             <div className="flex justify-between mb-8 items-start">
               <div>
-                <h3 className="text-[22px] font-extrabold m-0 mb-1.5 text-white tracking-tight">Goal Completion Trend (5 Weeks)</h3>
+                <h3 className="text-[22px] font-extrabold m-0 mb-1.5 text-evofit-text-primary tracking-tight">Goal Completion Trend (5 Weeks)</h3>
                 <p className="text-sm text-evofit-text-muted m-0 font-medium">Historical performance synchronized with Analytics</p>
               </div>
               <div className="bg-evofit-purple-main/10 p-2.5 rounded-xl">
@@ -247,14 +250,14 @@ export default function Targets() {
   
             <div className="h-80 w-full px-2.5">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={progressData?.weekly_trend}>
+                <BarChart data={progressData?.weekly_trend || []}>
                   <defs>
                      <linearGradient id="trendGradient" x1="0" y1="0" x2="0" y2="1">
                        <stop offset="0%" stopColor="#22D3EE" stopOpacity={0.9} />
                        <stop offset="100%" stopColor="#7C3AED" stopOpacity={0.6} />
                      </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.03)" />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" opacity={0.1} />
                   <XAxis 
                     dataKey="week" 
                     axisLine={false} 
@@ -270,13 +273,13 @@ export default function Targets() {
                     tickFormatter={(val) => `${val}%`}
                   />
                   <Tooltip 
-                    cursor={{ fill: 'rgba(255,255,255,0.03)', radius: 8 }}
+                    cursor={{ fill: 'var(--purple-main)', opacity: 0.05, radius: 8 }}
                     contentStyle={{ 
-                      background: '#161621', border: '1px solid rgba(124, 58, 237, 0.3)', 
-                      borderRadius: '12px', fontSize: '14px', boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
-                      color: '#fff', fontWeight: 600
+                      background: 'var(--bg-card)', border: '1px solid var(--border)', 
+                      borderRadius: '12px', fontSize: '14px', boxShadow: 'var(--card-shadow)',
+                      color: 'var(--text-primary)', fontWeight: 600
                     }}
-                    itemStyle={{ color: '#A78BFA' }}
+                    itemStyle={{ color: 'var(--purple-main)' }}
                   />
                   <Bar 
                     dataKey="completion" 
@@ -285,7 +288,7 @@ export default function Targets() {
                     barSize={48}
                     animationDuration={1500}
                   >
-                    {progressData?.weekly_trend.map((entry, index) => (
+                    {progressData?.weekly_trend?.map((entry, index) => (
                       <Cell key={`cell-${index}`} fillOpacity={entry.completion > 80 ? 1 : 0.8} />
                     ))}
                   </Bar>
@@ -300,27 +303,27 @@ export default function Targets() {
               <div className="w-8 h-8 rounded-lg bg-evofit-purple-main/10 flex items-center justify-center text-evofit-purple-light">
                 <Award size={18} />
               </div>
-              <h3 className="text-xl font-extrabold m-0 text-white tracking-tight">Recent Milestones</h3>
+              <h3 className="text-xl font-extrabold m-0 text-evofit-text-primary tracking-tight">Recent Milestones</h3>
             </div>
             
             <div className="flex flex-col gap-4">
-              {progressData?.recent_achievements.length > 0 ? (
-                progressData.recent_achievements.map((ach, i) => (
-                  <div key={ach.id} 
-                    className="glass-card p-6 bg-white/[0.02] border-white/[0.04] flex gap-4.5 items-center animate-fade-in-up"
-                    style={{ animationDelay: `${0.5 + i * 0.1}s` }}
-                  >
+                {progressData?.recent_achievements?.length > 0 ? (
+                  progressData.recent_achievements.map((ach, i) => (
+                    <div key={ach.id} 
+                      className="glass-card p-6 bg-evofit-bg-secondary border border-evofit-border flex gap-4.5 items-center animate-fade-in-up"
+                      style={{ animationDelay: `${0.5 + i * 0.1}s` }}
+                    >
                      <div className="w-14 h-14 rounded-[18px] bg-gradient-to-br from-amber-400 to-amber-700 flex items-center justify-center shadow-[0_0_20px_rgba(184,134,11,0.3)] shrink-0">
                         <Sparkles size={26} className="text-white" strokeWidth={2.5} />
                      </div>
                      <div>
-                       <p className="m-0 mb-1 text-[15px] font-extrabold text-white">{ach.badge_name}</p>
+                       <p className="m-0 mb-1 text-[15px] font-extrabold text-evofit-text-primary">{ach.badge_name}</p>
                        <p className="m-0 text-[13px] text-evofit-text-muted leading-relaxed font-medium">{ach.description}</p>
                      </div>
                   </div>
                 ))
               ) : (
-                <div className="glass-card p-10 text-center bg-white/[0.01]">
+                <div className="glass-card p-10 text-center bg-evofit-bg-secondary border border-evofit-border">
                    <p className="m-0 text-sm text-evofit-text-muted font-medium">No milestones yet. Keep training to unlock badges!</p>
                 </div>
               )}

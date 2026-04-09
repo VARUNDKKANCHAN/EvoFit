@@ -4,7 +4,7 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   PieChart, Pie, Cell, BarChart, Bar, ComposedChart, Line
 } from 'recharts';
-import { Activity, Dumbbell, Award, Timer, ChevronLeft, Share2, Sparkles } from 'lucide-react';
+import { Activity, Dumbbell, Award, Timer, ChevronLeft, Share2, Sparkles, Flame, TrendingUp } from 'lucide-react';
 
 const COLORS = {
   bench: '#7C3AED',
@@ -36,8 +36,7 @@ export default function Analytics() {
   });
 
   const predictionResult = location.state?.result || sessionData?.result;
-  const predictionFile   = location.state?.filename || sessionData?.filename;
-
+  
   const exerciseBreakdown = predictionResult?.exercise_breakdown || [];
   const availableExercises = exerciseBreakdown.map(ex => ex.label);
   
@@ -52,8 +51,6 @@ export default function Analytics() {
 
   const currentExerciseData = exerciseBreakdown.find(ex => ex.label === activeTab) || {};
 
-  const mainExLabel = EXERCISE_LABELS[activeTab] || activeTab;
-  const realReps = currentExerciseData.rep_count || 0;
   const realConfidence = Math.round((predictionResult?.confidence || 0.938) * 100);
 
   const [activeMetrics, setActiveMetrics] = useState(['Form Score', 'Rhythm']);
@@ -68,7 +65,6 @@ export default function Analytics() {
   const overallConsistency = predictionResult?.overall_consistency || '0%';
   const bestSetSummary = predictionResult?.best_set_summary || 'N/A';
   
-  // True Data from backend scoped to Active Tab
   const everyRepData = useMemo(() => currentExerciseData.rep_details || [], [currentExerciseData]);
   const rhythmData = useMemo(() => currentExerciseData.rhythm_waveform || [], [currentExerciseData]);
   
@@ -132,10 +128,14 @@ export default function Analytics() {
 
   if (!predictionResult && mounted) {
     return (
-      <div className="flex-1 flex items-center justify-center">
-        <div className="text-center p-10 bg-evofit-bg-secondary rounded-2xl border border-dashed border-evofit-border">
-          <p className="text-evofit-text-secondary mb-4">No active prediction result to display.</p>
-          <button className="premium-gradient text-white px-6 py-2.5 rounded-xl font-bold hover:-translate-y-0.5 transition-all shadow-lg" onClick={() => navigate('/upload')}>
+      <div className="flex-1 flex items-center justify-center p-6 bg-evofit-bg-primary min-h-full">
+        <div className="text-center p-12 glass-card max-w-md w-full">
+          <div className="w-16 h-16 rounded-full bg-evofit-purple-main/10 flex items-center justify-center mx-auto mb-6">
+             <Dumbbell className="text-evofit-purple-main" size={32} />
+          </div>
+          <h3 className="text-xl font-bold text-evofit-text-primary mb-2">No Session Data</h3>
+          <p className="text-evofit-text-secondary mb-8">Upload a session file to view AI performance analytics.</p>
+          <button className="premium-gradient text-evofit-text-primary px-6 py-2.5 rounded-xl font-bold hover:-translate-y-0.5 transition-all shadow-lg" onClick={() => navigate('/upload')}>
             Go to Upload
           </button>
         </div>
@@ -146,10 +146,9 @@ export default function Analytics() {
   return (
     <div ref={reportRef} className="flex-1 p-8 md:p-10 overflow-y-auto relative z-10 bg-evofit-bg-primary font-inter">
       
-      {/* ── TOP HEADER ─────────────────────────────────────────────────── */}
       {/* ── RETURN BUTTON ─────────────────────────────────────────────────── */}
       <div className={`mb-4 transition-all duration-400 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-        <button onClick={() => navigate('/upload')} className="bg-transparent border-none text-evofit-text-secondary flex items-center gap-1.5 text-[13px] cursor-pointer p-0 mb-2 hover:text-white transition-colors">
+        <button onClick={() => navigate('/upload')} className="bg-transparent border-none text-evofit-text-secondary flex items-center gap-1.5 text-[13px] cursor-pointer p-0 mb-2 hover:text-evofit-text-primary transition-colors font-semibold">
           <ChevronLeft size={16} /> Return to Upload & Predict
         </button>
       </div>
@@ -163,7 +162,7 @@ export default function Analytics() {
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`px-6 py-3 cursor-pointer transition-all duration-200 border-b-[3px] font-semibold text-sm
-                ${isActive ? 'text-evofit-purple-light border-evofit-purple-main' : 'text-evofit-text-secondary border-transparent hover:text-white'}`}
+                ${isActive ? 'text-evofit-purple-light border-evofit-purple-main' : 'text-evofit-text-secondary border-transparent hover:text-evofit-text-primary'}`}
             >
               {EXERCISE_LABELS[tab] || tab}
             </div>
@@ -183,13 +182,13 @@ export default function Analytics() {
             { label: 'Session Duration', val: sessionDuration, sub: sessionTimeRange, icon: <Timer size={18} className="text-pink-400" /> },
             { label: 'Best Set', val: bestSetSummary.split(' ')[0] + ' ' + bestSetSummary.split(' ')[1], sub: bestSetSummary.split(' ').slice(2).join(' '), icon: <Sparkles size={18} className="text-amber-400" /> }
           ].map((m, i) => (
-            <div key={i} className="glass-card p-5 flex flex-col gap-2 shadow-premium-card">
+            <div key={i} className="glass-card p-5 flex flex-col gap-2 shadow-premium-card hover:translate-y-[-2px] transition-transform">
               <div className="flex justify-between items-start">
                 <p className="text-[13px] text-evofit-text-secondary m-0 font-medium">{m.label}</p>
                 {m.icon && m.icon}
               </div>
               <div>
-                <p className="text-[28px] font-extrabold m-0 text-white leading-tight">{m.val}</p>
+                <p className="text-[28px] font-extrabold m-0 text-evofit-text-primary leading-tight">{m.val}</p>
                 <p className="text-[12px] text-evofit-text-muted m-0 mt-0.5">{m.sub}</p>
               </div>
             </div>
@@ -203,7 +202,7 @@ export default function Analytics() {
           <div className="glass-card p-6 shadow-premium-card">
             <div className="flex justify-between mb-5 items-center">
               <div>
-                <h3 className="text-base font-bold m-0 text-white">Every Rep Breakdown</h3>
+                <h3 className="text-base font-bold m-0 text-evofit-text-primary">Every Rep Breakdown</h3>
                 <p className="text-[13px] text-evofit-text-muted m-0">Interactive performance tracking</p>
               </div>
               <div className="flex gap-2">
@@ -212,7 +211,7 @@ export default function Analytics() {
                   return (
                     <span key={t} onClick={() => toggleMetric(t)} 
                       className={`text-[12px] px-2.5 py-1 rounded-full cursor-pointer transition-all border
-                        ${isActive ? 'bg-evofit-purple-main/20 text-evofit-purple-light border-evofit-purple-main/40 shadow-[0_0_10px_rgba(124,58,237,0.2)]' : 'bg-transparent text-evofit-text-secondary border-evofit-border hover:border-white/20'}`}>
+                        ${isActive ? 'bg-evofit-purple-main/20 text-evofit-purple-light border-evofit-purple-main/40 shadow-[0_0_10px_rgba(124,58,237,0.2)]' : 'bg-transparent text-evofit-text-secondary border-evofit-border hover:border-evofit-border-hover'}`}>
                       {t}
                     </span>
                   );
@@ -228,15 +227,15 @@ export default function Analytics() {
                       <stop offset="95%" stopColor="#7C3AED" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.03)" />
-                  <XAxis dataKey="rep" stroke="rgba(255,255,255,0.35)" fontSize={12} tickLine={false} axisLine={false} />
-                  <YAxis stroke="rgba(255,255,255,0.35)" fontSize={12} tickLine={false} axisLine={false} domain={[0, 100]} />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" opacity={0.1} />
+                  <XAxis dataKey="rep" stroke="var(--text-muted)" fontSize={12} tickLine={false} axisLine={false} />
+                  <YAxis stroke="var(--text-muted)" fontSize={12} tickLine={false} axisLine={false} domain={[0, 100]} />
                   <RechartsTooltip 
-                    contentStyle={{ borderRadius: '12px', background: '#16161F', border: '1px solid #2A2A3A', fontSize: '12px' }}
-                    itemStyle={{ color: '#F0F0F5', fontWeight: 'bold' }}
+                    contentStyle={{ borderRadius: '12px', background: 'var(--bg-card)', border: '1px solid var(--border)', fontSize: '12px', boxShadow: 'var(--card-shadow)', color: 'var(--text-primary)' }}
+                    itemStyle={{ color: 'var(--purple-main)', fontWeight: 'bold' }}
                   />
                   {activeMetrics.includes('Form Score') && (
-                    <Area type="monotone" dataKey="score" stroke="#A78BFA" strokeWidth={3} fillOpacity={1} fill="url(#colorScore)" activeDot={{ r: 6, fill: '#fff', stroke: '#7C3AED', strokeWidth: 2 }} />
+                    <Area type="monotone" dataKey="score" stroke="#A78BFA" strokeWidth={3} fillOpacity={1} fill="url(#colorScore)" activeDot={{ r: 6, fill: 'var(--purple-main)', stroke: 'var(--bg-card)', strokeWidth: 2 }} />
                   )}
                   {activeMetrics.includes('Rhythm') && (
                     <Line type="monotone" dataKey="rhythm" stroke="#3B82F6" strokeWidth={2} dot={false} strokeDasharray="5 5" />
@@ -245,10 +244,10 @@ export default function Analytics() {
               </ResponsiveContainer>
             </div>
           </div>
-
+  
           {/* All Exercises Distribution */}
           <div className="glass-card p-6 shadow-premium-card">
-            <h3 className="text-base font-bold m-0 text-white">All Exercises - Rep Distribution</h3>
+            <h3 className="text-base font-bold m-0 text-evofit-text-primary">All Exercises - Rep Distribution</h3>
             <p className="text-[13px] text-evofit-text-muted m-0 mb-4">Volume breakdown</p>
             <div className="flex items-center h-[200px]">
               <div className="w-1/2 h-full">
@@ -257,7 +256,9 @@ export default function Analytics() {
                     <Pie data={pieData} innerRadius={50} outerRadius={80} paddingAngle={4} dataKey="value" stroke="none">
                       {pieData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.fill} />)}
                     </Pie>
-                    <RechartsTooltip contentStyle={{ borderRadius: '8px', background: '#16161F', border: '1px solid #2A2A3A', fontSize: '12px' }} />
+                    <RechartsTooltip 
+                      contentStyle={{ borderRadius: '8px', background: 'var(--bg-card)', border: '1px solid var(--border)', fontSize: '12px', boxShadow: 'var(--card-shadow)', color: 'var(--text-primary)' }} 
+                    />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
@@ -266,7 +267,7 @@ export default function Analytics() {
                   <div key={d.name} className="flex items-center gap-2 text-[13px] text-evofit-text-secondary">
                     <div className="w-2.5 h-2.5 rounded-full" style={{ background: d.fill }}></div>
                     <span className="flex-1 truncate">{d.name}</span>
-                    <span className="font-bold text-white">{d.value}</span>
+                    <span className="font-bold text-evofit-text-primary">{d.value}</span>
                   </div>
                 ))}
               </div>
@@ -275,14 +276,14 @@ export default function Analytics() {
         </div>
 
         {/* ── DEEP ANALYSIS ROW ───────────────────────────────────────────── */}
-        <h3 className="text-lg font-extrabold mb-4 mt-3 text-white">Deep Analysis</h3>
+        <h3 className="text-lg font-extrabold mb-4 mt-3 text-evofit-text-primary">Deep Analysis</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-10">
           
           {/* Form Quality */}
           <div className="glass-card p-6 shadow-premium-card">
-            <h4 className="text-[15px] font-bold m-0 mb-4 text-white">Form Quality Breakdown</h4>
+            <h4 className="text-[15px] font-bold m-0 mb-4 text-evofit-text-primary">Form Quality Breakdown</h4>
             <div className="flex items-end gap-3 mb-6">
-              <span className="text-[42px] font-extrabold text-white leading-none tracking-tighter">{realConfidence}%</span>
+              <span className="text-[42px] font-extrabold text-evofit-text-primary leading-none tracking-tighter">{realConfidence}%</span>
               <span className="text-[12px] text-evofit-text-muted mb-1.5 font-bold uppercase tracking-wider">Avg. Score</span>
             </div>
             
@@ -290,10 +291,10 @@ export default function Analytics() {
               {pbBins.bars.map(f => (
                 <div key={f.label}>
                   <div className="flex justify-between text-[12px] mb-1.5 font-medium">
-                    <span className="text-evofit-text-secondary">{f.label}: <strong className="text-white ml-1">{f.val}</strong></span>
+                    <span className="text-evofit-text-secondary">{f.label}: <strong className="text-evofit-text-primary ml-1">{f.val}</strong></span>
                     <span className="text-evofit-text-muted">{f.count}/{everyRepData.length}</span>
                   </div>
-                  <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+                  <div className="h-1.5 bg-evofit-bg-secondary rounded-full overflow-hidden">
                     <div className="h-full rounded-full transition-all duration-1000 ease-out" style={{ width: f.val, background: f.color }}></div>
                   </div>
                 </div>
@@ -302,12 +303,12 @@ export default function Analytics() {
             
             {pbBins.problems.length > 0 && (
               <div className="border-t border-evofit-border pt-4">
-                 <h5 className="text-[13px] text-white font-bold m-0 mb-2.5">Problem Reps Identified</h5>
+                 <h5 className="text-[13px] text-evofit-text-primary font-bold m-0 mb-2.5">Problem Reps Identified</h5>
                  {pbBins.problems.map((pr, idx) => (
                    <div key={idx} className="grid grid-cols-[1fr_2fr_1fr] text-[12px] text-evofit-text-muted gap-2 mb-1.5 font-medium">
                      <span>Rep {pr.rep}</span>
                      <span className="text-amber-400">Form Score: {pr.score}</span>
-                     <span className="text-blue-400 text-right cursor-pointer hover:underline">Analysis</span>
+                     <span className="text-evofit-purple-light text-right cursor-pointer hover:underline">Analysis</span>
                    </div>
                  ))}
               </div>
@@ -317,7 +318,7 @@ export default function Analytics() {
           {/* Rep Rhythm */}
           <div className="glass-card p-6 shadow-premium-card">
             <div className="flex justify-between items-center mb-1">
-               <h4 className="text-[15px] font-bold m-0 text-white">Rep Rhythm & Consistency</h4>
+               <h4 className="text-[15px] font-bold m-0 text-evofit-text-primary">Rep Rhythm & Consistency</h4>
                <span className="text-[12px] font-extrabold text-[#34D399] bg-[#34D399]/10 px-2 py-0.5 rounded-lg border border-[#34D399]/15">Consistency: {overallConsistency}</span>
             </div>
             <p className="text-[12px] text-evofit-text-muted m-0 mb-5">{overallConsistency === '0%' ? 'No rhythm data recorded' : 'Tracked via peak-to-peak duration variance'}</p>
@@ -349,14 +350,14 @@ export default function Analytics() {
             {/* Wobble / Stability Card */}
             <div className="glass-card p-6 flex flex-1 items-center shadow-premium-card">
               <div className="flex-1">
-                 <h4 className="text-[15px] font-bold m-0 mb-1 text-white">Form Stability (Gyro)</h4>
+                 <h4 className="text-[15px] font-bold m-0 mb-1 text-evofit-text-primary">Form Stability (Gyro)</h4>
                  <p className="text-[12px] text-evofit-text-muted m-0 mb-4">Barbell rotational wobble</p>
                  <div className="flex items-end gap-2">
                    <span className="text-[32px] font-extrabold text-evofit-purple-light leading-none tracking-tight">{advancedMetrics.wobble}</span>
                    <span className="text-[12px] text-evofit-text-secondary mb-1 font-bold">var/s</span>
                  </div>
               </div>
-              <div className={`w-20 h-20 rounded-full border-4 flex items-center justify-center text-[12px] text-white font-extrabold shadow-lg
+              <div className={`w-20 h-20 rounded-full border-4 flex items-center justify-center text-[12px] text-evofit-text-primary font-extrabold shadow-lg
                   ${advancedMetrics.wobble > 2.0 ? 'border-red-500 shadow-red-500/10' : 'border-green-500 shadow-green-500/10'}`}>
                  {advancedMetrics.wobble > 2.0 ? 'Unstable' : 'Tight'}
               </div>
@@ -364,19 +365,19 @@ export default function Analytics() {
 
             {/* Time Under Tension Card */}
             <div className="glass-card p-6 flex-1 shadow-premium-card">
-              <h4 className="text-[15px] font-bold m-0 mb-1 text-white">Time Under Tension</h4>
+              <h4 className="text-[15px] font-bold m-0 mb-1 text-evofit-text-primary">Time Under Tension</h4>
               <p className="text-[12px] text-evofit-text-muted m-0 mb-4">Concentric vs Eccentric phases</p>
               
               <div className="flex justify-between text-[13px] mb-2 font-bold uppercase tracking-wide">
-                 <span className="text-amber-400">Up: {advancedMetrics.con}s</span>
+                 <span className="text-amber-500">Up: {advancedMetrics.con}s</span>
                  <span className="text-blue-400">Down: {advancedMetrics.ecc}s</span>
               </div>
-              <div className="flex h-2 bg-white/5 rounded-full overflow-hidden">
+              <div className="flex h-2 bg-evofit-bg-secondary rounded-full overflow-hidden">
                  <div className="bg-amber-400 h-full" style={{ width: `${(parseFloat(advancedMetrics.con) / (parseFloat(advancedMetrics.con) + parseFloat(advancedMetrics.ecc) || 1)) * 100}%` }}></div>
                  <div className="bg-blue-400 h-full" style={{ width: `${(parseFloat(advancedMetrics.ecc) / (parseFloat(advancedMetrics.con) + parseFloat(advancedMetrics.ecc) || 1)) * 100}%` }}></div>
               </div>
               <div className="text-center mt-3 text-[12px] text-evofit-text-secondary font-bold uppercase tracking-widest">
-                 Tempo Ratio <strong className="text-white ml-1">{advancedMetrics.ratio} : 1</strong>
+                 Tempo Ratio <strong className="text-evofit-text-primary ml-1">{advancedMetrics.ratio} : 1</strong>
               </div>
             </div>
             
@@ -385,7 +386,7 @@ export default function Analytics() {
           {/* Set-by-Set Performance */}
           <div className="glass-card p-6 flex flex-col shadow-premium-card">
             <div className="flex justify-between items-center mb-4">
-               <h4 className="text-[15px] font-bold m-0 text-white">Endurance & Recovery</h4>
+               <h4 className="text-[15px] font-bold m-0 text-evofit-text-primary">Endurance & Recovery</h4>
                <span className="text-[11px] text-evofit-text-muted font-bold uppercase tracking-wider">Power Fatigue Map</span>
             </div>
             <div className="flex gap-3 h-40 items-flex-end justify-between flex-1 pb-6 pt-4 px-2">
@@ -400,10 +401,10 @@ export default function Analytics() {
                        </div>
                      )}
                      <div className="flex flex-col items-center gap-2 flex-1 relative h-full justify-end">
-                       <div className="absolute -top-6 text-[10px] text-amber-400 whitespace-nowrap flex flex-col items-center font-bold">
+                       <div className="absolute -top-6 text-[10px] text-amber-500 whitespace-nowrap flex flex-col items-center font-bold">
                           <span>{set.mean_power}G</span>
                        </div>
-                       <span className="text-[14px] font-extrabold text-white">{set.reps}</span>
+                       <span className="text-[14px] font-extrabold text-evofit-text-primary">{set.reps}</span>
                        <div 
                         className={`w-full max-w-[30px] rounded-t-lg transition-all duration-1000 ease-out
                           ${i===0 ? 'bg-gradient-to-t from-evofit-bg-secondary to-evofit-purple-main' : 'bg-gradient-to-t from-evofit-bg-secondary to-blue-500'}`}
@@ -416,11 +417,11 @@ export default function Analytics() {
                })}
             </div>
             
-            <div className="mt-4 bg-white/5 p-4 rounded-xl border border-white/5 shadow-inner">
-              <h5 className="text-[13px] font-extrabold m-0 mb-1.5 text-white flex items-center gap-1.5">
+            <div className="mt-4 bg-evofit-bg-secondary p-4 rounded-xl border border-evofit-border shadow-inner">
+              <h5 className="text-[13px] font-extrabold m-0 mb-1.5 text-evofit-text-primary flex items-center gap-1.5">
                 <Sparkles size={14} className="text-amber-400" /> Key Observation
               </h5>
-              <p className="text-[12px] text-evofit-text-secondary m-0引导 leading-relaxed font-medium">
+              <p className="text-[12px] text-evofit-text-secondary leading-relaxed font-medium">
                 Your strongest recorded performance interval was {bestSetSummary} based on combined volume density.
               </p>
             </div>
