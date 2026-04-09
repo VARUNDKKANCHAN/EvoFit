@@ -5,7 +5,7 @@ Pydantic models for API request/response validation.
 These define exactly what the frontend receives as JSON.
 """
 
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr, Field
 from typing import Dict, List, Optional, Any
 from datetime import date, datetime
 
@@ -67,6 +67,56 @@ class MetricsResponse(BaseModel):
 class ErrorResponse(BaseModel):
     detail: str
 
+
+# --- USER & PROFILE SCHEMAS ---
+
+class UserBase(BaseModel):
+    username: str
+    email: EmailStr
+
+class UserCreate(UserBase):
+    password: str
+
+class UserResponse(UserBase):
+    id: int
+    created_at: datetime
+    is_active: bool
+
+    class Config:
+        from_attributes = True
+
+class ProfileBase(BaseModel):
+    full_name: Optional[str] = None
+    age: Optional[int] = None
+    weight_kg: Optional[float] = None
+    height_cm: Optional[float] = None
+    gender: Optional[str] = None
+    fitness_goal: Optional[str] = None
+
+class ProfileResponse(ProfileBase):
+    id: int
+    user_id: int
+
+    class Config:
+        from_attributes = True
+
+# --- BODY METRICS ---
+
+class BodyMetricBase(BaseModel):
+    weight: float
+    body_fat_pct: Optional[float] = None
+    log_date: date
+
+class BodyMetricCreate(BodyMetricBase):
+    pass
+
+class BodyMetricResponse(BodyMetricBase):
+    id: int
+    user_id: int
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
 
 # --- TARGETS & PROGRESS SCHEMAS ---
 

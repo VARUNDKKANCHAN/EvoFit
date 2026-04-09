@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from backend.routers import predict, targets
+from backend.routers import predict, targets, users
 from backend.database.database import engine, Base
 import backend.database.models as models
 
@@ -28,6 +28,7 @@ def startup_event():
 # Include routers
 app.include_router(predict.router)
 app.include_router(targets.router)
+app.include_router(users.router)
 
 @app.get("/")
 async def root():
