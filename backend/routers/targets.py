@@ -202,13 +202,3 @@ def get_progress(db: Session = Depends(get_db)):
         weekly_trend=weekly_trend
     )
 
-    return OverallProgressResponse(
-        overall_percent=min(overall_perc, 100),
-        total_reps_done=total_reps_done,
-        total_reps_target=total_reps_target,
-        current_streak=overall_streak,
-        overall_form_score=round(float(avg_form), 1),
-        exercise_progress=exercise_progress,
-        recent_achievements=achievements,
-        weekly_trend=weekly_trend
-    )
