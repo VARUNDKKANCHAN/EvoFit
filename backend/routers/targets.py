@@ -202,3 +202,8 @@ def get_progress(db: Session = Depends(get_db)):
         weekly_trend=weekly_trend
     )
 
+
+@router.get("/achievements", response_model=List[AchievementResponse])
+def get_all_achievements(db: Session = Depends(get_db)):
+    """Fetch all achievements for the default user (ID: 1), most recent first."""
+    return db.query(Achievement).filter(Achievement.user_id == 1).order_by(Achievement.unlocked_at.desc()).all()

@@ -8,7 +8,7 @@ import {
 } from 'recharts';
 import { 
   Target as TargetIcon, Award, TrendingUp, CheckCircle2, 
-  Plus, ChevronRight, Flame, Dumbbell, Activity, Timer, Sparkles
+  Plus, ChevronRight, Flame, Dumbbell, Activity, Timer, Sparkles, X, Trophy
 } from 'lucide-react';
 
 const EXERCISE_OPTIONS = [
@@ -24,6 +24,9 @@ export default function Targets() {
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
   const [progressData, setProgressData] = useState(null);
+  const [showBadgesModal, setShowBadgesModal] = useState(false);
+  const [allAchievements, setAllAchievements] = useState([]);
+  const [loadingBadges, setLoadingBadges] = useState(false);
   
   // Form state
   const [selectedExercise, setSelectedExercise] = useState('bench');
@@ -46,6 +49,29 @@ export default function Targets() {
     }
   };
 
+  const fetchAllAchievements = async () => {
+    setLoadingBadges(true);
+    try {
+      const res = await axios.get('http://localhost:8000/targets/achievements');
+      setAllAchievements(res.data);
+    } catch (err) {
+      console.error("Failed to fetch achievements", err);
+    } finally {
+      setLoadingBadges(false);
+    }
+  };
+
+  const openBadgesModal = () => {
+    setShowBadgesModal(true);
+    fetchAllAchievements();
+  };
+
+  const handleViewAnalysis = (exercise) => {
+    // Store the selected exercise filter so Analytics can pick it up
+    sessionStorage.setItem('analyticsExerciseFilter', exercise);
+    navigate('/analytics');
+  };
+
   const handleSaveTarget = async () => {
     if (!repTarget || isNaN(repTarget)) return;
     setSaving(true);
@@ -66,6 +92,76 @@ export default function Targets() {
   if (loading) return (
     <div className="flex items-center justify-center h-full">
       <div className="w-10 h-10 border-4 border-evofit-border border-t-evofit-purple-main rounded-full animate-spin" />
+    </div>
+  );
+
+  /* ── Badges Modal ──────────────────────────────── */
+  const BadgesModal = () => (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setShowBadgesModal(false)}>
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      {/* Panel */}
+      <div
+        className="relative z-10 w-full max-w-lg glass-card p-8 animate-fade-in-up shadow-2xl border border-evofit-purple-main/20"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-evofit-purple-main/15 border border-evofit-purple-main/30 flex items-center justify-center">
+              <Trophy size={20} className="text-evofit-purple-light" />
+            </div>
+            <div>
+              <h3 className="text-lg font-extrabold m-0 text-evofit-text-primary">All Badges</h3>
+              <p className="text-[12px] text-evofit-text-muted m-0">{allAchievements.length} milestone{allAchievements.length !== 1 ? 's' : ''} unlocked</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowBadgesModal(false)}
+            className="w-8 h-8 rounded-full bg-evofit-bg-secondary border border-evofit-border flex items-center justify-center text-evofit-text-secondary hover:text-evofit-text-primary hover:border-evofit-purple-main/40 transition-all cursor-pointer"
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="flex flex-col gap-3 max-h-[420px] overflow-y-auto pr-1">
+          {loadingBadges ? (
+            <div className="flex justify-center py-10">
+              <div className="w-8 h-8 border-4 border-evofit-border border-t-evofit-purple-main rounded-full animate-spin" />
+            </div>
+          ) : allAchievements.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="w-14 h-14 rounded-full bg-evofit-bg-secondary border border-evofit-border flex items-center justify-center mx-auto mb-4">
+                <Trophy size={24} className="text-evofit-text-muted" />
+              </div>
+              <p className="text-evofit-text-secondary font-semibold m-0 mb-1">No badges yet</p>
+              <p className="text-[13px] text-evofit-text-muted m-0">Keep training to unlock your first milestone!</p>
+            </div>
+          ) : (
+            allAchievements.map((ach, i) => (
+              <div
+                key={ach.id}
+                className="flex items-center gap-4 p-4 rounded-xl bg-evofit-bg-secondary border border-evofit-border hover:border-evofit-purple-main/30 transition-all duration-200 animate-fade-in-up"
+                style={{ animationDelay: `${i * 0.05}s` }}
+              >
+                <div className="w-12 h-12 rounded-[14px] bg-gradient-to-br from-amber-400 to-amber-700 flex items-center justify-center shadow-[0_0_15px_rgba(184,134,11,0.2)] shrink-0">
+                  <Sparkles size={22} className="text-white" strokeWidth={2.5} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="m-0 mb-0.5 text-[14px] font-extrabold text-evofit-text-primary truncate">{ach.badge_name}</p>
+                  <p className="m-0 text-[12px] text-evofit-text-muted leading-relaxed">{ach.description}</p>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="text-[10px] text-evofit-text-muted font-semibold m-0">
+                    {new Date(ach.unlocked_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  </p>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
     </div>
   );
 
@@ -224,8 +320,8 @@ export default function Targets() {
                 </div>
   
                 <button 
-                  onClick={() => navigate(`/analytics?exercise=${ex.exercise}&session=latest`)}
-                  className="w-full bg-white/5 border border-evofit-border rounded-xl py-3 text-evofit-text-secondary text-[13px] font-bold cursor-pointer transition-all duration-300 flex items-center justify-center gap-2 hover:bg-evofit-purple-main/10 hover:text-white hover:border-evofit-purple-main/30 group"
+                  onClick={() => handleViewAnalysis(ex.exercise)}
+                  className="w-full bg-evofit-bg-secondary border border-evofit-border rounded-xl py-3 text-evofit-text-secondary text-[13px] font-bold cursor-pointer transition-all duration-300 flex items-center justify-center gap-2 hover:bg-evofit-purple-main/10 hover:text-evofit-purple-light hover:border-evofit-purple-main/30 group"
                 >
                   View Detailed Analysis <ChevronRight size={16} className="transition-transform group-hover:translate-x-0.5" />
                 </button>
@@ -329,9 +425,10 @@ export default function Targets() {
               )}
               
               <button 
-                className="w-full bg-transparent text-evofit-text-primary border border-evofit-border py-3.5 rounded-xl font-bold text-sm cursor-pointer hover:border-evofit-purple-main hover:text-evofit-purple-light transition-all duration-200 uppercase tracking-widest mt-2"
+                onClick={openBadgesModal}
+                className="w-full bg-transparent text-evofit-text-primary border border-evofit-border py-3.5 rounded-xl font-bold text-sm cursor-pointer hover:border-evofit-purple-main hover:text-evofit-purple-light hover:bg-evofit-purple-main/5 transition-all duration-200 uppercase tracking-widest mt-2 flex items-center justify-center gap-2"
               >
-                View All Badges
+                <Trophy size={14} /> View All Badges
               </button>
             </div>
           </div>
@@ -340,6 +437,33 @@ export default function Targets() {
   
       </div>
       
+      {/* Badges Modal */}
+      {showBadgesModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="glass-card w-full max-w-lg p-8 animate-fade-in-up">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-extrabold text-evofit-text-primary">All Achievements</h2>
+              <button onClick={() => setShowBadgesModal(false)} className="text-evofit-text-muted hover:text-evofit-text-primary">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="max-h-[60vh] overflow-y-auto pr-2 space-y-4">
+              {allAchievements.map((ach) => (
+                <div key={ach.id} className="flex items-center gap-4 p-4 bg-evofit-bg-secondary rounded-xl border border-evofit-border">
+                  <div className="w-12 h-12 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500">
+                    <Award size={24} />
+                  </div>
+                  <div>
+                    <p className="font-bold text-evofit-text-primary">{ach.badge_name}</p>
+                    <p className="text-xs text-evofit-text-muted">{ach.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       <footer className="w-full max-w-[1440px] py-10 border-t border-evofit-border text-center">
          <div className="flex justify-center gap-6 mb-4">
             <span className="text-[12px] text-evofit-text-muted font-semibold cursor-pointer hover:text-evofit-purple-light transition-colors">Privacy Policy</span>
