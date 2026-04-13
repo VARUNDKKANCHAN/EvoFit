@@ -176,6 +176,13 @@ class SessionItem(BaseModel):
     consistency: float
     sparkline_data: List[float]
 
+class DashboardTargetItem(BaseModel):
+    label: str
+    reps_done: int
+    reps_target: int
+    completion_pct: int
+    icon_type: str # e.g. "activity", "clock", "trending"
+
 class TrendPoint(BaseModel):
     date: str
     reps: int
@@ -197,4 +204,5 @@ class DashboardSummaryResponse(BaseModel):
     trend_data: List[TrendPoint]
     recent_sessions: List[SessionItem]
     distribution: List[DistributionItem]
+    targets: List[DashboardTargetItem]
     insights: List[str]

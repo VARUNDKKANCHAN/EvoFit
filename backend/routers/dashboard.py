@@ -7,7 +7,7 @@ from typing import List
 
 from backend.database.database import get_db
 from backend.database.models import WorkoutSession, Target
-from backend.schemas.schemas import DashboardSummaryResponse, KPIStats, TrendPoint, SessionItem, DistributionItem
+from backend.schemas.schemas import DashboardSummaryResponse, KPIStats, TrendPoint, SessionItem, DistributionItem, DashboardTargetItem
 
 router = APIRouter(
     prefix="/dashboard",
@@ -144,7 +144,33 @@ def get_dashboard_summary(db: Session = Depends(get_db)):
         ) for ex, reps in dist_raw
     ]
 
-    # 5. AI Insights (Only added if there's enough data)
+    # 5. Targets (Active Goals)
+    active_targets_raw = db.query(Target).filter(
+        Target.user_id == user_id,
+        Target.end_date >= today
+    ).order_by(Target.end_date).limit(4).all()
+
+    targets = []
+    for tgt in active_targets_raw:
+        # Calculate reps done for this target's timeframe
+        reps_done_query = db.query(func.sum(WorkoutSession.reps_actual)).filter(
+            WorkoutSession.user_id == user_id,
+            WorkoutSession.exercise == tgt.exercise,
+            WorkoutSession.date >= tgt.start_date,
+            WorkoutSession.date <= tgt.end_date
+        ).scalar() or 0
+        
+        pct = min(100, int((reps_done_query / tgt.weekly_rep_target) * 100)) if tgt.weekly_rep_target > 0 else 0
+        
+        targets.append({
+            "label": f"{tgt.exercise.capitalize()} Volume",
+            "reps_done": int(reps_done_query),
+            "reps_target": tgt.weekly_rep_target,
+            "completion_pct": pct,
+            "icon_type": "activity"
+        })
+
+    # 6. AI Insights (Only added if there's enough data)
     insights = []
     if reps_week > 100:
         insights.append(f"You've lifted {reps_week} reps this week. Keep up the momentum!")
@@ -164,5 +190,6 @@ def get_dashboard_summary(db: Session = Depends(get_db)):
         trend_data=trend_data,
         recent_sessions=recent_sessions,
         distribution=distribution,
+        targets=targets,
         insights=insights
     )

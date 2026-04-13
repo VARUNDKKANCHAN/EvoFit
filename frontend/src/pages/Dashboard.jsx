@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
@@ -20,6 +21,7 @@ const EXERCISE_COLORS = {
 };
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState(null);
@@ -48,7 +50,7 @@ export default function Dashboard() {
     );
   }
 
-  const { kpis, trend_data, recent_sessions, distribution, insights } = data || {};
+  const { kpis, trend_data, recent_sessions, distribution, targets, insights } = data || {};
 
   return (
     <div className="flex-1 flex flex-col items-center py-10 px-7 overflow-y-auto bg-evofit-bg-primary min-h-screen font-inter">
@@ -62,7 +64,7 @@ export default function Dashboard() {
               Welcome back, Alex 👋
             </h1>
             <p className="text-evofit-text-secondary text-base m-0 mt-1 font-medium">
-              Today is Monday, October 28, 2025 · Your training performance is peaking.
+              Today is {new Date().toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} · Your training performance is peaking.
             </p>
           </div>
           <div className="flex items-center gap-4">
@@ -96,10 +98,7 @@ export default function Dashboard() {
                   </div>
                 )}
              </div>
-             <p className="text-[10px] text-evofit-text-muted mt-2 font-bold flex items-center gap-1.5 uppercase">
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" /> count-up animation
-             </p>
-          </div>
+           </div>
 
           {/* KPI 2: Avg Form Score */}
           <div className="glass-card p-7 shadow-premium-card hover:border-evofit-purple-main/30 transition-all group">
@@ -125,10 +124,7 @@ export default function Dashboard() {
                   {kpis?.avg_form_score >= 90 ? 'Excellent' : kpis?.avg_form_score >= 70 ? 'Good' : 'N/A'}
                 </p>
              </div>
-             <p className="text-[10px] text-evofit-text-muted mt-2 font-bold flex items-center gap-1.5 uppercase">
-                <span className="w-1.5 h-1.5 rounded-full bg-evofit-purple-light" /> pulse-glow effect
-             </p>
-          </div>
+           </div>
 
           {/* KPI 3: Consistency */}
           <div className="glass-card p-7 shadow-premium-card border-evofit-purple-main/40 bg-evofit-purple-main/[0.03] hover:bg-evofit-purple-main/[0.05] transition-all group">
@@ -149,10 +145,7 @@ export default function Dashboard() {
                   {kpis?.consistency_score > 0 ? `${kpis.consistency_score}%` : '0%'}
                 </h2>
              </div>
-             <p className="text-[10px] text-evofit-purple-light mt-2 font-bold flex items-center gap-1.5 uppercase">
-                <span className="w-1.5 h-1.5 rounded-full bg-evofit-purple-main" /> count-up animation
-             </p>
-          </div>
+           </div>
 
           {/* KPI 4: Streak */}
           <div className="glass-card p-7 shadow-premium-card hover:border-amber-500/30 transition-all group">
@@ -170,15 +163,15 @@ export default function Dashboard() {
                   <div className="px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-[10px] text-amber-500 font-black mb-2 uppercase">Record High</div>
                 )}
              </div>
-             <p className="text-[10px] text-evofit-text-muted mt-2 font-bold flex items-center gap-1.5 uppercase">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-500" /> count-up animation
-             </p>
-          </div>
+           </div>
         </div>
 
         {/* ── QUICK UPLOAD + LAST SESSION ───────────────────────────────── */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-7 mb-7">
-           <div className="glass-card p-10 border-2 border-dashed border-evofit-border flex flex-col items-center justify-center text-center hover:border-evofit-purple-main/50 transition-all group cursor-pointer">
+           <div 
+             onClick={() => navigate('/upload')}
+             className="glass-card p-10 border-2 border-dashed border-evofit-border flex flex-col items-center justify-center text-center hover:border-evofit-purple-main/50 transition-all group cursor-pointer"
+           >
               <div className="w-[70px] h-[70px] rounded-full bg-evofit-purple-main/10 flex items-center justify-center mb-6 shadow-purple-glow">
                  <Plus size={32} className="text-evofit-purple-light group-hover:rotate-90 transition-transform duration-500" />
               </div>
@@ -186,7 +179,10 @@ export default function Dashboard() {
               <p className="text-evofit-text-secondary text-sm max-w-[400px] mb-8 leading-relaxed">
                  Drop your training footage here. Our AI will analyze your form, reps, and intensity in real-time.
               </p>
-              <button className="premium-gradient text-white px-10 py-3.5 rounded-xl font-bold text-base shadow-lg hover:-translate-y-1 transition-all">
+              <button 
+                onClick={(e) => { e.stopPropagation(); navigate('/upload'); }}
+                className="premium-gradient text-white px-10 py-3.5 rounded-xl font-bold text-base shadow-lg hover:-translate-y-1 transition-all"
+              >
                  Browse Files
               </button>
            </div>
@@ -227,7 +223,10 @@ export default function Dashboard() {
                       </p>
                    </div>
 
-                   <button className="w-full bg-evofit-bg-secondary border border-evofit-border py-3.5 rounded-xl text-[13px] font-bold text-evofit-text-primary hover:border-evofit-purple-main/40 transition-all">
+                   <button 
+                      onClick={() => navigate('/analytics')}
+                      className="w-full bg-evofit-bg-secondary border border-evofit-border py-3.5 rounded-xl text-[13px] font-bold text-evofit-text-primary hover:border-evofit-purple-main/40 transition-all"
+                   >
                       View Session Breakdown
                    </button>
                 </div>
@@ -317,11 +316,6 @@ export default function Dashboard() {
                     />
                  </ComposedChart>
               </ResponsiveContainer>
-              <div className="absolute top-0 right-0 p-4">
-                 <p className="text-[10px] text-evofit-text-muted font-black border border-evofit-border bg-evofit-bg-secondary px-3 py-1 rounded-full uppercase tracking-tighter">
-                    Area fills left-to-right · Line draws smoothly
-                 </p>
-              </div>
            </div>
         </div>
 
@@ -333,7 +327,7 @@ export default function Dashboard() {
                  <p className="text-sm text-evofit-text-muted m-0 font-medium">Track your progression against predefined goals</p>
               </div>
               <button 
-                onClick={() => window.location.href='/targets'}
+                onClick={() => navigate('/targets')}
                 className="text-evofit-purple-light text-sm font-bold flex items-center gap-1.5 hover:underline"
               >
                  View in targets <ChevronRight size={16} />
@@ -341,20 +335,42 @@ export default function Dashboard() {
            </div>
 
            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-              {/* Note: This section currently remains empty until Targets are connected to the database */}
-              <div className="col-span-full py-12 flex flex-col items-center justify-center glass-card border-evofit-border group hover:border-evofit-purple-main/30 transition-all">
-                 <div className="w-12 h-12 rounded-xl bg-evofit-bg-secondary flex items-center justify-center text-evofit-text-muted mb-4">
-                    <Award size={24} />
-                 </div>
-                 <h4 className="text-[15px] font-bold text-evofit-text-primary mb-1">No Active Targets</h4>
-                 <p className="text-[13px] text-evofit-text-muted mb-6">Set weekly goals to track your progression here.</p>
-                 <button 
-                   onClick={() => window.location.href='/targets'}
-                   className="bg-evofit-bg-secondary border border-evofit-border px-5 py-2 rounded-xl text-[12px] font-bold text-evofit-text-primary hover:text-evofit-purple-light hover:border-evofit-purple-main/40 transition-all"
-                 >
-                    Setup My First Target
-                 </button>
-              </div>
+              {targets?.length > 0 ? (
+                targets.map((t, i) => (
+                  <div key={i} className="glass-card p-6 shadow-premium-card border-evofit-border hover:border-evofit-purple-main/30 transition-all flex flex-col gap-4">
+                     <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-2.5">
+                           <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-evofit-purple-light">
+                              {t.icon_type === 'activity' ? <Activity size={18} /> : <TrendingUp size={18} />}
+                           </div>
+                           <span className="text-[14px] font-bold text-evofit-text-primary">{t.label}</span>
+                        </div>
+                        <span className="text-[12px] font-black text-evofit-purple-light">{t.completion_pct}%</span>
+                     </div>
+                     <div className="h-2 bg-evofit-bg-secondary rounded-full overflow-hidden">
+                        <div className="h-full bg-evofit-purple-main rounded-full animate-fill-in duration-[1500ms]" style={{ width: `${t.completion_pct}%` }} />
+                     </div>
+                     <div className="flex justify-between items-center mt-1">
+                        <p className="text-[11px] text-evofit-text-muted m-0 font-medium">{t.reps_done} / {t.reps_target} reps</p>
+                        <p className="text-[9px] text-evofit-text-muted font-bold uppercase">Tracking</p>
+                     </div>
+                  </div>
+                ))
+              ) : (
+                <div className="col-span-full py-12 flex flex-col items-center justify-center glass-card border-evofit-border group hover:border-evofit-purple-main/30 transition-all">
+                   <div className="w-12 h-12 rounded-xl bg-evofit-bg-secondary flex items-center justify-center text-evofit-text-muted mb-4">
+                      <Award size={24} />
+                   </div>
+                   <h4 className="text-[15px] font-bold text-evofit-text-primary mb-1">No Active Targets</h4>
+                   <p className="text-[13px] text-evofit-text-muted mb-6">Set weekly goals to track your progression here.</p>
+                   <button 
+                     onClick={() => navigate('/targets')}
+                     className="bg-evofit-bg-secondary border border-evofit-border px-5 py-2 rounded-xl text-[12px] font-bold text-evofit-text-primary hover:text-evofit-purple-light hover:border-evofit-purple-main/40 transition-all"
+                   >
+                      Setup My First Target
+                   </button>
+                </div>
+              )}
            </div>
         </div>
 
@@ -419,7 +435,10 @@ export default function Dashboard() {
                                 </div>
                              </td>
                              <td className="py-5 text-right pr-2">
-                                <button className="w-8 h-8 rounded-lg bg-evofit-bg-secondary border border-evofit-border flex items-center justify-center text-evofit-text-muted group-hover:text-evofit-purple-light group-hover:border-evofit-purple-main transition-all">
+                                <button 
+                                  onClick={() => navigate('/analytics')}
+                                  className="w-8 h-8 rounded-lg bg-evofit-bg-secondary border border-evofit-border flex items-center justify-center text-evofit-text-muted group-hover:text-evofit-purple-light group-hover:border-evofit-purple-main transition-all"
+                                >
                                    <ChevronRight size={16} />
                                 </button>
                              </td>
@@ -503,7 +522,6 @@ export default function Dashboard() {
                           ))}
                        </div>
                     </div>
-                    <p className="text-[9px] text-evofit-text-muted mt-5 font-black uppercase text-center tracking-widest">Segments pop in one by one</p>
                  </div>
               </div>
            </div>
