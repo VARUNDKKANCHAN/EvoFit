@@ -66,10 +66,7 @@ export default function UploadPredict() {
   const [dragOver, setDragOver] = useState(false);
   const [loading, setLoading]   = useState(false);
   const [error, setError]       = useState('');
-  const [mounted, setMounted]   = useState(false);
   const inputRef                = useRef();
-
-  useEffect(() => { setMounted(true); }, []);
 
   const isAllowed = (f) => ALLOWED_EXT.some(ext => f.name.toLowerCase().endsWith(ext));
 
@@ -124,19 +121,18 @@ export default function UploadPredict() {
   const fileExt = file ? file.name.split('.').pop().toLowerCase() : null;
 
   return (
-    <div className="flex-1 flex flex-col items-center py-8 px-6 overflow-y-auto relative z-10 bg-evofit-bg-primary font-inter min-h-full">
+    <div className="flex-1 flex flex-col items-center py-8 px-6 overflow-y-auto relative z-10 bg-evofit-bg-primary font-inter min-h-full animate-page-enter">
       <BackgroundOrbs />
       
       {/* ── Heading ───────────────────────────────── */}
-      <div className={`w-full max-w-[760px] mb-6 transition-all duration-500 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+      <div className="w-full max-w-[760px] mb-6">
       </div>
 
       {/* ── Drop Zone ─────────────────────────────── */}
       <div
         className={`glass-card w-full max-w-[760px] p-12 md:p-14 text-center border-2 border-dashed transition-all duration-300 shadow-premium-card
           ${dragOver ? 'border-evofit-purple-main bg-evofit-purple-main/10 scale-[1.02]' : 'border-evofit-border hover:border-evofit-purple-main/50'}
-          ${file ? 'cursor-default' : 'cursor-pointer'}
-          ${mounted ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
+          ${file ? 'cursor-default' : 'cursor-pointer'}`}
         onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
         onDragLeave={() => setDragOver(false)}
         onDrop={onDrop}
@@ -227,8 +223,8 @@ export default function UploadPredict() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mt-8 w-full max-w-[760px] mb-12">
         {STEPS.map(({ n, title, desc }, i) => (
           <div key={n} 
-            className="glass-card p-6 flex flex-col gap-3 group transition-all duration-300 hover:-translate-y-1.5 hover:border-evofit-purple-main/50 hover:shadow-premium-card animate-stagger-in"
-            style={{ animationDelay: `${0.2 + i * 0.1}s` }}
+            className="glass-card p-6 flex flex-col gap-3 group transition-all duration-300 hover:-translate-y-1.5 hover:border-evofit-purple-main/50 hover:shadow-premium-card evofit-stagger-item"
+            style={{ animationDelay: `${200 + i * 100}ms` }}
           >
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-evofit-purple-main text-white font-extrabold flex items-center justify-center text-sm shadow-lg group-hover:animate-bounce-subtle">

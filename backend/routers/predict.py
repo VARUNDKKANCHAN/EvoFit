@@ -69,11 +69,15 @@ async def predict_exercise(file: UploadFile = File(...), db: Session = Depends(g
 
         # Achievement logic
         new_badges = []
+        from sqlalchemy import func
         for ex in result.get("exercise_breakdown", []):
             label = ex.get("label")
-            from sqlalchemy import func
+            reps = ex.get("rep_count", 0)
+            avg_conf = result.get("confidence", 0) * 100
+            
             total_ever = db.query(func.sum(WorkoutSession.reps_actual)).filter(WorkoutSession.exercise == label).scalar() or 0
             
+            # Badge 1: 500 Club
             if total_ever >= 500:
                 badge = f"500 {label.capitalize()} Reps Club"
                 exists = db.query(Achievement).filter(Achievement.badge_name == badge).first()
@@ -82,6 +86,49 @@ async def predict_exercise(file: UploadFile = File(...), db: Session = Depends(g
                         badge_name=badge, 
                         description=f"You've smashed 500 total reps of {label}!", 
                         icon="star",
+                        user_id=user_id
+                    )
+                    db.add(new_achive)
+                    new_badges.append(badge)
+            
+            # Badge 2: Volume King (100+ reps in one session)
+            if reps >= 100:
+                badge = f"{label.capitalize()} Volume King"
+                exists = db.query(Achievement).filter(Achievement.badge_name == badge).first()
+                if not exists:
+                    new_achive = Achievement(
+                        badge_name=badge, 
+                        description=f"Over 100 reps of {label} in a single session! Unstoppable.", 
+                        icon="flame",
+                        user_id=user_id
+                    )
+                    db.add(new_achive)
+                    new_badges.append(badge)
+
+            # Badge 3: Set Sniper (Form >= 95%)
+            if avg_conf >= 95.0 and reps >= 10:
+                badge = f"{label.capitalize()} Set Sniper"
+                exists = db.query(Achievement).filter(Achievement.badge_name == badge).first()
+                if not exists:
+                    new_achive = Achievement(
+                        badge_name=badge, 
+                        description=f"Near perfect form on {label} for a full set. Flawless execution.", 
+                        icon="target",
+                        user_id=user_id
+                    )
+                    db.add(new_achive)
+                    new_badges.append(badge)
+            
+            # Badge 4: New Ground (First time)
+            session_count = db.query(WorkoutSession).filter(WorkoutSession.exercise == label).count()
+            if session_count == 1: # Only the one we just inserted
+                badge = f"New Ground: {label.capitalize()}"
+                exists = db.query(Achievement).filter(Achievement.badge_name == badge).first()
+                if not exists:
+                    new_achive = Achievement(
+                        badge_name=badge, 
+                        description=f"Welcome to {label}. The journey of a thousand reps begins here.", 
+                        icon="pulse",
                         user_id=user_id
                     )
                     db.add(new_achive)

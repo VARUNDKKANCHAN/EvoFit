@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const EXERCISE_ICONS = {
   bench: '🏋️',
@@ -19,6 +20,8 @@ const EXERCISE_LABELS = {
 };
 
 export default function PredictionResult({ result, filename }) {
+  const navigate = useNavigate();
+
   if (!result) return null;
 
   const label       = result.predicted_label || 'unknown';
@@ -112,13 +115,30 @@ export default function PredictionResult({ result, filename }) {
       )}
 
       {/* Footer */}
-      <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="var(--text-muted)" strokeWidth="2">
-          <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
-        </svg>
-        <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: 0 }}>
-          Analysed from: <span style={{ color: 'var(--text-secondary)' }}>{filename}</span>
-        </p>
+      <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="var(--text-muted)" strokeWidth="2">
+            <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+          </svg>
+          <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: 0 }}>
+            Analysed from: <span style={{ color: 'var(--text-secondary)' }}>{filename}</span>
+          </p>
+        </div>
+        <button 
+          onClick={() => navigate('/history')}
+          style={{
+            background: 'var(--bg-secondary)',
+            border: '1px solid var(--border)',
+            padding: '6px 12px',
+            borderRadius: '8px',
+            fontSize: '12px',
+            fontWeight: 600,
+            color: 'var(--text-primary)',
+            cursor: 'pointer',
+          }}
+        >
+          View in History →
+        </button>
       </div>
     </div>
   );

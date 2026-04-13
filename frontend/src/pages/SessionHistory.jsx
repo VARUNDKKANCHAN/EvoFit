@@ -11,17 +11,17 @@ export default function SessionHistory() {
   const navigate = useNavigate();
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [mounted, setMounted] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-
-  useEffect(() => {
-    setMounted(true);
-    fetchSessions();
-  }, []);
+  const [daysFilter, setDaysFilter] = useState(null);
 
   const fetchSessions = async () => {
     try {
-      const res = await axios.get('http://127.0.0.1:8000/sessions/');
+      setLoading(true);
+      let url = 'http://127.0.0.1:8000/sessions/';
+      if (daysFilter !== null) {
+        url += `?days=${daysFilter}`;
+      }
+      const res = await axios.get(url);
       setSessions(res.data);
     } catch (err) {
       console.error("Failed to fetch sessions", err);
@@ -29,6 +29,10 @@ export default function SessionHistory() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchSessions();
+  }, [daysFilter]);
 
   const filteredSessions = sessions.filter(s => 
     s.exercise.toLowerCase().includes(searchQuery.toLowerCase())
@@ -56,7 +60,7 @@ export default function SessionHistory() {
   return (
     <div className="flex-1 flex flex-col items-center py-10 px-7 overflow-y-auto bg-evofit-bg-primary min-h-screen font-inter">
       {/* ── CENTRAL ARTBOARD (1200px) ─────────────────────────────────── */}
-      <div className={`w-full max-w-[1200px] transition-all duration-700 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+      <div className="evofit-page-container">
         
         {/* Header section */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
@@ -86,7 +90,14 @@ export default function SessionHistory() {
            <button className="flex items-center justify-center gap-2 bg-evofit-bg-secondary border border-evofit-border px-6 py-3.5 rounded-2xl text-sm font-bold text-evofit-text-secondary hover:text-evofit-text-primary hover:border-evofit-purple-main/40 transition-all">
               <Filter size={18} /> Filters
            </button>
-           <button className="flex items-center justify-center gap-2 bg-evofit-bg-secondary border border-evofit-border px-6 py-3.5 rounded-2xl text-sm font-bold text-evofit-text-secondary hover:text-evofit-text-primary hover:border-evofit-purple-main/40 transition-all">
+           <button 
+             onClick={() => setDaysFilter(daysFilter === 30 ? null : 30)}
+             className={`flex items-center justify-center gap-2 border px-6 py-3.5 rounded-2xl text-sm font-bold transition-all ${
+               daysFilter === 30 
+                 ? 'bg-evofit-purple-main/20 border-evofit-purple-main text-evofit-purple-light' 
+                 : 'bg-evofit-bg-secondary border-evofit-border text-evofit-text-secondary hover:text-evofit-text-primary hover:border-evofit-purple-main/40'
+             }`}
+           >
               <Calendar size={18} /> Last 30 Days
            </button>
         </div>

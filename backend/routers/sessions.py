@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import desc
 from typing import List, Optional
 import json
+from datetime import date, timedelta
 from backend.database.database import get_db
 from backend.database.models import WorkoutSession
 from backend.schemas.schemas import SessionItem
@@ -13,11 +14,22 @@ router = APIRouter(
 )
 
 @router.get("/", response_model=List[SessionItem])
-def get_all_sessions(db: Session = Depends(get_db)):
+def get_all_sessions(
+    days: Optional[int] = None,
+    exercise: Optional[str] = None,
+    db: Session = Depends(get_db)
+):
     user_id = 1
-    sessions = db.query(WorkoutSession).filter(
-        WorkoutSession.user_id == user_id
-    ).order_by(desc(WorkoutSession.date), desc(WorkoutSession.created_at)).all()
+    query = db.query(WorkoutSession).filter(WorkoutSession.user_id == user_id)
+    
+    if days is not None:
+        lookback = date.today() - timedelta(days=days)
+        query = query.filter(WorkoutSession.date >= lookback)
+        
+    if exercise:
+        query = query.filter(WorkoutSession.exercise.ilike(f"%{exercise}%"))
+        
+    sessions = query.order_by(desc(WorkoutSession.date), desc(WorkoutSession.created_at)).all()
     
     # Map to SessionItem format
     result = []

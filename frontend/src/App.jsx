@@ -15,20 +15,10 @@ import 'react-toastify/dist/ReactToastify.css';
    Animated page wrapper — fades + slides on route change
    ══════════════════════════════════════════════════ */
 function AnimatedPage({ children }) {
-  const ref = useRef();
   const location = useLocation();
 
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    el.style.animation = 'none';
-    // Force reflow
-    void el.offsetHeight;
-    el.style.animation = 'page-enter 0.35s cubic-bezier(0.4,0,0.2,1) both';
-  }, [location.pathname]);
-
   return (
-    <div ref={ref} className="contents">
+    <div key={location.pathname} className="contents animate-page-enter">
       {children}
     </div>
   );

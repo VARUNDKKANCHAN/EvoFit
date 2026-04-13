@@ -23,13 +23,10 @@ const EXERCISE_LABELS = {
 export default function Analytics() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [mounted, setMounted] = useState(false);
   const [copied, setCopied] = useState(false);
   const [highlightedRep, setHighlightedRep] = useState(null);
   const chartRef = React.useRef(null);
   const reportRef = React.useRef(null);
-  
-  useEffect(() => { setMounted(true); }, []);
 
   const [sessionData] = useState(() => {
     try {
@@ -176,7 +173,7 @@ export default function Analytics() {
     };
   }, [everyRepData]);
 
-  if (!predictionResult && mounted) {
+  if (!predictionResult) {
     return (
       <div className="flex-1 flex items-center justify-center p-6 bg-evofit-bg-primary min-h-full">
         <div className="text-center p-12 glass-card max-w-md w-full">
@@ -194,10 +191,10 @@ export default function Analytics() {
   }
 
   return (
-    <div ref={reportRef} className="flex-1 p-8 md:p-10 overflow-y-auto relative z-10 bg-evofit-bg-primary font-inter">
+    <div ref={reportRef} className="flex-1 p-8 md:p-10 overflow-y-auto relative z-10 bg-evofit-bg-primary font-inter animate-page-enter">
       
       {/* ── RETURN BUTTON + SHARE ─────────────────────────────────────────── */}
-      <div className={`mb-4 flex items-center justify-between transition-all duration-400 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+      <div className="mb-4 flex items-center justify-between">
         <button onClick={() => navigate('/upload')} className="bg-transparent border-none text-evofit-text-secondary flex items-center gap-1.5 text-[13px] cursor-pointer p-0 hover:text-evofit-text-primary transition-colors font-semibold">
           <ChevronLeft size={16} /> Return to Upload & Predict
         </button>
@@ -216,7 +213,7 @@ export default function Analytics() {
       </div>
 
       {/* ── TABS ───────────────────────────────────────────────────────── */}
-      <div className={`flex border-b border-evofit-border mb-6 transition-all duration-500 delay-100 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+      <div className="flex border-b border-evofit-border mb-6">
         {availableExercises.map(tab => {
           const isActive = activeTab === tab;
           return (
@@ -232,7 +229,7 @@ export default function Analytics() {
         })}
       </div>
 
-      <div className={`transition-all duration-600 delay-200 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+      <div className="animate-page-enter delay-200">
         
         {/* ── KEY METRICS ROW ───────────────────────────────────────────── */}
         <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">

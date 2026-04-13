@@ -21,7 +21,6 @@ const EXERCISE_OPTIONS = [
 
 export default function Targets() {
   const navigate = useNavigate();
-  const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
   const [progressData, setProgressData] = useState(null);
   const [showBadgesModal, setShowBadgesModal] = useState(false);
@@ -32,11 +31,6 @@ export default function Targets() {
   const [selectedExercise, setSelectedExercise] = useState('bench');
   const [repTarget, setRepTarget] = useState('');
   const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-    fetchProgress();
-  }, []);
 
   const fetchProgress = async () => {
     try {
@@ -60,6 +54,10 @@ export default function Targets() {
       setLoadingBadges(false);
     }
   };
+
+  useEffect(() => {
+    fetchProgress();
+  }, []);
 
   const openBadgesModal = () => {
     setShowBadgesModal(true);
@@ -168,7 +166,7 @@ export default function Targets() {
   return (
     <div className="flex-1 flex flex-col items-center py-10 px-5 overflow-y-auto bg-evofit-bg-primary min-h-screen font-inter">
       {/* ── CENTRAL ARTBOARD (1440px) ─────────────────────────────────── */}
-      <div className={`w-full max-w-[1440px] transition-opacity duration-600 ${mounted ? 'opacity-100' : 'opacity-0'}`}>
+      <div className="evofit-page-container">
         
         {/* ── TOP HEADER ─────────────────────────────────────────────────── */}
         <div className="flex justify-between items-center mb-10">

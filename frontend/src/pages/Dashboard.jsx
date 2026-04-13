@@ -22,14 +22,8 @@ const EXERCISE_COLORS = {
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const [mounted, setMounted] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [data, setData] = useState(null);
-
-  useEffect(() => {
-    setMounted(true);
-    fetchDashboardData();
-  }, []);
+  const [loading, setLoading] = useState(true);
 
   const fetchDashboardData = async () => {
     try {
@@ -41,6 +35,10 @@ export default function Dashboard() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
 
   if (loading) {
     return (
@@ -55,7 +53,7 @@ export default function Dashboard() {
   return (
     <div className="flex-1 flex flex-col items-center py-10 px-7 overflow-y-auto bg-evofit-bg-primary min-h-screen font-inter">
       {/* ── CENTRAL ARTBOARD (1440px) ─────────────────────────────────── */}
-      <div className={`w-full max-w-[1440px] transition-all duration-700 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+      <div className="evofit-page-container">
         
         {/* ── TOP HEADER (Welcome) ─────────────────────────────────────────── */}
         <div className="flex justify-between items-center mb-10">
