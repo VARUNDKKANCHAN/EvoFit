@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
+import Dashboard from './pages/Dashboard';
 import UploadPredict from './pages/UploadPredict';
 import Analytics from './pages/Analytics';
 import Targets from './pages/Targets';
@@ -152,14 +153,8 @@ function AppShell() {
         <div className="flex-1 overflow-y-auto overflow-x-hidden">
           <AnimatedPage>
             <Routes location={location}>
-              <Route path="/" element={
-                <ComingSoon title="Dashboard" icon="📊"
-                  description="Your personal training overview — workout history, streaks, personal records and weekly summaries." />
-              } />
-              <Route path="/dashboard" element={
-                <ComingSoon title="Dashboard" icon="📊"
-                  description="Your personal training overview — workout history, streaks, personal records and weekly summaries." />
-              } />
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/upload"    element={<UploadPredict />} />
               <Route path="/analytics" element={<Analytics />} />
               <Route path="/targets"   element={<Targets />} />

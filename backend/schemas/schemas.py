@@ -165,3 +165,36 @@ class OverallProgressResponse(BaseModel):
     exercise_progress: List[WeeklyExerciseProgress]
     recent_achievements: List[AchievementResponse]
     weekly_trend: List[Dict[str, Any]] # e.g. [{"week": "Week 1", "completion": 75.0}]
+# --- DASHBOARD SCHEMAS ---
+
+class SessionItem(BaseModel):
+    id: int
+    date: date
+    exercise: str
+    reps: int
+    form_score: float
+    consistency: float
+    sparkline_data: List[float]
+
+class TrendPoint(BaseModel):
+    date: str
+    reps: int
+    quality: float
+
+class DistributionItem(BaseModel):
+    name: str
+    value: int
+    fill: str
+
+class KPIStats(BaseModel):
+    total_reps_lifted: int
+    avg_form_score: float
+    consistency_score: float
+    active_streak: int
+
+class DashboardSummaryResponse(BaseModel):
+    kpis: KPIStats
+    trend_data: List[TrendPoint]
+    recent_sessions: List[SessionItem]
+    distribution: List[DistributionItem]
+    insights: List[str]
