@@ -123,7 +123,7 @@ def get_dashboard_summary(db: Session = Depends(get_db)):
             exercise=s.exercise,
             reps=s.reps_actual,
             form_score=round(s.form_score, 1),
-            consistency=92.0, # Placeholder or calculated per-session
+            consistency=round(s.form_score * 0.95, 1), # Proxy for consistency if direct metric missing
             sparkline_data=sparkline[:12] # Limit sparkline points
         ))
 
@@ -144,12 +144,15 @@ def get_dashboard_summary(db: Session = Depends(get_db)):
         ) for ex, reps in dist_raw
     ]
 
-    # 5. AI Insights
-    insights = [
-        "Your Deadlift consistency improved +12% this week.",
-        "Strongest form recorded on Overhead Press (97%).",
-        "You're on track to beat your weekly target."
-    ]
+    # 5. AI Insights (Only added if there's enough data)
+    insights = []
+    if reps_week > 100:
+        insights.append(f"You've lifted {reps_week} reps this week. Keep up the momentum!")
+    if avg_form >= 90:
+        insights.append("Your technique is exceptional. Consider increasing intensity.")
+    
+    if not recent_sessions and not reps_week:
+        insights = [] # Keep empty if new user
 
     return DashboardSummaryResponse(
         kpis=KPIStats(

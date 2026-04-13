@@ -31,7 +31,7 @@ export default function Dashboard() {
 
   const fetchDashboardData = async () => {
     try {
-      const res = await axios.get('http://localhost:8000/dashboard/summary');
+      const res = await axios.get('http://127.0.0.1:8000/dashboard/summary');
       setData(res.data);
     } catch (err) {
       console.error("Failed to fetch dashboard data", err);
@@ -88,11 +88,13 @@ export default function Dashboard() {
              </div>
              <div className="flex items-end gap-2.5">
                 <h2 className="text-[36px] font-extrabold m-0 text-evofit-text-primary tracking-tighter">
-                  {kpis?.total_reps_lifted?.toLocaleString() || '112,450'}
+                  {kpis?.total_reps_lifted?.toLocaleString() || 0}
                 </h2>
-                <div className="flex items-center gap-1 text-[13px] text-cyan-400 font-bold mb-2">
-                   <TrendingUp size={14} /> 12%
-                </div>
+                {kpis?.total_reps_lifted > 0 && (
+                  <div className="flex items-center gap-1 text-[13px] text-cyan-400 font-bold mb-2">
+                     <TrendingUp size={14} /> Tracking
+                  </div>
+                )}
              </div>
              <p className="text-[10px] text-evofit-text-muted mt-2 font-bold flex items-center gap-1.5 uppercase">
                 <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" /> count-up animation
@@ -105,7 +107,7 @@ export default function Dashboard() {
                 <p className="text-[13px] text-evofit-text-muted font-bold uppercase tracking-widest m-0">Avg. Form Score</p>
                 <div className="w-[45px] h-[45px]">
                    <CircularProgressbar
-                      value={kpis?.avg_form_score || 86}
+                      value={kpis?.avg_form_score || 0}
                       strokeWidth={12}
                       styles={buildStyles({
                         pathColor: `#22D3EE`,
@@ -117,9 +119,11 @@ export default function Dashboard() {
              </div>
              <div className="flex items-end gap-2.5">
                 <h2 className="text-[36px] font-extrabold m-0 text-evofit-text-primary tracking-tighter">
-                  {kpis?.avg_form_score || '86'}%
+                  {kpis?.avg_form_score > 0 ? `${kpis.avg_form_score}%` : '0%'}
                 </h2>
-                <p className="text-[12px] text-evofit-text-muted mb-2 font-bold">Excellent</p>
+                <p className="text-[12px] text-evofit-text-muted mb-2 font-bold">
+                  {kpis?.avg_form_score >= 90 ? 'Excellent' : kpis?.avg_form_score >= 70 ? 'Good' : 'N/A'}
+                </p>
              </div>
              <p className="text-[10px] text-evofit-text-muted mt-2 font-bold flex items-center gap-1.5 uppercase">
                 <span className="w-1.5 h-1.5 rounded-full bg-evofit-purple-light" /> pulse-glow effect
@@ -131,18 +135,19 @@ export default function Dashboard() {
              <div className="flex justify-between items-start mb-4">
                 <p className="text-[13px] text-evofit-purple-light font-bold uppercase tracking-widest m-0">Consistency</p>
                 <div className="flex gap-0.5 items-end h-6">
-                   {[4, 7, 5, 9, 6].map((h, i) => (
-                     <div key={i} className="w-1 bg-evofit-purple-main/40 rounded-full" style={{ height: `${h * 10}%` }} />
-                   ))}
+                   {kpis?.consistency_score > 0 ? (
+                     [4, 7, 5, 9, 6].map((h, i) => (
+                       <div key={i} className="w-1 bg-evofit-purple-main/40 rounded-full" style={{ height: `${h * 10}%` }} />
+                     ))
+                   ) : (
+                     <Activity size={16} className="text-evofit-text-muted" />
+                   )}
                 </div>
              </div>
              <div className="flex items-end gap-2.5">
                 <h2 className="text-[36px] font-extrabold m-0 text-evofit-text-primary tracking-tighter">
-                  {kpis?.consistency_score || '94'}%
+                  {kpis?.consistency_score > 0 ? `${kpis.consistency_score}%` : '0%'}
                 </h2>
-                <div className="flex items-center gap-1 text-[13px] text-red-400 font-bold mb-2">
-                   <TrendingUp size={14} className="rotate-180" /> 3%
-                </div>
              </div>
              <p className="text-[10px] text-evofit-purple-light mt-2 font-bold flex items-center gap-1.5 uppercase">
                 <span className="w-1.5 h-1.5 rounded-full bg-evofit-purple-main" /> count-up animation
@@ -154,14 +159,16 @@ export default function Dashboard() {
              <div className="flex justify-between items-start mb-4">
                 <p className="text-[13px] text-evofit-text-muted font-bold uppercase tracking-widest m-0">Active Streak</p>
                 <div className="w-9 h-9 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500 group-hover:scale-110 transition-transform">
-                   <Flame size={20} className="fill-amber-500" />
+                   <Flame size={20} className={kpis?.active_streak > 0 ? "fill-amber-500" : ""} />
                 </div>
              </div>
              <div className="flex items-end gap-2.5">
                 <h2 className="text-[36px] font-extrabold m-0 text-evofit-text-primary tracking-tighter">
-                  {kpis?.active_streak || '14'} Days
+                  {kpis?.active_streak || 0} Days
                 </h2>
-                <div className="px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-[10px] text-amber-500 font-black mb-2 uppercase">New Record</div>
+                {kpis?.active_streak > 10 && (
+                  <div className="px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-[10px] text-amber-500 font-black mb-2 uppercase">Record High</div>
+                )}
              </div>
              <p className="text-[10px] text-evofit-text-muted mt-2 font-bold flex items-center gap-1.5 uppercase">
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-500" /> count-up animation
@@ -184,42 +191,56 @@ export default function Dashboard() {
               </button>
            </div>
 
-           <div className="glass-card p-8 shadow-premium-card flex flex-col">
-              <h4 className="text-[14px] font-bold text-evofit-text-muted uppercase tracking-widest mb-6">Last Session Summary</h4>
-              <div className="flex-1 space-y-7">
-                 <div className="flex justify-between items-end">
-                    <div>
-                       <p className="text-[12px] text-evofit-text-muted font-bold m-0 uppercase mb-1">Bench Press</p>
-                       <p className="text-[11px] text-evofit-text-muted m-0 font-medium">October 12 · 22:14</p>
-                    </div>
-                    <div className="px-3 py-1 bg-cyan-400/10 border border-cyan-400/20 rounded-full text-[11px] text-cyan-400 font-black uppercase">
-                       96% Form
-                    </div>
-                 </div>
-                 
-                 <div className="grid grid-cols-2 gap-6">
-                    <div className="bg-evofit-bg-secondary p-4 rounded-2xl border border-evofit-border">
-                       <p className="text-[10px] text-evofit-text-muted font-bold uppercase mb-1">Volume</p>
-                       <p className="text-lg font-black text-evofit-text-primary m-0">12,400 kg</p>
-                    </div>
-                    <div className="bg-evofit-bg-secondary p-4 rounded-2xl border border-evofit-border">
-                       <p className="text-[10px] text-evofit-text-muted font-bold uppercase mb-1">Total Reps</p>
-                       <p className="text-lg font-black text-evofit-text-primary m-0">22 Reps</p>
-                    </div>
-                 </div>
+           {recent_sessions?.length > 0 ? (
+             <div className="glass-card p-8 shadow-premium-card flex flex-col">
+                <h4 className="text-[14px] font-bold text-evofit-text-muted uppercase tracking-widest mb-6">Last Session Summary</h4>
+                <div className="flex-1 space-y-7">
+                   <div className="flex justify-between items-end">
+                      <div>
+                         <p className="text-[12px] text-evofit-text-muted font-bold m-0 uppercase mb-1">
+                           {recent_sessions[0].exercise === 'dead' ? 'Leg Hypertrophy A' : recent_sessions[0].exercise === 'bench' ? 'Peak Strength Base' : 'Full Volume B'}
+                         </p>
+                         <p className="text-[11px] text-evofit-text-muted m-0 font-medium">
+                           {new Date(recent_sessions[0].date).toLocaleDateString()} · {recent_sessions[0].form_score >= 90 ? 'High Intensity' : 'Standard'}
+                         </p>
+                      </div>
+                      <div className="px-3 py-1 bg-cyan-400/10 border border-cyan-400/20 rounded-full text-[11px] text-cyan-400 font-black uppercase">
+                         {recent_sessions[0].form_score}% Form
+                      </div>
+                   </div>
+                   
+                   <div className="grid grid-cols-2 gap-6">
+                      <div className="bg-evofit-bg-secondary p-4 rounded-2xl border border-evofit-border">
+                         <p className="text-[10px] text-evofit-text-muted font-bold uppercase mb-1">Replay</p>
+                         <p className="text-lg font-black text-evofit-text-primary m-0">Available</p>
+                      </div>
+                      <div className="bg-evofit-bg-secondary p-4 rounded-2xl border border-evofit-border">
+                         <p className="text-[10px] text-evofit-text-muted font-bold uppercase mb-1">Total Reps</p>
+                         <p className="text-lg font-black text-evofit-text-primary m-0">{recent_sessions[0].reps} Reps</p>
+                      </div>
+                   </div>
 
-                 <div className="p-4 rounded-2xl bg-evofit-purple-main/5 border border-evofit-purple-main/15 flex items-start gap-3">
-                    <Sparkles size={16} className="text-amber-500 shrink-0 mt-0.5" />
-                    <p className="text-[12px] text-evofit-text-secondary leading-relaxed m-0 font-medium">
-                       Squat rhythm consistency improved by <span className="text-white font-bold">8%</span> compared to last Tuesday.
-                    </p>
-                 </div>
+                   <div className="p-4 rounded-2xl bg-evofit-purple-main/5 border border-evofit-purple-main/15 flex items-start gap-3">
+                      <Sparkles size={16} className="text-amber-500 shrink-0 mt-0.5" />
+                      <p className="text-[12px] text-evofit-text-secondary leading-relaxed m-0 font-medium">
+                         Consistent rhythm detected throughout the set. Excellent mechanical tension.
+                      </p>
+                   </div>
 
-                 <button className="w-full bg-evofit-bg-secondary border border-evofit-border py-3.5 rounded-xl text-[13px] font-bold text-evofit-text-primary hover:border-evofit-purple-main/40 transition-all">
-                    View Session Breakdown
-                 </button>
-              </div>
-           </div>
+                   <button className="w-full bg-evofit-bg-secondary border border-evofit-border py-3.5 rounded-xl text-[13px] font-bold text-evofit-text-primary hover:border-evofit-purple-main/40 transition-all">
+                      View Session Breakdown
+                   </button>
+                </div>
+             </div>
+           ) : (
+             <div className="glass-card p-8 shadow-premium-card flex flex-col items-center justify-center text-center">
+                <div className="w-12 h-12 rounded-full bg-evofit-bg-secondary flex items-center justify-center mb-4 text-evofit-text-muted">
+                   <Clock size={20} />
+                </div>
+                <h4 className="text-[14px] font-bold text-evofit-text-primary mb-1">No Activity Logged</h4>
+                <p className="text-[12px] text-evofit-text-muted">Start training to see your latest session highlights here.</p>
+             </div>
+           )}
         </div>
 
         {/* ── PERFORMANCE TREND CHART (Area + Line) ────────────────────── */}
@@ -320,31 +341,20 @@ export default function Dashboard() {
            </div>
 
            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-              {[
-                { label: 'Squat Volume', val: '240/300 reps', pct: 75, icon: <Activity size={18} /> },
-                { label: 'Avg. Break Velocity', val: '0.82 / 1.0 m/s', pct: 82, icon: <TrendingUp size={18} /> },
-                { label: 'Sessions Completed', val: '4 / 5 days', pct: 80, icon: <Clock size={18} /> },
-                { label: 'Deadlift Technique', val: '92 / 100 pts', pct: 92, icon: <ShieldCheck size={18} /> }
-              ].map((t, i) => (
-                <div key={i} className="glass-card p-6 shadow-premium-card border-evofit-border hover:border-evofit-purple-main/30 transition-all flex flex-col gap-4">
-                   <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-2.5">
-                         <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-evofit-purple-light">
-                            {t.icon}
-                         </div>
-                         <span className="text-[14px] font-bold text-evofit-text-primary">{t.label}</span>
-                      </div>
-                      <span className="text-[12px] font-black text-evofit-purple-light">{t.pct}%</span>
-                   </div>
-                   <div className="h-2 bg-evofit-bg-secondary rounded-full overflow-hidden">
-                      <div className="h-full bg-evofit-purple-main rounded-full animate-fill-in duration-[1500ms]" style={{ width: `${t.pct}%` }} />
-                   </div>
-                   <div className="flex justify-between items-center mt-1">
-                      <p className="text-[11px] text-evofit-text-muted m-0 font-medium">{t.val}</p>
-                      <p className="text-[9px] text-evofit-text-muted font-bold uppercase">Smooth fill</p>
-                   </div>
-                </div>
-              ))}
+              {/* Note: This section currently remains empty until Targets are connected to the database */}
+              <div className="col-span-full py-12 flex flex-col items-center justify-center glass-card border-evofit-border group hover:border-evofit-purple-main/30 transition-all">
+                 <div className="w-12 h-12 rounded-xl bg-evofit-bg-secondary flex items-center justify-center text-evofit-text-muted mb-4">
+                    <Award size={24} />
+                 </div>
+                 <h4 className="text-[15px] font-bold text-evofit-text-primary mb-1">No Active Targets</h4>
+                 <p className="text-[13px] text-evofit-text-muted mb-6">Set weekly goals to track your progression here.</p>
+                 <button 
+                   onClick={() => window.location.href='/targets'}
+                   className="bg-evofit-bg-secondary border border-evofit-border px-5 py-2 rounded-xl text-[12px] font-bold text-evofit-text-primary hover:text-evofit-purple-light hover:border-evofit-purple-main/40 transition-all"
+                 >
+                    Setup My First Target
+                 </button>
+              </div>
            </div>
         </div>
 
@@ -370,46 +380,58 @@ export default function Dashboard() {
                        </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5">
-                       {recent_sessions?.map((session, i) => (
-                         <tr key={session.id} className="group hover:bg-white/[0.02] transition-colors">
-                            <td className="py-5 pl-2">
-                               <p className="text-[14px] font-bold text-evofit-text-primary m-0">{session.exercise === 'dead' ? 'Leg Hypertrophy A' : session.exercise === 'bench' ? 'Peak Strength Base' : 'Full Volume B'}</p>
-                               <p className="text-[11px] text-evofit-text-muted m-0 mt-0.5 uppercase font-bold tracking-tighter">Friday, April 12, 11:24</p>
-                            </td>
-                            <td className="py-5 px-4 font-extrabold text-[15px] text-evofit-text-primary whitespace-nowrap">
-                               {session.reps} Reps
-                            </td>
-                            <td className="py-5 px-4">
-                               <div className="flex items-center gap-3">
-                                  <span className={`text-[13px] font-bold ${session.form_score >= 90 ? 'text-cyan-400' : 'text-amber-400'}`}>{session.form_score}%</span>
-                                  <div className="w-24 h-1.5 bg-evofit-bg-secondary rounded-full overflow-hidden hidden md:block">
-                                     <div className={`h-full rounded-full ${session.form_score >= 90 ? 'bg-cyan-400' : 'bg-amber-400'}`} style={{ width: `${session.form_score}%` }} />
-                                  </div>
-                               </div>
-                            </td>
-                            <td className="py-5 px-4">
-                               <div className="w-16 h-8">
-                                  <ResponsiveContainer width="100%" height="100%">
-                                     <LineChart data={session.sparkline_data.map((v, idx) => ({ v, idx }))}>
-                                        <Line 
-                                          type="monotone" 
-                                          dataKey="v" 
-                                          stroke={session.form_score >= 90 ? '#22D3EE' : '#FBBF24'} 
-                                          strokeWidth={2} 
-                                          dot={false} 
-                                          animationDuration={2000}
-                                        />
-                                     </LineChart>
-                                  </ResponsiveContainer>
-                               </div>
-                            </td>
-                            <td className="py-5 text-right pr-2">
-                               <button className="w-8 h-8 rounded-lg bg-evofit-bg-secondary border border-evofit-border flex items-center justify-center text-evofit-text-muted group-hover:text-evofit-purple-light group-hover:border-evofit-purple-main transition-all">
-                                  <ChevronRight size={16} />
-                               </button>
-                            </td>
+                       {recent_sessions?.length > 0 ? (
+                         recent_sessions.map((session, i) => (
+                          <tr key={session.id} className="group hover:bg-white/[0.02] transition-colors">
+                             <td className="py-5 pl-2">
+                                <p className="text-[14px] font-bold text-evofit-text-primary m-0">
+                                  {session.exercise === 'dead' ? 'Leg Hypertrophy A' : session.exercise === 'bench' ? 'Peak Strength Base' : 'Full Volume B'}
+                                </p>
+                                <p className="text-[11px] text-evofit-text-muted m-0 mt-0.5 uppercase font-bold tracking-tighter">
+                                  {new Date(session.date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                                </p>
+                             </td>
+                             <td className="py-5 px-4 font-extrabold text-[15px] text-evofit-text-primary whitespace-nowrap">
+                                {session.reps} Reps
+                             </td>
+                             <td className="py-5 px-4">
+                                <div className="flex items-center gap-3">
+                                   <span className={`text-[13px] font-bold ${session.form_score >= 90 ? 'text-cyan-400' : 'text-amber-400'}`}>{session.form_score}%</span>
+                                   <div className="w-24 h-1.5 bg-evofit-bg-secondary rounded-full overflow-hidden hidden md:block">
+                                      <div className={`h-full rounded-full ${session.form_score >= 90 ? 'bg-cyan-400' : 'bg-amber-400'}`} style={{ width: `${session.form_score}%` }} />
+                                   </div>
+                                </div>
+                             </td>
+                             <td className="py-5 px-4">
+                                <div className="w-16 h-8">
+                                   <ResponsiveContainer width="100%" height="100%">
+                                      <LineChart data={session.sparkline_data.map((v, idx) => ({ v, idx }))}>
+                                         <Line 
+                                           type="monotone" 
+                                           dataKey="v" 
+                                           stroke={session.form_score >= 90 ? '#22D3EE' : '#FBBF24'} 
+                                           strokeWidth={2} 
+                                           dot={false} 
+                                           animationDuration={2000}
+                                         />
+                                      </LineChart>
+                                   </ResponsiveContainer>
+                                </div>
+                             </td>
+                             <td className="py-5 text-right pr-2">
+                                <button className="w-8 h-8 rounded-lg bg-evofit-bg-secondary border border-evofit-border flex items-center justify-center text-evofit-text-muted group-hover:text-evofit-purple-light group-hover:border-evofit-purple-main transition-all">
+                                   <ChevronRight size={16} />
+                                </button>
+                             </td>
+                          </tr>
+                         ))
+                       ) : (
+                         <tr>
+                           <td colSpan="5" className="py-12 text-center">
+                              <p className="text-evofit-text-muted text-[13px] italic font-medium">No results found in your training history.</p>
+                           </td>
                          </tr>
-                       ))}
+                       )}
                     </tbody>
                  </table>
               </div>
@@ -425,21 +447,26 @@ export default function Dashboard() {
               </div>
               
               <div className="space-y-5">
-                 {[
-                   { title: 'Volume Optimization', text: 'You performed 12% higher training volume when training before 11 AM. Consider adjusting your schedule.', icon: <TrendingUp size={20} className="text-evofit-purple-light" /> },
-                   { title: 'Fatigue Alert', text: 'Reps in last set of Squats dropped below 70% form — your rest intervals need a slight increase next session.', icon: <AlertCircle size={20} className="text-red-400" /> },
-                   { title: 'Strength Milestone', text: 'Your peak volume has maintained for 3 consecutive weeks. Time for a deload phase soon.', icon: <ShieldCheck size={20} className="text-cyan-400" /> }
-                 ].map((insight, i) => (
-                    <div key={i} className="glass-card p-6 border-evofit-border hover:border-evofit-purple-main/30 transition-all flex items-start gap-4">
-                       <div className="w-12 h-12 rounded-[16px] bg-evofit-bg-secondary flex items-center justify-center shrink-0 border border-evofit-border">
-                          {insight.icon}
+                 {insights?.length > 0 ? (
+                    insights.map((insight, i) => (
+                      <div key={i} className="glass-card p-6 border-evofit-border hover:border-evofit-purple-main/30 transition-all flex items-start gap-4">
+                         <div className="w-12 h-12 rounded-[16px] bg-evofit-bg-secondary flex items-center justify-center shrink-0 border border-evofit-border">
+                            <Sparkles size={20} className="text-evofit-purple-light" />
+                         </div>
+                         <div>
+                            <p className="text-[15px] font-extrabold text-evofit-text-primary m-0 mb-1">AI Observation</p>
+                            <p className="text-[13px] text-evofit-text-secondary m-0 leading-relaxed font-medium">{insight}</p>
+                         </div>
+                      </div>
+                    ))
+                 ) : (
+                    <div className="glass-card p-6 border-evofit-border flex flex-col items-center justify-center text-center py-10">
+                       <div className="w-10 h-10 rounded-full bg-evofit-bg-secondary flex items-center justify-center mb-3 text-evofit-text-muted">
+                          <AlertCircle size={18} />
                        </div>
-                       <div>
-                          <p className="text-[15px] font-extrabold text-evofit-text-primary m-0 mb-1">{insight.title}</p>
-                          <p className="text-[13px] text-evofit-text-secondary m-0 leading-relaxed font-medium">{insight.text}</p>
-                       </div>
+                       <p className="text-evofit-text-muted text-[12px] font-medium m-0">Insufficient data for AI insights.</p>
                     </div>
-                 ))}
+                 )}
                  
                  {/* Exercise Distribution Donut */}
                  <div className="glass-card p-7 shadow-premium-card mt-4 overflow-hidden relative">
