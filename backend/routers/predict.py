@@ -4,6 +4,7 @@ from backend.database.models import WorkoutSession, Achievement
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 from fastapi.responses import JSONResponse
+import json
 from typing import List
 
 router = APIRouter(
@@ -33,6 +34,7 @@ async def predict_exercise(file: UploadFile = File(...), db: Session = Depends(g
         result = predict_from_upload(file_bytes, file.filename)
         
         # --- SAVE TO DATABASE ---
+        user_id = 1
         for ex in result.get("exercise_breakdown", []):
             label = ex.get("label")
             reps = ex.get("rep_count", 0)
@@ -41,12 +43,25 @@ async def predict_exercise(file: UploadFile = File(...), db: Session = Depends(g
             sets = ex.get("set_details", [])
             avg_power = sum(s.get("mean_power", 0) for s in sets) / len(sets) if sets else 0
             
+            # Store the individual exercise breakdown as JSON for specific re-rendering later
+            report_data = {
+                "rep_details": ex.get("rep_details", []),
+                "set_details": ex.get("set_details", []),
+                "rhythm_waveform": ex.get("rhythm_waveform", []),
+                "summary": {
+                    "duration": result.get("duration"),
+                    "time_range": result.get("time_range"),
+                    "overall_consistency": result.get("overall_consistency")
+                }
+            }
+
             session_row = WorkoutSession(
                 exercise=label,
                 reps_actual=reps,
                 form_score=float(avg_conf * 100),
                 mean_power=avg_power,
-                user_id=1
+                json_report=json.dumps(report_data),
+                user_id=user_id
             )
             db.add(session_row)
         
@@ -66,7 +81,8 @@ async def predict_exercise(file: UploadFile = File(...), db: Session = Depends(g
                     new_achive = Achievement(
                         badge_name=badge, 
                         description=f"You've smashed 500 total reps of {label}!", 
-                        icon="star"
+                        icon="star",
+                        user_id=user_id
                     )
                     db.add(new_achive)
                     new_badges.append(badge)

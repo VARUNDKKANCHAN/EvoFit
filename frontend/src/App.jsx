@@ -5,6 +5,8 @@ import Dashboard from './pages/Dashboard';
 import UploadPredict from './pages/UploadPredict';
 import Analytics from './pages/Analytics';
 import Targets from './pages/Targets';
+import TrophyRoom from './pages/TrophyRoom';
+import SessionHistory from './pages/SessionHistory';
 import ThemeToggle from './components/ThemeToggle';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -140,6 +142,8 @@ function AppShell() {
       case '/upload': return 'AI Dataset Upload';
       case '/analytics': return 'Performance Analytics';
       case '/targets': return 'Target Monitoring';
+      case '/history': return 'Workout History';
+      case '/trophy': return 'EvoFit Trophy Room';
       case '/chatbot': return 'EvoFit AI Assistant';
       default: return 'EvoFit Dashboard';
     }
@@ -158,6 +162,8 @@ function AppShell() {
               <Route path="/upload"    element={<UploadPredict />} />
               <Route path="/analytics" element={<Analytics />} />
               <Route path="/targets"   element={<Targets />} />
+              <Route path="/history"   element={<SessionHistory />} />
+              <Route path="/trophy"    element={<TrophyRoom />} />
               <Route path="/chatbot"   element={
                 <ComingSoon title="AI Chatbot" icon="🤖"
                   description="Ask the EvoFit AI coach anything about your training — powered by RAG on your personal workout data." />

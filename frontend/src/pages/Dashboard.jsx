@@ -321,18 +321,18 @@ export default function Dashboard() {
 
         {/* ── WEEKLY TARGETS GRID ────────────────────────────────────────── */}
         <div className="mb-[60px]">
-           <div className="flex justify-between items-center mb-7">
-              <div>
-                 <h3 className="text-xl font-extrabold text-evofit-text-primary m-0 tracking-tight">Your Weekly Targets</h3>
-                 <p className="text-sm text-evofit-text-muted m-0 font-medium">Track your progression against predefined goals</p>
-              </div>
-              <button 
-                onClick={() => navigate('/targets')}
-                className="text-evofit-purple-light text-sm font-bold flex items-center gap-1.5 hover:underline"
-              >
-                 View in targets <ChevronRight size={16} />
-              </button>
-           </div>
+            <div className="flex justify-between items-center mb-7">
+               <div>
+                  <h3 className="text-xl font-extrabold text-evofit-text-primary m-0 tracking-tight">Your Weekly Targets</h3>
+                  <p className="text-sm text-evofit-text-muted m-0 font-medium">Track your progression against predefined goals</p>
+               </div>
+               <button 
+                 onClick={() => navigate('/targets')}
+                 className="text-evofit-purple-light text-sm font-bold flex items-center gap-1.5 hover:underline"
+               >
+                  View in targets <ChevronRight size={16} />
+               </button>
+            </div>
 
            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
               {targets?.length > 0 ? (
@@ -380,8 +380,16 @@ export default function Dashboard() {
            {/* Section Left: Recent Sessions Table */}
            <div className="glass-card p-9 shadow-premium-card">
               <div className="flex justify-between items-center mb-8">
-                 <h3 className="text-xl font-extrabold text-evofit-text-primary m-0 tracking-tight">Recent Sessions</h3>
-                 <div className="text-[11px] text-evofit-text-muted font-bold uppercase border border-evofit-border px-3 py-1 rounded-full">Viewing Last 5 Events</div>
+                 <div>
+                    <h3 className="text-xl font-extrabold text-evofit-text-primary m-0 tracking-tight">Recent Sessions</h3>
+                    <p className="text-xs text-evofit-text-muted mt-0.5 font-bold uppercase tracking-wider">Viewing Last 5 Events</p>
+                 </div>
+                 <button 
+                   onClick={() => navigate('/history')}
+                   className="text-evofit-purple-light text-sm font-bold flex items-center gap-1.5 hover:underline"
+                 >
+                    View history <ChevronRight size={16} />
+                 </button>
               </div>
               
               <div className="overflow-x-auto">
