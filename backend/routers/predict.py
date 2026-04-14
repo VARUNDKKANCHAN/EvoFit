@@ -51,7 +51,8 @@ async def predict_exercise(file: UploadFile = File(...), db: Session = Depends(g
                 "summary": {
                     "duration": result.get("duration"),
                     "time_range": result.get("time_range"),
-                    "overall_consistency": result.get("overall_consistency")
+                    "overall_consistency": result.get("overall_consistency"),
+                    "best_set_summary": result.get("best_set_summary", "N/A")
                 }
             }
 

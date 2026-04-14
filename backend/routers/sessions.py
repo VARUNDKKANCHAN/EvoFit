@@ -72,6 +72,7 @@ def get_session_detail(session_id: int, db: Session = Depends(get_db)):
         "duration": report_data.get("summary", {}).get("duration", "N/A"),
         "time_range": report_data.get("summary", {}).get("time_range", "N/A"),
         "overall_consistency": report_data.get("summary", {}).get("overall_consistency", "0%"),
+        "best_set_summary": report_data.get("summary", {}).get("best_set_summary", "N/A"),
         "exercise_breakdown": [
             {
                 "label": session.exercise,
