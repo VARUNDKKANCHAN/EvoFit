@@ -7,7 +7,7 @@ import {
 } from 'recharts';
 import { 
   Activity, Dumbbell, Award, Flame, TrendingUp, Plus, 
-  ChevronRight, Sparkles, Trophy, Bell, Clock, ShieldCheck, AlertCircle
+  ChevronRight, Sparkles, Trophy, Bell, Clock, ShieldCheck, AlertCircle, Zap
 } from 'lucide-react';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
@@ -74,6 +74,35 @@ export default function Dashboard() {
              </button>
           </div>
         </div>
+
+        {/* ── XP LEVEL PROGRESS BAR ────────────────────────────────────────── */}
+        {data?.user_progression && (
+          <div className="glass-card p-6 mb-7 flex items-center justify-between gap-6 shadow-premium-card animate-fade-in-up">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-[0_0_20px_rgba(245,158,11,0.3)] shrink-0 group-hover:scale-105 transition-transform">
+                <Trophy size={24} className="text-white" strokeWidth={2.5} />
+              </div>
+              <div>
+                <h3 className="m-0 text-[18px] font-extrabold text-evofit-text-primary flex items-center gap-2">
+                  Level {data.user_progression.level} <Zap size={16} className="text-amber-500 fill-amber-500" />
+                </h3>
+                <p className="m-0 text-[13px] text-evofit-text-muted font-medium">Keep hitting targets to rank up</p>
+              </div>
+            </div>
+            <div className="flex-1 max-w-[500px]">
+              <div className="flex justify-between text-[12px] font-bold text-evofit-text-secondary mb-2">
+                <span>{data.user_progression.xp.toLocaleString()} XP</span>
+                <span>{data.user_progression.xp_to_next_level.toLocaleString()} XP</span>
+              </div>
+              <div className="h-3 w-full bg-evofit-bg-secondary border border-evofit-border rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-amber-400 to-amber-600 rounded-full transition-all duration-1000"
+                  style={{ width: `${Math.min(100, (data.user_progression.xp / data.user_progression.xp_to_next_level) * 100)}%` }}
+                />
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* ── HERO KPI ROW (4 Cards) ────────────────────────────────────────── */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-7 mb-7">

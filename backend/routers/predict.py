@@ -1,6 +1,6 @@
 from backend.services.ml_service import predict_from_upload, get_metrics
 from backend.database.database import get_db
-from backend.database.models import WorkoutSession, Achievement
+from backend.database.models import WorkoutSession, Achievement, User
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 from fastapi.responses import JSONResponse
@@ -136,6 +136,33 @@ async def predict_exercise(file: UploadFile = File(...), db: Session = Depends(g
         
         db.commit()
         result["new_achievements"] = new_badges
+
+        # --- XP LOGIC ---
+        user = db.query(User).filter(User.id == user_id).first()
+        leveled_up = False
+        if user:
+            gained_xp = 0
+            for ex in result.get("exercise_breakdown", []):
+                reps = ex.get("rep_count", 0)
+                gained_xp += reps * 10
+            
+            # Form bonus from overall confidence
+            overall_form = result.get("confidence", 0) * 100
+            if overall_form > 80.0:
+                gained_xp += int((overall_form - 80.0) * 5)
+            
+            user.xp += gained_xp
+            xp_needed = user.level * 1000
+            
+            while user.xp >= xp_needed:
+                user.xp -= xp_needed
+                user.level += 1
+                leveled_up = True
+                xp_needed = user.level * 1000
+
+            db.commit()
+            result["new_xp_total"] = user.xp
+            result["leveled_up"] = leveled_up
 
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))

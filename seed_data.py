@@ -13,6 +13,10 @@ def seed():
     c.execute("DELETE FROM workout_sessions WHERE user_id = 1")
     c.execute("DELETE FROM targets WHERE user_id = 1")
     c.execute("DELETE FROM achievements WHERE user_id = 1")
+    
+    # Ensure User 1 exists and set some XP
+    c.execute("INSERT OR IGNORE INTO users (id, username, email, password_hash, xp, level) VALUES (1, 'alex_j', 'alex@example.com', 'hash', 4500, 5)")
+    c.execute("UPDATE users SET xp = 4500, level = 5 WHERE id = 1")
 
     exercises = ["bench", "dead", "squat", "ohp", "row", "pullups"]
     today = date.today()

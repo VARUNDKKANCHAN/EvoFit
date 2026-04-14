@@ -52,6 +52,8 @@ class PredictionResponse(BaseModel):
     time_range:      Optional[str] = None
     overall_consistency: Optional[str] = None
     best_set_summary: Optional[str] = None
+    leveled_up:      Optional[bool] = False
+    new_xp_total:    Optional[int] = 0
 
 
 class MetricsResponse(BaseModel):
@@ -81,6 +83,8 @@ class UserResponse(UserBase):
     id: int
     created_at: datetime
     is_active: bool
+    xp: int
+    level: int
 
     class Config:
         from_attributes = True
@@ -193,6 +197,11 @@ class DistributionItem(BaseModel):
     value: int
     fill: str
 
+class UserProgression(BaseModel):
+    xp: int
+    level: int
+    xp_to_next_level: int
+
 class KPIStats(BaseModel):
     total_reps_lifted: int
     avg_form_score: float
@@ -201,6 +210,7 @@ class KPIStats(BaseModel):
 
 class DashboardSummaryResponse(BaseModel):
     kpis: KPIStats
+    user_progression: UserProgression
     trend_data: List[TrendPoint]
     recent_sessions: List[SessionItem]
     distribution: List[DistributionItem]

@@ -6,8 +6,8 @@ import json
 from typing import List
 
 from backend.database.database import get_db
-from backend.database.models import WorkoutSession, Target
-from backend.schemas.schemas import DashboardSummaryResponse, KPIStats, TrendPoint, SessionItem, DistributionItem, DashboardTargetItem
+from backend.database.models import WorkoutSession, Target, User
+from backend.schemas.schemas import DashboardSummaryResponse, KPIStats, TrendPoint, SessionItem, DistributionItem, DashboardTargetItem, UserProgression
 
 router = APIRouter(
     prefix="/dashboard",
@@ -180,12 +180,19 @@ def get_dashboard_summary(db: Session = Depends(get_db)):
     if not recent_sessions and not reps_week:
         insights = [] # Keep empty if new user
 
+    user = db.query(User).filter(User.id == user_id).first()
+    
     return DashboardSummaryResponse(
         kpis=KPIStats(
             total_reps_lifted=reps_week,
             avg_form_score=round(float(avg_form), 1),
             consistency_score=round(float(avg_consistency), 1),
             active_streak=get_active_streak(db, user_id)
+        ),
+        user_progression=UserProgression(
+            xp=user.xp if user else 0,
+            level=user.level if user else 1,
+            xp_to_next_level=(user.level if user else 1) * 1000
         ),
         trend_data=trend_data,
         recent_sessions=recent_sessions,

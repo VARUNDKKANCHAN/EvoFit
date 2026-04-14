@@ -11,6 +11,8 @@ class User(Base):
     password_hash = Column(String, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     is_active = Column(Boolean, default=True)
+    xp = Column(Integer, default=0)
+    level = Column(Integer, default=1)
 
     # Relationships
     profile = relationship("UserProfile", back_populates="user", uselist=False)
