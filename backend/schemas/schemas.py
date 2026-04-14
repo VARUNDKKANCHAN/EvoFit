@@ -152,6 +152,12 @@ class AchievementResponse(BaseModel):
     class Config:
         from_attributes = True
 
+class TrophyRoomResponse(BaseModel):
+    level: int
+    xp: int
+    total_badges: int
+    achievements: List[AchievementResponse]
+
 class WeeklyExerciseProgress(BaseModel):
     exercise: str
     label: str

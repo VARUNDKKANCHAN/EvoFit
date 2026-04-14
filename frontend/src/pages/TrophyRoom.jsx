@@ -12,14 +12,14 @@ const ICON_MAP = {
 };
 
 export default function TrophyRoom() {
-  const [achievements, setAchievements] = useState([]);
+  const [data, setData] = useState({ level: 1, xp: 0, total_badges: 0, achievements: [] });
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState('All Badges');
 
   const fetchAchievements = async () => {
     try {
       const res = await axios.get('http://127.0.0.1:8000/achievements/');
-      setAchievements(res.data);
+      setData(res.data);
     } catch (err) {
       console.error("Failed to fetch achievements", err);
     } finally {
@@ -58,12 +58,12 @@ export default function TrophyRoom() {
           <div className="glass-card px-8 py-5 flex items-center gap-6 shadow-premium-card border-evofit-purple-main/20">
              <div className="text-center">
                 <p className="text-[10px] text-evofit-text-muted font-bold uppercase mb-1">Total Badges</p>
-                <p className="text-2xl font-black text-evofit-text-primary m-0">{achievements.length}</p>
+                <p className="text-2xl font-black text-evofit-text-primary m-0">{data.total_badges}</p>
              </div>
              <div className="w-px h-8 bg-evofit-border" />
              <div className="text-center">
                 <p className="text-[10px] text-evofit-text-muted font-bold uppercase mb-1">XP Level</p>
-                <p className="text-2xl font-black text-evofit-purple-light m-0">12</p>
+                <p className="text-2xl font-black text-evofit-purple-light m-0">{data.level}</p>
              </div>
           </div>
         </div>
@@ -83,7 +83,7 @@ export default function TrophyRoom() {
 
         {/* Achievement Grid */}
         {(() => {
-          const filtered = achievements.filter(badge => {
+          const filtered = data.achievements.filter(badge => {
             if (activeCategory === 'All Badges') return true;
             const name = badge.badge_name.toLowerCase();
             const desc = badge.description.toLowerCase();
