@@ -138,9 +138,9 @@ def get_dashboard_summary(db: Session = Depends(get_db)):
 
     distribution = [
         DistributionItem(
-            name=ex.capitalize(),
+            name=(ex or "Exercise").capitalize(),
             value=reps,
-            fill=EXERCISE_COLORS.get(ex.lower(), "#7C3AED")
+            fill=EXERCISE_COLORS.get((ex or "unknown").lower(), "#7C3AED")
         ) for ex, reps in dist_raw
     ]
 

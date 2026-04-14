@@ -64,4 +64,26 @@ def get_session_detail(session_id: int, db: Session = Depends(get_db)):
     if not session.json_report:
         return {"id": session.id, "error": "No detailed report available for this session"}
         
-    return json.loads(session.json_report)
+    report_data = json.loads(session.json_report)
+    
+    # Restructure into PredictionResponse format so Analytics.jsx can parse it correctly
+    return {
+        "confidence": session.form_score / 100.0,
+        "duration": report_data.get("summary", {}).get("duration", "N/A"),
+        "time_range": report_data.get("summary", {}).get("time_range", "N/A"),
+        "overall_consistency": report_data.get("summary", {}).get("overall_consistency", "0%"),
+        "exercise_breakdown": [
+            {
+                "label": session.exercise,
+                "rep_count": session.reps_actual,
+                "confidence": session.form_score / 100.0,
+                "rep_details": report_data.get("rep_details", []),
+                "set_details": report_data.get("set_details", []),
+                "rhythm_waveform": report_data.get("rhythm_waveform", [])
+            }
+        ],
+        "analysis_json": report_data,
+        "leveled_up": False,
+        "new_xp_total": 0,
+        "new_achievements": []
+    }

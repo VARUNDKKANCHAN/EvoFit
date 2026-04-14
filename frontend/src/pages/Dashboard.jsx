@@ -20,6 +20,16 @@ const EXERCISE_COLORS = {
   row: '#9CA3AF'
 };
 
+const EXERCISE_LABELS = {
+  bench: 'Bench Press',
+  dead:  'Deadlift',
+  squat: 'Back Squat',
+  ohp:   'Overhead Press',
+  row:   'Barbell Row',
+  pullups: 'Pull Ups',
+  rest:  'Rest / Recovery',
+};
+
 export default function Dashboard() {
   const navigate = useNavigate();
   const [data, setData] = useState(null);
@@ -436,7 +446,7 @@ export default function Dashboard() {
                           <tr key={session.id} className="group hover:bg-white/[0.02] transition-colors">
                              <td className="py-5 pl-2">
                                 <p className="text-[14px] font-bold text-evofit-text-primary m-0">
-                                  {session.exercise === 'dead' ? 'Leg Hypertrophy A' : session.exercise === 'bench' ? 'Peak Strength Base' : 'Full Volume B'}
+                                  {EXERCISE_LABELS[session.exercise] || session.exercise}
                                 </p>
                                 <p className="text-[11px] text-evofit-text-muted m-0 mt-0.5 uppercase font-bold tracking-tighter">
                                   {new Date(session.date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}

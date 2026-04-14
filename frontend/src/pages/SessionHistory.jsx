@@ -7,6 +7,16 @@ import {
 } from 'lucide-react';
 import { ResponsiveContainer, LineChart, Line } from 'recharts';
 
+const EXERCISE_LABELS = {
+  bench: 'Bench Press',
+  dead:  'Deadlift',
+  squat: 'Back Squat',
+  ohp:   'Overhead Press',
+  row:   'Barbell Row',
+  pullups: 'Pull Ups',
+  rest:  'Rest / Recovery',
+};
+
 export default function SessionHistory() {
   const navigate = useNavigate();
   const [sessions, setSessions] = useState([]);
@@ -117,7 +127,7 @@ export default function SessionHistory() {
                     </div>
                     <div>
                        <h3 className="text-base font-extrabold text-evofit-text-primary m-0 uppercase tracking-tight">
-                         {s.exercise === 'dead' ? 'Leg Hypertrophy A' : s.exercise === 'bench' ? 'Peak Strength Base' : 'Full Volume B'}
+                         {EXERCISE_LABELS[s.exercise] || s.exercise}
                        </h3>
                        <p className="text-xs text-evofit-text-muted m-0 font-bold mt-0.5">
                          {new Date(s.date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
