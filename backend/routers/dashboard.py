@@ -6,7 +6,7 @@ import json
 from typing import List
 
 from backend.database.database import get_db
-from backend.database.models import WorkoutSession, Target, User
+from backend.database.models import WorkoutSession, Target, User, Achievement
 from backend.schemas.schemas import DashboardSummaryResponse, KPIStats, TrendPoint, SessionItem, DistributionItem, DashboardTargetItem, UserProgression
 
 router = APIRouter(
@@ -181,6 +181,7 @@ def get_dashboard_summary(db: Session = Depends(get_db)):
         insights = [] # Keep empty if new user
 
     user = db.query(User).filter(User.id == user_id).first()
+    recent_achievements = db.query(Achievement).filter(Achievement.user_id == user_id).order_by(Achievement.unlocked_at.desc()).limit(3).all()
     
     return DashboardSummaryResponse(
         kpis=KPIStats(
@@ -194,6 +195,7 @@ def get_dashboard_summary(db: Session = Depends(get_db)):
             level=user.level if user else 1,
             xp_to_next_level=(user.level if user else 1) * 1000
         ),
+        recent_achievements=recent_achievements,
         trend_data=trend_data,
         recent_sessions=recent_sessions,
         distribution=distribution,

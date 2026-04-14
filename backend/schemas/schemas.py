@@ -217,6 +217,7 @@ class KPIStats(BaseModel):
 class DashboardSummaryResponse(BaseModel):
     kpis: KPIStats
     user_progression: UserProgression
+    recent_achievements: List[AchievementResponse]
     trend_data: List[TrendPoint]
     recent_sessions: List[SessionItem]
     distribution: List[DistributionItem]

@@ -491,8 +491,39 @@ export default function Dashboard() {
               </div>
            </div>
 
-           {/* Section Right: Key Insights */}
+           {/* Section Right: Milestones & Insights */}
            <div className="flex flex-col gap-6">
+
+              {/* Recent Milestones Widget */}
+              <div className="flex items-center gap-3 mt-2">
+                 <div className="w-8 h-8 rounded-lg bg-evofit-purple-main/10 flex items-center justify-center text-evofit-purple-light">
+                    <Award size={18} />
+                 </div>
+                 <h3 className="text-xl font-extrabold text-evofit-text-primary m-0 tracking-tight">Recent Milestones</h3>
+              </div>
+
+              <div className="flex flex-col gap-4">
+                  {data?.recent_achievements?.length > 0 ? (
+                    data.recent_achievements.map((ach, i) => (
+                      <div key={ach.id} onClick={() => navigate('/trophy')} className="glass-card p-5 bg-evofit-bg-secondary border border-evofit-border flex gap-4 items-center hover:border-evofit-purple-main/40 transition-all cursor-pointer">
+                       <div className="w-12 h-12 rounded-[14px] bg-gradient-to-br from-amber-400 to-amber-700 flex items-center justify-center shadow-[0_0_15px_rgba(184,134,11,0.2)] shrink-0">
+                          <Sparkles size={20} className="text-white" strokeWidth={2.5} />
+                       </div>
+                       <div>
+                         <p className="m-0 mb-1 text-[14px] font-extrabold text-evofit-text-primary">{ach.badge_name}</p>
+                         <p className="m-0 text-[12px] text-evofit-text-muted leading-relaxed font-medium line-clamp-1">{ach.description}</p>
+                       </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="glass-card p-6 text-center bg-evofit-bg-secondary border border-evofit-border flex flex-col justify-center items-center">
+                    <Trophy size={20} className="text-evofit-text-muted mb-2" />
+                    <p className="text-evofit-text-muted text-[13px] italic font-medium m-0">No achievements unlocked yet.</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Key Insights */}
               <div className="flex items-center gap-3">
                  <div className="w-8 h-8 rounded-lg bg-evofit-purple-main/10 flex items-center justify-center text-evofit-purple-light">
                     <Sparkles size={18} />
