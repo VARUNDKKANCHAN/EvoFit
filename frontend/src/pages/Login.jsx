@@ -464,7 +464,15 @@ export default function Login() {
 
           {/* Logo */}
           <div className="login-logo">
-            <div className="login-logo-icon">⚡</div>
+            <svg width="34" height="34" viewBox="0 0 34 34" fill="none" className="drop-shadow-[0_0_12px_rgba(124,58,237,0.6)]">
+              <circle cx="17" cy="17" r="17" fill="url(#logo_grad)" />
+              <path d="M11 17H14L16 11L20 23L22 17H25" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+              <defs>
+                <linearGradient id="logo_grad" x1="0" y1="0" x2="34" y2="34">
+                  <stop stopColor="#7C3AED" /><stop offset="1" stopColor="#A78BFA" />
+                </linearGradient>
+              </defs>
+            </svg>
             <span className="login-logo-text">EVOFIT</span>
           </div>
 

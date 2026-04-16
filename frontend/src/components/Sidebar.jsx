@@ -81,11 +81,11 @@ export default function Sidebar() {
 
       {/* ── Logo ─────────────────────────────── */}
       <div className={`border-b border-evofit-border flex items-center gap-[10px] animate-slide-in-left transition-[padding] duration-300 ${collapsed ? 'py-6 justify-center' : 'py-7 px-5 pb-5 justify-start'}`}>
-        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" className="shrink-0 drop-shadow-[0_0_8px_rgba(124,58,237,0.5)]">
-          <rect width="28" height="28" rx="8" fill="url(#lg)" />
-          <path d="M7 14h4l3-6 4 12 3-6h2" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <svg width="28" height="28" viewBox="0 0 34 34" fill="none" className="shrink-0 drop-shadow-[0_0_8px_rgba(124,58,237,0.5)]">
+          <circle cx="17" cy="17" r="17" fill="url(#lg)" />
+          <path d="M11 17H14L16 11L20 23L22 17H25" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
           <defs>
-            <linearGradient id="lg" x1="0" y1="0" x2="28" y2="28">
+            <linearGradient id="lg" x1="0" y1="0" x2="34" y2="34">
               <stop stopColor="#6D28D9" /><stop offset="1" stopColor="#A78BFA" />
             </linearGradient>
           </defs>
