@@ -144,31 +144,45 @@ def get_dashboard_summary(db: Session = Depends(get_db)):
         ) for ex, reps in dist_raw
     ]
 
-    # 5. Targets (Active Goals)
-    active_targets_raw = db.query(Target).filter(
-        Target.user_id == user_id,
-        Target.end_date >= today
-    ).order_by(Target.end_date).limit(4).all()
+    # 5. Targets — mirror targets/progress logic so Dashboard shows the SAME data
+    # Step A: get user-set targets
+    DEFAULT_TARGETS = {"bench": 300, "dead": 150, "squat": 250, "ohp": 200, "row": 300}
+    EXERCISE_LABELS_MAP = {"bench": "Bench Press", "dead": "Deadlift", "squat": "Back Squat", "ohp": "Overhead Press", "row": "Barbell Row"}
 
+    user_target_rows = db.query(Target).filter(Target.user_id == user_id).all()
+    target_map = {t.exercise: t.weekly_rep_target for t in user_target_rows}
+
+    # Step B: actual reps for each exercise in last 7 days
+    session_totals = db.query(
+        WorkoutSession.exercise,
+        func.sum(WorkoutSession.reps_actual).label("total_reps")
+    ).filter(
+        WorkoutSession.user_id == user_id,
+        WorkoutSession.date >= last_week
+    ).group_by(WorkoutSession.exercise).all()
+    actual_map = {s.exercise: int(s.total_reps) for s in session_totals}
+
+    # Step C: build target cards for the 5 main exercises, capped at 4 for dashboard
     targets = []
-    for tgt in active_targets_raw:
-        # Calculate reps done for this target's timeframe
-        reps_done_query = db.query(func.sum(WorkoutSession.reps_actual)).filter(
-            WorkoutSession.user_id == user_id,
-            WorkoutSession.exercise == tgt.exercise,
-            WorkoutSession.date >= tgt.start_date,
-            WorkoutSession.date <= tgt.end_date
-        ).scalar() or 0
-        
-        pct = min(100, int((reps_done_query / tgt.weekly_rep_target) * 100)) if tgt.weekly_rep_target > 0 else 0
-        
+    STANDARD_EXERCISES = ["bench", "dead", "squat", "ohp", "row"]
+    for ex in STANDARD_EXERCISES:
+        reps_done = actual_map.get(ex, 0)
+        rep_target = target_map.get(ex, DEFAULT_TARGETS.get(ex, 200))
+        pct = min(100, int((reps_done / rep_target) * 100)) if rep_target > 0 else 0
+        is_achieved = pct >= 100
         targets.append({
-            "label": f"{tgt.exercise.capitalize()} Volume",
-            "reps_done": int(reps_done_query),
-            "reps_target": tgt.weekly_rep_target,
+            "label": f"{EXERCISE_LABELS_MAP.get(ex, ex.capitalize())} Volume",
+            "reps_done": reps_done,
+            "reps_target": rep_target,
             "completion_pct": pct,
-            "icon_type": "activity"
+            "icon_type": "activity",
+            "is_achieved": is_achieved,
+            "status": "achieved" if is_achieved else "active"
         })
+
+    # Sort: achieved first, then by completion % desc; keep top 4
+    targets.sort(key=lambda x: (-x["is_achieved"], -x["completion_pct"]))
+    targets = targets[:4]
 
     # 6. AI Insights (Only added if there's enough data)
     insights = []

@@ -177,6 +177,16 @@ export default function Analytics() {
     };
   }, [everyRepData]);
 
+  // True average form score derived from per-rep scores (NOT model confidence)
+  const avgFormScore = useMemo(() => {
+    if (!everyRepData || everyRepData.length === 0) return realConfidence;
+    const sum = everyRepData.reduce((acc, r) => acc + (r.score || 0), 0);
+    return Math.round(sum / everyRepData.length);
+  }, [everyRepData, realConfidence]);
+
+  // Tier label consistent with pbBins thresholds
+  const avgFormTier = avgFormScore >= 85 ? 'Excellent' : avgFormScore >= 70 ? 'Good Form' : 'Needs Improvement';
+
   if (!predictionResult) {
     return (
       <div className="flex-1 flex items-center justify-center p-6 bg-evofit-bg-primary min-h-full">
@@ -240,7 +250,7 @@ export default function Analytics() {
           {[
             { label: 'Total Reps Context', val: totalReps, sub: 'Entire Session', icon: <Dumbbell size={18} className="text-evofit-purple-light" /> },
             { label: 'Exercises Performed', val: exercisesPerformed, sub: 'Auto-detected', icon: null },
-            { label: 'Average Form Score', val: `${realConfidence}%`, sub: 'Excellent', icon: <Award size={18} className="text-green-400" /> },
+            { label: 'Average Form Score', val: `${avgFormScore}%`, sub: avgFormTier, icon: <Award size={18} className={avgFormScore >= 85 ? 'text-green-400' : avgFormScore >= 70 ? 'text-yellow-400' : 'text-red-400'} /> },
             { label: 'Overall Consistency', val: overallConsistency, sub: 'Calculated Rhythm', icon: <Activity size={18} className="text-blue-400" /> },
             { label: 'Session Duration', val: sessionDuration, sub: sessionTimeRange, icon: <Timer size={18} className="text-pink-400" /> },
             { label: 'Best Set', val: bestSetVal, sub: bestSetSub, icon: <Sparkles size={18} className="text-amber-400" /> }
@@ -353,8 +363,15 @@ export default function Analytics() {
           <div className="glass-card p-6 shadow-premium-card">
             <h4 className="text-[15px] font-bold m-0 mb-4 text-evofit-text-primary">Form Quality Breakdown</h4>
             <div className="flex items-end gap-3 mb-6">
-              <span className="text-[42px] font-extrabold text-evofit-text-primary leading-none tracking-tighter">{realConfidence}%</span>
-              <span className="text-[12px] text-evofit-text-muted mb-1.5 font-bold uppercase tracking-wider">Avg. Score</span>
+              <span className={`text-[42px] font-extrabold leading-none tracking-tighter ${
+                avgFormScore >= 85 ? 'text-[#34D399]' : avgFormScore >= 70 ? 'text-[#FCD34D]' : 'text-[#F87171]'
+              }`}>{avgFormScore}%</span>
+              <div className="flex flex-col mb-1.5 gap-0.5">
+                <span className="text-[12px] text-evofit-text-muted font-bold uppercase tracking-wider">Avg. Score</span>
+                <span className={`text-[11px] font-extrabold uppercase tracking-wider ${
+                  avgFormScore >= 85 ? 'text-[#34D399]' : avgFormScore >= 70 ? 'text-[#FCD34D]' : 'text-[#F87171]'
+                }`}>{avgFormTier}</span>
+              </div>
             </div>
             
             <div className="flex flex-col gap-3.5 mb-6">

@@ -6,7 +6,7 @@ import {
   AreaChart, Area, LineChart, Line, ComposedChart, Cell, PieChart, Pie
 } from 'recharts';
 import { 
-  Activity, Dumbbell, Award, Flame, TrendingUp, Plus, 
+  Activity, Dumbbell, Award, Flame, TrendingUp, Plus, Check,
   ChevronRight, Sparkles, Trophy, Bell, Clock, ShieldCheck, AlertCircle, Zap
 } from 'lucide-react';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
@@ -373,26 +373,53 @@ export default function Dashboard() {
 
            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
               {targets?.length > 0 ? (
-                targets.map((t, i) => (
-                  <div key={i} className="glass-card p-6 shadow-premium-card border-evofit-border hover:border-evofit-purple-main/30 transition-all flex flex-col gap-4">
+                targets.map((t, i) => {
+                  const isAchieved = t.is_achieved || t.status === 'achieved';
+                  const isExpired  = !isAchieved && t.status === 'expired';
+                  return (
+                  <div key={i} className={`glass-card p-6 shadow-premium-card transition-all flex flex-col gap-4
+                    ${isAchieved
+                      ? 'border-green-500/40 bg-green-500/[0.03] hover:border-green-500/60'
+                      : isExpired
+                        ? 'border-evofit-border opacity-60 hover:opacity-80'
+                        : 'border-evofit-border hover:border-evofit-purple-main/30'
+                    }`}>
                      <div className="flex justify-between items-center">
                         <div className="flex items-center gap-2.5">
-                           <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-evofit-purple-light">
-                              {t.icon_type === 'activity' ? <Activity size={18} /> : <TrendingUp size={18} />}
+                           <div className={`w-8 h-8 rounded-lg flex items-center justify-center
+                             ${isAchieved ? 'bg-green-500/10 text-green-400' : 'bg-white/5 text-evofit-purple-light'}`}>
+                              {isAchieved ? <Check size={18} /> : t.icon_type === 'activity' ? <Activity size={18} /> : <TrendingUp size={18} />}
                            </div>
                            <span className="text-[14px] font-bold text-evofit-text-primary">{t.label}</span>
                         </div>
-                        <span className="text-[12px] font-black text-evofit-purple-light">{t.completion_pct}%</span>
+                        {isAchieved ? (
+                          <span className="text-[11px] font-black text-green-400 bg-green-500/10 border border-green-500/30 px-2 py-0.5 rounded-full flex items-center gap-1">
+                            <Check size={10} /> Achieved
+                          </span>
+                        ) : isExpired ? (
+                          <span className="text-[11px] font-black text-evofit-text-muted">{t.completion_pct}% — Expired</span>
+                        ) : (
+                          <span className="text-[12px] font-black text-evofit-purple-light">{t.completion_pct}%</span>
+                        )}
                      </div>
                      <div className="h-2 bg-evofit-bg-secondary rounded-full overflow-hidden">
-                        <div className="h-full bg-evofit-purple-main rounded-full animate-fill-in duration-[1500ms]" style={{ width: `${t.completion_pct}%` }} />
+                        <div
+                          className={`h-full rounded-full animate-fill-in duration-[1500ms]
+                            ${isAchieved ? 'bg-gradient-to-r from-green-500 to-emerald-400 shadow-[0_0_10px_rgba(34,197,94,0.4)]'
+                              : isExpired ? 'bg-evofit-text-muted'
+                              : 'bg-evofit-purple-main'}`}
+                          style={{ width: `${t.completion_pct}%` }}
+                        />
                      </div>
                      <div className="flex justify-between items-center mt-1">
                         <p className="text-[11px] text-evofit-text-muted m-0 font-medium">{t.reps_done} / {t.reps_target} reps</p>
-                        <p className="text-[9px] text-evofit-text-muted font-bold uppercase">Tracking</p>
+                        <p className={`text-[9px] font-bold uppercase ${isAchieved ? 'text-green-400' : 'text-evofit-text-muted'}`}>
+                          {isAchieved ? '✓ Complete' : isExpired ? 'Past Week' : 'Tracking'}
+                        </p>
                      </div>
                   </div>
-                ))
+                  );
+                })
               ) : (
                 <div className="col-span-full py-12 flex flex-col items-center justify-center glass-card border-evofit-border group hover:border-evofit-purple-main/30 transition-all">
                    <div className="w-12 h-12 rounded-xl bg-evofit-bg-secondary flex items-center justify-center text-evofit-text-muted mb-4">

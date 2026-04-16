@@ -191,7 +191,9 @@ class DashboardTargetItem(BaseModel):
     reps_done: int
     reps_target: int
     completion_pct: int
-    icon_type: str # e.g. "activity", "clock", "trending"
+    icon_type: str           # e.g. "activity", "clock", "trending"
+    is_achieved: bool = False
+    status: str = "active"   # "active" | "achieved" | "expired"
 
 class TrendPoint(BaseModel):
     date: str
