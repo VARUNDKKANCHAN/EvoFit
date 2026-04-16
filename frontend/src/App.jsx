@@ -2,8 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import Dashboard from './pages/Dashboard';
-import Login from './pages/Login';
-import Signup from './pages/Signup';
+import AuthPage from './pages/AuthPage';
 import UploadPredict from './pages/UploadPredict';
 import Analytics from './pages/Analytics';
 import Targets from './pages/Targets';
@@ -171,8 +170,8 @@ function AppShell() {
           <AnimatedPage>
             <Routes location={location}>
               {/* Auth Routes */}
-              <Route path="/login"  element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
+              <Route path="/login" element={<AuthPage />} />
+              <Route path="/signup" element={<AuthPage />} />
 
               {/* Main App Routes */}
               <Route path="/" element={<Dashboard />} />

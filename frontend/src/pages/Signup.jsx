@@ -57,166 +57,179 @@ export default function Signup() {
   return (
     <>
       <style>{`
-        @keyframes floatDotSignup {
-          from { transform: translateY(0px); }
-          to   { transform: translateY(-30px); }
-        }
-        @keyframes signupFadeIn {
-          from { opacity: 0; transform: scale(0.98) translateY(10px); }
-          to   { opacity: 1; transform: scale(1) translateY(0); }
-        }
-        @keyframes spinSlow {
-          from { transform: rotate(0deg); }
-          to   { transform: rotate(360deg); }
-        }
-
         .signup-root {
           display: flex;
           min-height: 100vh;
-          background: #07070E;
+          background: #020617;
           font-family: 'Inter', sans-serif;
-          color: #F0F0F5;
-        }
-
-        /* ── Left Sticky Panel ────────────────────── */
-        .signup-left {
-          width: 400px;
-          background: linear-gradient(180deg, #0E0E16 0%, #07070E 100%);
-          border-right: 1px solid rgba(255,255,255,0.06);
-          padding: 48px;
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-          position: sticky;
-          top: 0;
-          height: 100vh;
           overflow: hidden;
         }
-        .signup-left-glow {
+        @keyframes floatDot {
+          from { transform: translateY(0px) scale(1); }
+          to   { transform: translateY(-20px) scale(1.1); }
+        }
+        @keyframes meshShift {
+          0%   { background-position: 0% 50%; }
+          50%  { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideRight {
+          from { opacity: 0; transform: translateX(-24px); }
+          to   { opacity: 1; transform: translateX(0); }
+        }
+
+        /* ── Left Branding Panel (Same as Login) ─────── */
+        .signup-left {
+          position: relative;
+          flex: 1.1;
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          justify-content: flex-end;
+          padding: 48px;
+          overflow: hidden;
+          min-height: 100vh;
+        }
+        .signup-left-bg {
           position: absolute;
-          top: 50%; left: 50%; transform: translate(-50%, -50%);
-          width: 400px; height: 400px;
-          background: radial-gradient(circle, rgba(124,58,237,0.1) 0%, transparent 70%);
-          filter: blur(40px);
+          inset: 0;
+          background: radial-gradient(circle at 20% 30%, #1e1b4b 0%, #0f172a 50%, #020617 100%);
           z-index: 0;
         }
-        .signup-loader {
-           position: relative; width: 180px; height: 180px; margin: 40px auto;
-           display: flex; align-items: center; justify-content: center;
+        .signup-left-mesh {
+          position: absolute;
+          inset: 0;
+          background:
+            radial-gradient(ellipse 70% 60% at 30% 20%, rgba(99,102,241,0.15) 0%, transparent 80%),
+            radial-gradient(ellipse 50% 50% at 80% 80%, rgba(139,92,246,0.12) 0%, transparent 80%);
+          animation: meshShift 10s ease-in-out infinite alternate;
+          z-index: 0;
         }
-        .signup-loader-spinner {
-          position: absolute; inset: 0;
-          border: 2px solid rgba(124,58,237,0.1);
-          border-top-color: #7C3AED;
-          border-radius: 50%;
-          animation: spinSlow 3s linear infinite;
+        .signup-left-lighting {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(to bottom, transparent, rgba(2,6,23,0.85));
+          z-index: 1;
         }
-        .signup-left-content { position: relative; z-index: 2; text-align: center; }
-        .signup-left-footer { font-size: 12px; color: rgba(255,255,255,0.3); text-align: center; z-index: 2; }
+        .signup-left-img {
+          position: absolute;
+          inset: 0;
+          background:
+            linear-gradient(135deg, rgba(2,6,23,0.3) 0%, rgba(2,6,23,0.9) 100%),
+            url('https://images.unsplash.com/photo-1541534741688-6078c64b5913?w=1200&q=80') center/cover no-repeat;
+          z-index: 0;
+          opacity: 0.5;
+          filter: contrast(1.1) brightness(0.7);
+        }
+        .signup-left-content { position: relative; z-index: 2; animation: slideRight 0.8s cubic-bezier(0.4,0,0.2,1) both; }
+        
+        .signup-logo {
+          display: flex; align-items: center; gap: 10px;
+          position: absolute; top: 48px; left: 48px; z-index: 2;
+          animation: fadeUp 0.6s ease both;
+        }
+        .signup-logo-text { font-size: 20px; font-weight: 800; color: #fff; letter-spacing: -0.5px; }
 
-        /* ── Right Scrollable Form ─────────────────── */
+        .signup-headline {
+          font-size: clamp(34px, 4vw, 54px);
+          font-weight: 950;
+          color: #fff; line-height: 1.05; letter-spacing: -2px; margin: 0 0 16px;
+        }
+        .signup-headline em {
+          font-style: normal; display: block;
+          background: linear-gradient(90deg, #818cf8, #c084fc, #e879f9);
+          -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .signup-subtext {
+          font-size: 16px; color: rgba(255,255,255,0.6);
+          line-height: 1.6; max-width: 380px; margin: 0 0 40px;
+        }
+        .signup-stats { display: flex; gap: 16px; animation: fadeUp 0.8s 0.3s ease both; }
+        .signup-stat-card {
+          flex: 1; background: rgba(255,255,255,0.03); backdrop-filter: blur(12px);
+          border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 16px;
+        }
+        .signup-stat-num { font-size: 24px; font-weight: 900; color: #fff; display: block; margin-bottom: 4px; }
+        .signup-stat-label { font-size: 11px; color: rgba(255,255,255,0.4); font-weight: 600; text-transform: uppercase; }
+
+        /* ── Right Action Panel ──────────────────────── */
         .signup-right {
-          flex: 1;
+          width: 580px;
+          background: #0E0E16;
+          border-left: 1px solid rgba(255,255,255,0.05);
           display: flex;
           flex-direction: column;
           align-items: center;
-          padding: 60px 20px;
+          padding: 60px 48px;
           overflow-y: auto;
-          background: #07070E;
         }
-        .signup-form-container {
-          width: 100%;
-          max-width: 580px;
-          animation: signupFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
-        }
-        .signup-header { margin-bottom: 40px; text-align: center; }
-        .signup-title { font-size: 32px; font-weight: 800; letter-spacing: -1px; margin-bottom: 12px; }
-        .signup-subtitle { color: rgba(240,240,245,0.45); font-size: 14px; }
+        .signup-form-container { width: 100%; max-width: 480px; position: relative; z-index: 10; }
+        .signup-title { font-size: 30px; font-weight: 800; letter-spacing: -1px; margin-bottom: 10px; color: #F0F0F5; }
+        .signup-subtitle { color: rgba(240,240,245,0.45); font-size: 13px; margin-bottom: 32px; }
 
-        /* Card Sectioning */
         .signup-section {
           background: rgba(255,255,255,0.02);
-          border: 1px solid rgba(255,255,255,0.06);
-          border-radius: 20px;
-          padding: 32px;
-          margin-bottom: 24px;
+          border: 1px solid rgba(255,255,255,0.05);
+          border-radius: 18px; padding: 24px; margin-bottom: 24px;
         }
         .signup-section-title {
-          font-size: 13px; font-weight: 700; color: #A78BFA;
-          text-transform: uppercase; letter-spacing: 0.1em;
-          margin-bottom: 24px; display: flex; align-items: center; gap: 10px;
-        }
-        .signup-section-title::after {
-          content: ''; flex: 1; height: 1px; background: rgba(167,139,250,0.15);
+          font-size: 11px; font-weight: 700; color: #A78BFA;
+          text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 20px;
         }
 
-        .signup-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 20px;
+        .signup-input {
+          width: 100%; background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(255,255,255,0.08); border-radius: 12px;
+          padding: 12px 14px; color: #fff; font-size: 14px; outline: none; transition: all 0.2s;
         }
-        .signup-full { grid-column: span 2; }
+        .signup-input:focus { border-color: #7C3AED; background: rgba(124,58,237,0.05); box-shadow: 0 0 0 4px rgba(124,58,237,0.1); }
 
-        .signup-input-group { margin-bottom: 4px; }
-        .signup-label {
-          display: block; font-size: 12px; font-weight: 600;
-          color: rgba(240,240,245,0.6); margin-bottom: 8px;
+        /* FIX: Select Dropdown Contrast Bug */
+        .signup-select {
+          width: 100%; background: #16161E;
+          border: 1px solid rgba(255,255,255,0.1); border-radius: 12px;
+          padding: 12px 14px; color: #fff; font-size: 14px; outline: none;
+          cursor: pointer; appearance: none;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23A78BFA' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+          background-repeat: no-repeat; background-position: right 14px center; background-size: 16px;
         }
-        .signup-input, .signup-select {
-          width: 100%;
-          background: rgba(255,255,255,0.04);
-          border: 1px solid rgba(255,255,255,0.08);
-          border-radius: 12px;
-          padding: 12px 16px;
+        .signup-select option {
+          background-color: #16161E;
           color: #fff;
-          font-family: 'Inter', sans-serif;
-          font-size: 14px;
-          outline: none;
-          transition: all 0.2s ease;
-          box-sizing: border-box;
+          padding: 12px;
         }
-        .signup-input:focus, .signup-select:focus {
-          border-color: rgba(124,58,237,0.5);
-          background: rgba(124,58,237,0.06);
-          box-shadow: 0 0 0 4px rgba(124,58,237,0.1);
-        }
+        .signup-select:focus { border-color: #818cf8; box-shadow: 0 0 0 4px rgba(129,140,248,0.1); }
 
         .signup-btn {
-          width: 100%;
-          padding: 16px;
+          width: 100%; padding: 16px; border: none; border-radius: 14px;
           background: linear-gradient(135deg, #7C3AED, #A78BFA);
-          border: none; border-radius: 14px;
-          color: #fff; font-weight: 700; font-size: 15px;
-          cursor: pointer; transition: all 0.3s ease;
-          margin-top: 10px;
-          box-shadow: 0 10px 25px -5px rgba(124,58,237,0.4);
+          color: #fff; font-weight: 700; font-size: 15px; cursor: pointer; transition: all 0.3s ease;
+          box-shadow: 0 8px 25px -5px rgba(124,58,237,0.5);
         }
-        .signup-btn:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 15px 30px -5px rgba(124,58,237,0.5);
-        }
+        .signup-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 30px -5px rgba(124,58,237,0.6); }
+        .signup-btn:active { transform: translateY(0); }
 
-        .signup-footer {
-          text-align: center; margin-top: 24px;
-          font-size: 14px; color: rgba(240,240,245,0.4);
-        }
-        .signup-footer a { color: #A78BFA; font-weight: 600; text-decoration: none; }
-
-        @media (max-width: 900px) {
+        @media (max-width: 960px) {
           .signup-left { display: none; }
-          .signup-grid { grid-template-columns: 1fr; }
-          .signup-full { grid-column: span 1; }
+          .signup-right { width: 100%; padding: 48px 24px; }
         }
       `}</style>
 
       <div className="signup-root">
-        {/* ── Left Branding ── */}
+        {/* ── Left Branding Panel (Now Unified with Login) ── */}
         <div className="signup-left">
+          <div className="signup-left-img" />
+          <div className="signup-left-bg" />
+          <div className="signup-left-mesh" />
+          <div className="signup-left-lighting" />
           <Particles />
-          <div className="signup-left-glow" />
-          
-          <div className="signup-logo" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <svg width="34" height="34" viewBox="0 0 34 34" fill="none" className="drop-shadow-[0_0_12px_rgba(124,58,237,0.6)]">
+ 
+          <div className="signup-logo">
+            <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
               <circle cx="17" cy="17" r="17" fill="url(#logo_grad_s)" />
               <path d="M11 17H14L16 11L20 23L22 17H25" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
               <defs>
@@ -225,22 +238,28 @@ export default function Signup() {
                 </linearGradient>
               </defs>
             </svg>
-            <span style={{ fontWeight: 800, fontSize: 20 }}>EVOFIT PRO</span>
+            <span className="signup-logo-text">EVOFIT</span>
           </div>
-
+ 
           <div className="signup-left-content">
-             <div className="signup-loader">
-                <div className="signup-loader-spinner" />
-                <div style={{ fontSize: 40 }}>🧘</div>
-             </div>
-             <h2 style={{ fontSize: 24, fontWeight: 800, margin: '20px 0 10px' }}>Evolve Your Body</h2>
-             <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, lineHeight: 1.6 }}>
-               Personalize your AI profile to get hyper-targeted feedback on your form and progress.
-             </p>
-          </div>
-
-          <div className="signup-left-footer">
-            12k+ Athletes Synced • 99% Precision
+            <h2 className="signup-headline">Elevate Your<br /><em>Performance.</em></h2>
+            <p className="signup-subtext">
+              Experience the future of fitness with intelligent tracking, hyper-personalized insights, and cinematic workout analysis.
+            </p>
+            <div className="signup-stats">
+              <div className="signup-stat-card">
+                <span className="signup-stat-num">10k+</span>
+                <span className="signup-stat-label">Active Users</span>
+              </div>
+              <div className="signup-stat-card">
+                <span className="signup-stat-num">98%</span>
+                <span className="signup-stat-label">Accuracy</span>
+              </div>
+              <div className="signup-stat-card">
+                <span className="signup-stat-num">5</span>
+                <span className="signup-stat-label">Classes</span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -259,23 +278,48 @@ export default function Signup() {
                 <div className="signup-grid">
                   <div className="signup-input-group">
                     <label className="signup-label">Username</label>
-                    <input name="username" className="signup-input" placeholder="alex_pro" onChange={handleChange} required />
+                    <div style={{ position: 'relative' }}>
+                      <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', opacity: 0.4 }}>
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                        </svg>
+                      </span>
+                      <input name="username" className="signup-input" style={{ paddingLeft: 36 }} placeholder="alex_pro" onChange={handleChange} required />
+                    </div>
                   </div>
                   <div className="signup-input-group">
                     <label className="signup-label">Full Name</label>
-                    <input name="fullName" className="signup-input" placeholder="Alex Johnson" onChange={handleChange} />
+                    <div style={{ position: 'relative' }}>
+                      <input name="fullName" className="signup-input" placeholder="Alex Johnson" onChange={handleChange} />
+                    </div>
                   </div>
                   <div className="signup-input-group signup-full">
                     <label className="signup-label">Email Address</label>
-                    <input name="email" type="email" className="signup-input" placeholder="name@example.com" onChange={handleChange} required />
+                    <div style={{ position: 'relative' }}>
+                      <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', opacity: 0.4 }}>
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
+                        </svg>
+                      </span>
+                      <input name="email" type="email" className="signup-input" style={{ paddingLeft: 36 }} placeholder="name@example.com" onChange={handleChange} required />
+                    </div>
                   </div>
                   <div className="signup-input-group">
                     <label className="signup-label">Password</label>
-                    <input name="password" type="password" className="signup-input" placeholder="••••••••" onChange={handleChange} />
+                    <div style={{ position: 'relative' }}>
+                      <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', opacity: 0.4 }}>
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                        </svg>
+                      </span>
+                      <input name="password" type="password" className="signup-input" style={{ paddingLeft: 36 }} placeholder="••••••••" onChange={handleChange} />
+                    </div>
                   </div>
                   <div className="signup-input-group">
                     <label className="signup-label">Confirm Password</label>
-                    <input name="confirmPassword" type="password" className="signup-input" placeholder="••••••••" onChange={handleChange} />
+                    <div style={{ position: 'relative' }}>
+                       <input name="confirmPassword" type="password" className="signup-input" placeholder="••••••••" onChange={handleChange} />
+                    </div>
                   </div>
                 </div>
               </div>

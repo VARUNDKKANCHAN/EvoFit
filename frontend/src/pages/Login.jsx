@@ -118,26 +118,34 @@ export default function Login() {
         .login-left-bg {
           position: absolute;
           inset: 0;
-          background: linear-gradient(135deg, #1a0533 0%, #0d0d1a 40%, #090920 70%, #07070e 100%);
+          background: radial-gradient(circle at 20% 30%, #1e1b4b 0%, #0f172a 50%, #020617 100%);
           z-index: 0;
         }
         .login-left-mesh {
           position: absolute;
           inset: 0;
           background:
-            radial-gradient(ellipse 60% 50% at 25% 30%, rgba(124,58,237,0.28) 0%, transparent 70%),
-            radial-gradient(ellipse 40% 40% at 75% 70%, rgba(167,139,250,0.18) 0%, transparent 70%),
-            radial-gradient(ellipse 30% 30% at 50% 10%, rgba(109,40,217,0.2) 0%, transparent 60%);
-          animation: meshShift 8s ease-in-out infinite;
+            radial-gradient(ellipse 70% 60% at 30% 20%, rgba(99,102,241,0.15) 0%, transparent 80%),
+            radial-gradient(ellipse 50% 50% at 80% 80%, rgba(139,92,246,0.12) 0%, transparent 80%),
+            radial-gradient(circle at 50% 50%, rgba(30,27,75,0.4) 0%, transparent 100%);
+          animation: meshShift 10s ease-in-out infinite alternate;
           z-index: 0;
+        }
+        .login-left-lighting {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(to bottom, transparent, rgba(2,6,23,0.8));
+          z-index: 1;
         }
         .login-left-img {
           position: absolute;
           inset: 0;
           background:
-            linear-gradient(180deg, rgba(7,7,14,0.15) 0%, rgba(7,7,14,0.85) 100%),
-            url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=900&q=80') center/cover no-repeat;
+            linear-gradient(135deg, rgba(2,6,23,0.4) 0%, rgba(2,6,23,0.95) 100%),
+            url('https://images.unsplash.com/photo-1541534741688-6078c64b5913?w=1200&q=80') center/cover no-repeat;
           z-index: 0;
+          opacity: 0.6;
+          filter: contrast(1.1) brightness(0.8);
         }
         .login-left-content {
           position: relative;
@@ -185,41 +193,57 @@ export default function Login() {
         }
         .login-tagline-badge span { width: 6px; height: 6px; border-radius: 50%; background: #A78BFA; animation: pulseGlow 2s infinite; }
         .login-headline {
-          font-size: clamp(30px, 3.5vw, 46px);
-          font-weight: 900;
+          font-size: clamp(34px, 4vw, 54px);
+          font-weight: 950;
           color: #fff;
-          line-height: 1.12;
-          letter-spacing: -1.5px;
-          margin: 0 0 14px;
+          line-height: 1.05;
+          letter-spacing: -2px;
+          margin: 0 0 16px;
         }
         .login-headline em {
           font-style: normal;
-          background: linear-gradient(90deg, #A78BFA, #7C3AED);
+          display: block;
+          background: linear-gradient(90deg, #818cf8, #c084fc, #e879f9);
+          background-size: 200% auto;
           -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+          animation: shimmerBtn 4s linear infinite;
+          filter: drop-shadow(0 0 15px rgba(167,139,250,0.4));
         }
         .login-subtext {
-          font-size: 14px;
-          color: rgba(255,255,255,0.55);
-          line-height: 1.7;
-          max-width: 320px;
-          margin: 0 0 32px;
+          font-size: 16px;
+          color: rgba(255,255,255,0.6);
+          line-height: 1.6;
+          max-width: 380px;
+          margin: 0 0 40px;
+          font-weight: 400;
         }
         .login-stats {
           display: flex;
-          gap: 24px;
+          gap: 16px;
+          animation: fadeUp 0.8s 0.3s ease both;
         }
-        .login-stat {
-          display: flex;
-          flex-direction: column;
+        .login-stat-card {
+          flex: 1;
+          background: rgba(255,255,255,0.03);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 16px;
+          padding: 16px;
+          transition: transform 0.3s ease, background 0.3s ease;
+        }
+        .login-stat-card:hover {
+          background: rgba(255,255,255,0.06);
+          transform: translateY(-5px);
+          border-color: rgba(167,139,250,0.3);
         }
         .login-stat-num {
-          font-size: 22px; font-weight: 800; color: #fff;
+          font-size: 24px; font-weight: 900; color: #fff; display: block;
+          margin-bottom: 4px; letter-spacing: -0.5px;
         }
         .login-stat-label {
-          font-size: 11px; color: rgba(255,255,255,0.45); font-weight: 500;
-        }
-        .login-stat-divider {
-          width: 1px; background: rgba(255,255,255,0.12); align-self: stretch;
+          font-size: 11px; color: rgba(255,255,255,0.4); font-weight: 600;
+          text-transform: uppercase; letter-spacing: 0.05em;
         }
 
         /* ── Right Form Panel ───────────────────────── */
@@ -479,28 +503,26 @@ export default function Login() {
           {/* Bottom content */}
           <div className="login-left-content">
             <div className="login-tagline-badge">
-              <span /> AI-Powered Training
+              <span /> Next-Gen AI Training
             </div>
             <h2 className="login-headline">
               Elevate Your<br /><em>Performance.</em>
             </h2>
             <p className="login-subtext">
-              Track, analyze, and optimize every rep with AI-powered insights tailored to your body.
+              Experience the future of fitness with intelligent tracking, hyper-personalized insights, and cinematic workout analysis.
             </p>
             <div className="login-stats">
-              <div className="login-stat">
+              <div className="login-stat-card">
                 <span className="login-stat-num">10k+</span>
                 <span className="login-stat-label">Active Users</span>
               </div>
-              <div className="login-stat-divider" />
-              <div className="login-stat">
+              <div className="login-stat-card">
                 <span className="login-stat-num">98%</span>
                 <span className="login-stat-label">Accuracy</span>
               </div>
-              <div className="login-stat-divider" />
-              <div className="login-stat">
+              <div className="login-stat-card">
                 <span className="login-stat-num">5</span>
-                <span className="login-stat-label">Exercise Classes</span>
+                <span className="login-stat-label">Classes</span>
               </div>
             </div>
           </div>
