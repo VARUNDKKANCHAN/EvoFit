@@ -1,13 +1,16 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import Dashboard from './pages/Dashboard';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
 import UploadPredict from './pages/UploadPredict';
 import Analytics from './pages/Analytics';
 import Targets from './pages/Targets';
 import TrophyRoom from './pages/TrophyRoom';
 import SessionHistory from './pages/SessionHistory';
 import ThemeToggle from './components/ThemeToggle';
+import { useAuth } from './context/AuthContext';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -125,10 +128,28 @@ function ComingSoon({ title, icon, description }) {
    ══════════════════════════════════════════════════ */
 function AppShell() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, loading, isAuthenticated } = useAuth();
+
+  /* 
+  useEffect(() => {
+    // Redirect logic: If not logged in and not on login/signup, go to login
+    if (!loading && !isAuthenticated && location.pathname !== '/login' && location.pathname !== '/signup') {
+      navigate('/login');
+    }
+    
+    // If logged in and on login/signup, go to dashboard
+    if (!loading && isAuthenticated && (location.pathname === '/login' || location.pathname === '/signup')) {
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, loading, location.pathname, navigate]);
+  */
 
   const getPageTitle = (path) => {
     switch (path) {
       case '/': return 'Dashboard';
+      case '/login': return 'Authentication';
+      case '/signup': return 'Create Account';
       case '/upload': return 'AI Dataset Upload';
       case '/analytics': return 'Performance Analytics';
       case '/targets': return 'Target Monitoring';
@@ -139,14 +160,21 @@ function AppShell() {
     }
   };
 
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/signup';
+
   return (
     <div className="flex min-h-screen bg-evofit-bg-primary font-inter">
-      <Sidebar />
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <PageHeader title={getPageTitle(location.pathname)} />
+      {!isAuthPage && <Sidebar />}
+      <div className={`flex-1 flex flex-col min-w-0 overflow-hidden ${isAuthPage ? 'w-full' : ''}`}>
+        {!isAuthPage && <PageHeader title={getPageTitle(location.pathname)} />}
         <div className="flex-1 overflow-y-auto overflow-x-hidden">
           <AnimatedPage>
             <Routes location={location}>
+              {/* Auth Routes */}
+              <Route path="/login"  element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+
+              {/* Main App Routes */}
               <Route path="/" element={<Dashboard />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/upload"    element={<UploadPredict />} />

@@ -225,3 +225,16 @@ class DashboardSummaryResponse(BaseModel):
     distribution: List[DistributionItem]
     targets: List[DashboardTargetItem]
     insights: List[str]
+
+# --- AUTH SCHEMAS ---
+
+class UserLogin(BaseModel):
+    username: str
+    password: str
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class TokenData(BaseModel):
+    username: Optional[str] = None

@@ -39,7 +39,30 @@ def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db.add(new_profile)
     db.commit()
     
+    
     return new_user
+
+@router.post("/login", response_model=schemas.Token)
+def login_for_access_token(user_credentials: schemas.UserLogin, db: Session = Depends(get_db)):
+    """Authenticate user and return JWT access token."""
+    user = db.query(models.User).filter(models.User.username == user_credentials.username).first()
+    
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid credentials"
+        )
+    
+    if not auth_service.verify_password(user_credentials.password, user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid credentials"
+        )
+    
+    # Create token
+    access_token = auth_service.create_access_token(data={"sub": user.username})
+    
+    return {"access_token": access_token, "token_type": "bearer"}
 
 @router.get("/me/profile", response_model=schemas.ProfileResponse)
 def get_user_profile(user_id: int = 1, db: Session = Depends(get_db)):
