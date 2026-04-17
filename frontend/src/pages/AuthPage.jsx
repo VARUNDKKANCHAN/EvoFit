@@ -2,38 +2,65 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-/* ══════════════════════════════════════════════
-   Floating particle dots for the left panel
-   ══════════════════════════════════════════════ */
-function Particles() {
-  const dots = Array.from({ length: 18 }, (_, i) => ({
+/* ── Cinematic Particle Field ── */
+function CinematicParticleField() {
+  const particles = React.useMemo(() => Array.from({ length: 22 }, (_, i) => ({
     id: i,
-    size: Math.random() * 4 + 2,
+    size: Math.random() * 5 + 1.5,
     x: Math.random() * 100,
     y: Math.random() * 100,
-    delay: Math.random() * 4,
-    dur: Math.random() * 4 + 4,
-    opacity: Math.random() * 0.4 + 0.1,
-  }));
+    delay: Math.random() * 5,
+    dur: Math.random() * 8 + 6,
+    blur: Math.random() > 0.5 ? 'blur(1px)' : 'none',
+    opacity: Math.random() * 0.3 + 0.05,
+  })), []);
 
   return (
-    <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
-      {dots.map((d) => (
+    <div className="absolute inset-0 pointer-events-none overflow-hidden z-[1]">
+      {particles.map((p) => (
         <div
-          key={d.id}
+          key={p.id}
+          className="absolute rounded-full bg-evofit-purple-light"
           style={{
-            position: 'absolute',
-            left: `${d.x}%`,
-            top: `${d.y}%`,
-            width: d.size,
-            height: d.size,
-            borderRadius: '50%',
-            background: 'rgba(167,139,250,0.6)',
-            animation: `floatDot ${d.dur}s ${d.delay}s ease-in-out infinite alternate`,
-            opacity: d.opacity,
+            left: `${p.x}%`,
+            top: `${p.y}%`,
+            width: p.size,
+            height: p.size,
+            filter: p.blur,
+            opacity: p.opacity,
+            animation: `floatAround ${p.dur}s ${p.delay}s ease-in-out infinite alternate`,
           }}
         />
       ))}
+    </div>
+  );
+}
+
+/* ── Neural Motion Field (Dynamic SVG Splines) ── */
+function NeuralMotionField() {
+  return (
+    <div className="absolute inset-0 pointer-events-none opacity-20 z-0">
+      <svg className="w-full h-full">
+        <defs>
+          <linearGradient id="neuralGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="transparent" />
+            <stop offset="50%" stopColor="#818cf8" />
+            <stop offset="100%" stopColor="transparent" />
+          </linearGradient>
+        </defs>
+        <path d="M-100,300 Q400,100 900,300 T1900,300" stroke="url(#neuralGrad)" strokeWidth="1" fill="none">
+          <animate attributeName="d" dur="15s" repeatCount="indefinite"
+            values="M-100,300 Q400,100 900,300 T1900,300;
+                    M-100,350 Q400,150 900,350 T1900,350;
+                    M-100,300 Q400,100 900,300 T1900,300" />
+        </path>
+        <path d="M-100,600 Q500,800 1000,600 T2100,600" stroke="url(#neuralGrad)" strokeWidth="1" fill="none">
+           <animate attributeName="d" dur="20s" repeatCount="indefinite"
+            values="M-100,600 Q500,800 1000,600 T2100,600;
+                    M-100,550 Q500,750 1000,550 T2100,550;
+                    M-100,600 Q500,800 1000,600 T2100,600" />
+        </path>
+      </svg>
     </div>
   );
 }
@@ -47,6 +74,14 @@ export default function AuthPage() {
   
   const [showPass, setShowPass] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const rootRef = React.useRef(null);
+
+  const handleMouseMove = (e) => {
+    if (!rootRef.current) return;
+    const { clientX, clientY } = e;
+    rootRef.current.style.setProperty('--mouse-x', `${clientX}px`);
+    rootRef.current.style.setProperty('--mouse-y', `${clientY}px`);
+  };
   
   // Login State
   const [loginForm, setLoginForm] = useState({ username: '', password: '' });
@@ -99,36 +134,38 @@ export default function AuthPage() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
 
-        @keyframes floatDot {
-          from { transform: translateY(0px) scale(1); }
-          to   { transform: translateY(-18px) scale(1.2); }
-        }
+        @keyframes floatAround {
+          from { transform: translate(0, 0) scale(1); }
+          to   { transform: translate(15px, -25px) scale(1.1); }
+         }
         @keyframes meshShift {
           0%   { background-position: 0% 50%; }
           50%  { background-position: 100% 50%; }
           100% { background-position: 0% 50%; }
         }
         @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(24px); }
-          to   { opacity: 1; transform: translateY(0); }
+          from { opacity: 0; transform: translateY(30px); filter: blur(10px); }
+          to   { opacity: 1; transform: translateY(0); filter: blur(0); }
         }
         @keyframes slideRight {
-          from { opacity: 0; transform: translateX(-24px); }
+          from { opacity: 0; transform: translateX(-40px); }
           to   { opacity: 1; transform: translateX(0); }
         }
-        @keyframes shimmerTab {
-          0% { background-position: -200% center; }
-          100% { background-position: 200% center; }
+        @keyframes glowPulse {
+          0% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.4); }
+          100% { box-shadow: 0 0 0 15px rgba(124, 58, 237, 0); }
         }
 
         .auth-root {
           display: flex;
           height: 100vh;
           background: #020617;
-          font-family: 'Inter', sans-serif;
+          font-family: 'Outfit', sans-serif;
           overflow: hidden;
+          --mouse-x: 50%;
+          --mouse-y: 50%;
         }
 
         /* ── Left Branding Panel ─────────────────────── */
@@ -213,7 +250,7 @@ export default function AuthPage() {
         /* ── Right Action Panel ──────────────────────── */
         .auth-right {
           width: 580px;
-          background: #0E0E16;
+          background: #06060c;
           border-left: 1px solid rgba(255,255,255,0.04);
           display: flex;
           flex-direction: column;
@@ -225,21 +262,38 @@ export default function AuthPage() {
           position: relative;
           z-index: 5;
         }
+        .auth-right::before {
+          content: ''; position: fixed; inset: 0; pointer-events: none;
+          background: radial-gradient(circle at var(--mouse-x) var(--mouse-y), rgba(124,58,237,0.06) 0%, transparent 40%);
+          z-index: 0;
+        }
         .auth-form-container { 
           width: 100%; 
           max-width: 440px; 
           position: relative; 
-          animation: fadeUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+          animation: fadeUp 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+          background: rgba(255, 255, 255, 0.01);
+          backdrop-filter: blur(40px);
+          border-radius: 32px;
+          padding: 40px;
+          border: 1px solid rgba(255, 255, 255, 0.05);
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
         
-        .auth-title { font-size: 32px; font-weight: 900; letter-spacing: -1.2px; margin-bottom: 8px; color: #F8F8FA; }
-        .auth-subtitle { color: rgba(240,240,245,0.4); font-size: 14px; margin-bottom: 32px; }
+        .auth-title { font-size: 36px; font-weight: 900; letter-spacing: -1.5px; margin-bottom: 8px; color: #fff; text-shadow: 0 0 20px rgba(124,58,237,0.3); }
+        .auth-subtitle { color: rgba(240,240,245,0.4); font-size: 15px; margin-bottom: 32px; font-weight: 500; }
+
+        .auth-stagger-1 { animation-delay: 100ms; }
+        .auth-stagger-2 { animation-delay: 200ms; }
+        .auth-stagger-3 { animation-delay: 300ms; }
+        .auth-stagger-4 { animation-delay: 400ms; }
+        .auth-stagger-5 { animation-delay: 500ms; }
 
         /* Unified Card Styles */
         .auth-section {
           background: rgba(255,255,255,0.02);
-          border: 1px solid rgba(255,255,255,0.05);
-          border-radius: 20px; padding: 28px; margin-bottom: 24px;
+          border: 1px solid rgba(255,255,255,0.04);
+          border-radius: 20px; padding: 24px; margin-bottom: 24px;
         }
         .auth-section-title {
           font-size: 11px; font-weight: 800; color: #A78BFA;
@@ -303,14 +357,15 @@ export default function AuthPage() {
         }
       `}</style>
 
-      <div className="auth-root">
+      <div className="auth-root" ref={rootRef} onMouseMove={handleMouseMove}>
         {/* ── Left Branding Panel ── */}
         <div className="auth-left">
           <div className="auth-left-img" />
           <div className="auth-left-bg" />
           <div className="auth-left-mesh" />
           <div className="auth-left-lighting" />
-          <Particles />
+          <CinematicParticleField />
+          <NeuralMotionField />
 
           <div className="auth-logo">
             <svg width="36" height="36" viewBox="0 0 34 34" fill="none">
@@ -365,7 +420,7 @@ export default function AuthPage() {
               <span className="auth-logo-text" style={{ color: '#fff', fontSize: 18 }}>EVOFIT</span>
             </div>
 
-            <div style={{ marginBottom: 36, textAlign: 'center' }}>
+            <div style={{ marginBottom: 36, textAlign: 'center' }} className="auth-stagger-1">
                <h1 className="auth-title">{isLogin ? 'Welcome Back' : 'Join the Elite'}</h1>
                <p className="auth-subtitle">
                  {isLogin ? 'Continue your AI-powered fitness journey.' : 'Create your pro profile and start training today.'}
@@ -373,14 +428,14 @@ export default function AuthPage() {
             </div>
 
             {/* Tab switcher */}
-            <div className="auth-tabs">
+            <div className="auth-tabs auth-stagger-2">
               <Link to="/login" className={`auth-tab ${isLogin ? 'active' : ''}`}>Sign In</Link>
               <Link to="/signup" className={`auth-tab ${!isLogin ? 'active' : ''}`}>Get Started</Link>
             </div>
 
             {isLogin ? (
               /* LOGIN FORM */
-              <form onSubmit={handleLoginSubmit}>
+              <form onSubmit={handleLoginSubmit} className="auth-stagger-3">
                 <div className="auth-field">
                   <label className="auth-label">Username</label>
                   <div className="auth-input-wrap">
@@ -413,7 +468,7 @@ export default function AuthPage() {
             ) : (
               /* SIGNUP FORM (FULL RESTORATION) */
               <form onSubmit={handleSignupSubmit}>
-                <div className="auth-section">
+                <div className="auth-section auth-stagger-3">
                   <div className="auth-section-title">Account Details</div>
                   <div className="auth-field">
                     <label className="auth-label">Full Name</label>
@@ -471,7 +526,7 @@ export default function AuthPage() {
                   </div>
                 </div>
 
-                <div className="auth-section">
+                <div className="auth-section auth-stagger-4">
                    <div className="auth-section-title">Physical Profile</div>
                    <div className="auth-grid-stack" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                       <div className="auth-field">
@@ -525,7 +580,7 @@ export default function AuthPage() {
                    </div>
                 </div>
 
-                <div className="auth-section">
+                <div className="auth-section auth-stagger-5">
                    <div className="auth-section-title">Fitness Aspirations</div>
                    <div className="auth-field">
                       <label className="auth-label">Primary Goal</label>
