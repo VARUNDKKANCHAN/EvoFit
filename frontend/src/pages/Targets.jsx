@@ -169,19 +169,19 @@ export default function Targets() {
       <div className="evofit-page-container">
         
         {/* ── TOP HEADER ─────────────────────────────────────────────────── */}
-        <div className="flex justify-between items-center mb-10">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10 animate-fade-in">
           <div className="animate-slide-in-left">
-            <h1 className="text-[32px] font-extrabold m-0 tracking-tight text-evofit-text-primary">
+            <h1 className="text-[28px] md:text-[32px] font-extrabold m-0 tracking-tight text-evofit-text-primary">
               Targets & Progress
             </h1>
-            <p className="text-evofit-text-secondary text-base m-0">
+            <p className="text-evofit-text-secondary text-sm md:text-base m-0 mt-1">
               Visualize your fitness milestones and track weekly volume benchmarks.
             </p>
           </div>
           
-          <div className="flex items-center gap-3.5 px-6 py-3 bg-evofit-purple-main/10 border border-evofit-purple-main/30 rounded-[20px] shadow-[0_0_25px_rgba(124,58,237,0.15)] animate-pulse-glow">
+          <div className="flex items-center gap-3.5 px-6 py-3 bg-evofit-purple-main/10 border border-evofit-purple-main/30 rounded-[20px] shadow-[0_0_25px_rgba(124,58,237,0.15)] animate-pulse-glow w-full md:w-auto justify-center md:justify-start">
             <Flame size={24} className="text-evofit-purple-light fill-evofit-purple-main" />
-            <div className="text-right">
+            <div className="text-left">
               <p className="m-0 text-[11px] font-bold text-evofit-purple-light uppercase tracking-wider">Active Streak</p>
               <p className="m-0 text-xl font-extrabold text-evofit-text-primary">{progressData?.current_streak || 0} Days</p>
             </div>
@@ -238,8 +238,8 @@ export default function Targets() {
           </div>
 
           {/* ── OVERALL PROGRESS CENTER ─────────────────────────────────── */}
-          <div className="glass-card p-8 flex flex-col items-center justify-center text-center relative overflow-hidden bg-[radial-gradient(circle_at_top_right,rgba(124,58,237,0.08),transparent)] shadow-premium-card">
-            <div className="w-[220px] h-[220px] mb-7 relative drop-shadow-[0_0_30px_rgba(124,58,237,0.15)]">
+          <div className="glass-card p-6 md:p-8 flex flex-col items-center justify-center text-center relative overflow-hidden bg-[radial-gradient(circle_at_top_right,rgba(124,58,237,0.08),transparent)] shadow-premium-card">
+            <div className="w-[180px] h-[180px] md:w-[220px] md:h-[220px] mb-7 relative drop-shadow-[0_0_30px_rgba(124,58,237,0.15)]">
                <CircularProgressbar
                   value={progressData?.overall_percent || 0}
                   strokeWidth={10}

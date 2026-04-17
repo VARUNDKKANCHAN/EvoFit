@@ -61,21 +61,21 @@ export default function Dashboard() {
   const { kpis, trend_data, recent_sessions, distribution, targets, insights } = data || {};
 
   return (
-    <div className="flex-1 flex flex-col items-center py-10 px-7 overflow-y-auto bg-evofit-bg-primary min-h-screen font-inter">
+    <div className="flex-1 flex flex-col items-center py-6 md:py-10 px-4 md:px-7 overflow-y-auto bg-evofit-bg-primary min-h-screen font-inter">
       {/* ── CENTRAL ARTBOARD (1440px) ─────────────────────────────────── */}
       <div className="evofit-page-container">
         
         {/* ── TOP HEADER (Welcome) ─────────────────────────────────────────── */}
-        <div className="flex justify-between items-center mb-10">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
           <div>
-            <h1 className="text-[32px] font-extrabold m-0 tracking-tight text-evofit-text-primary">
+            <h1 className="text-[28px] md:text-[32px] font-extrabold m-0 tracking-tight text-evofit-text-primary">
               Welcome back, Alex 👋
             </h1>
-            <p className="text-evofit-text-secondary text-base m-0 mt-1 font-medium">
+            <p className="text-evofit-text-secondary text-sm md:text-base m-0 mt-1 font-medium">
               Today is {new Date().toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} · Your training performance is peaking.
             </p>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end">
              <div className="px-4 py-2 rounded-xl bg-evofit-bg-secondary border border-evofit-border text-[13px] font-bold text-evofit-text-secondary">
                 UK-S1 <span className="ml-1 text-evofit-text-muted">Pro</span>
              </div>

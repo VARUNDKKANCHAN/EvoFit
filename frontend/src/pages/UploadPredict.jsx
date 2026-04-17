@@ -121,7 +121,7 @@ export default function UploadPredict() {
   const fileExt = file ? file.name.split('.').pop().toLowerCase() : null;
 
   return (
-    <div className="flex-1 flex flex-col items-center py-8 px-6 overflow-y-auto relative z-10 bg-evofit-bg-primary font-inter min-h-full animate-page-enter">
+    <div className="flex-1 flex flex-col items-center py-6 md:py-8 px-4 md:px-6 overflow-y-auto relative z-10 bg-evofit-bg-primary font-inter min-h-full animate-page-enter">
       <BackgroundOrbs />
       
       {/* ── Heading ───────────────────────────────── */}
@@ -130,7 +130,7 @@ export default function UploadPredict() {
 
       {/* ── Drop Zone ─────────────────────────────── */}
       <div
-        className={`glass-card w-full max-w-[760px] p-12 md:p-14 text-center border-2 border-dashed transition-all duration-300 shadow-premium-card
+        className={`glass-card w-full max-w-[760px] p-8 md:p-14 text-center border-2 border-dashed transition-all duration-300 shadow-premium-card
           ${dragOver ? 'border-evofit-purple-main bg-evofit-purple-main/10 scale-[1.02]' : 'border-evofit-border hover:border-evofit-purple-main/50'}
           ${file ? 'cursor-default' : 'cursor-pointer'}`}
         onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
@@ -170,13 +170,13 @@ export default function UploadPredict() {
               <RippleButton
                 onClick={(e) => { e.stopPropagation(); runPrediction(); }}
                 disabled={loading} 
-                className={`premium-gradient text-white px-8 py-3.5 rounded-xl font-bold min-w-[180px] hover:-translate-y-0.5 transition-all shadow-lg
+                className={`premium-gradient text-white px-6 md:px-8 py-3.5 rounded-xl font-bold w-full sm:w-auto sm:min-w-[180px] hover:-translate-y-0.5 transition-all shadow-lg
                   ${loading ? 'opacity-70 grayscale pointer-events-none' : ''}`}>
                 {loading ? '⏳ Analysing…' : '⚡ Run Prediction'}
               </RippleButton>
               <RippleButton
                 onClick={(e) => { e.stopPropagation(); reset(); }}
-                className="bg-evofit-bg-secondary border border-evofit-border text-evofit-text-primary px-8 py-3.5 rounded-xl font-bold hover:bg-evofit-purple-main/5 transition-all">
+                className="bg-evofit-bg-secondary border border-evofit-border text-evofit-text-primary px-6 md:px-8 py-3.5 rounded-xl font-bold w-full sm:w-auto hover:bg-evofit-purple-main/5 transition-all">
                 Change File
               </RippleButton>
             </div>

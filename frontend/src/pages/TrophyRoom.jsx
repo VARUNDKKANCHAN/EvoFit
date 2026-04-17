@@ -40,7 +40,7 @@ export default function TrophyRoom() {
   }
 
   return (
-    <div className="flex-1 flex flex-col items-center py-10 px-7 overflow-y-auto bg-evofit-bg-primary min-h-screen font-inter">
+    <div className="flex-1 flex flex-col items-center py-6 md:py-10 px-4 md:px-7 overflow-y-auto bg-evofit-bg-primary min-h-screen font-inter">
       {/* ── CENTRAL ARTBOARD (1200px) ─────────────────────────────────── */}
       <div className="evofit-page-container">
         
@@ -50,12 +50,12 @@ export default function TrophyRoom() {
             <div className="flex items-center gap-3 mb-2 text-evofit-purple-light uppercase tracking-widest font-black text-xs">
               <Sparkles size={14} /> Rewards & Progression
             </div>
-            <h1 className="text-4xl font-extrabold m-0 tracking-tight text-evofit-text-primary">Trophy Room</h1>
-            <p className="text-evofit-text-secondary text-lg m-0 mt-2 font-medium max-w-[600px]">
+            <h1 className="text-3xl md:text-4xl font-extrabold m-0 tracking-tight text-evofit-text-primary">Trophy Room</h1>
+            <p className="text-evofit-text-secondary text-base md:text-lg m-0 mt-2 font-medium max-w-[600px]">
               Celebrating your dedication and milestones in form perfection and strength.
             </p>
           </div>
-          <div className="glass-card px-8 py-5 flex items-center gap-6 shadow-premium-card border-evofit-purple-main/20">
+          <div className="glass-card px-6 md:px-8 py-4 md:py-5 flex items-center gap-4 md:gap-6 shadow-premium-card border-evofit-purple-main/20 w-fit">
              <div className="text-center">
                 <p className="text-[10px] text-evofit-text-muted font-bold uppercase mb-1">Total Badges</p>
                 <p className="text-2xl font-black text-evofit-text-primary m-0">{data.total_badges}</p>

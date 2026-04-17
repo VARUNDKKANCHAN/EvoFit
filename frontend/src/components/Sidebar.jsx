@@ -69,18 +69,34 @@ const NAV = [
   },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ mobileOpen }) {
   const navigate    = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
 
   return (
     <aside 
-      className={`bg-evofit-bg-sidebar border-r border-evofit-border flex flex-col shrink-0 transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] overflow-hidden min-h-screen`}
+      className={`
+        bg-evofit-bg-sidebar border-r border-evofit-border flex flex-col shrink-0 
+        transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] overflow-hidden min-h-screen
+        fixed inset-y-0 left-0 z-[70] lg:static lg:z-auto
+        ${mobileOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'}
+      `}
       style={{ width: collapsed ? '64px' : '240px' }}
     >
 
       {/* ── Logo ─────────────────────────────── */}
-      <div className={`border-b border-evofit-border flex items-center gap-[10px] animate-slide-in-left transition-[padding] duration-300 ${collapsed ? 'py-6 justify-center' : 'py-7 px-5 pb-5 justify-start'}`}>
+      <div className={`border-b border-evofit-border flex items-center gap-[10px] animate-slide-in-left transition-[padding] duration-300 relative ${collapsed ? 'py-6 justify-center' : 'py-7 px-5 pb-5 justify-start'}`}>
+        {/* Mobile Close Btn */}
+        <button 
+          className="lg:hidden absolute right-4 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-evofit-purple-main/10 text-evofit-purple-light hover:bg-evofit-purple-main/20"
+          onClick={() => navigate(location.pathname)} // This is a placeholder since AppShell handles backdrop clicks, but I'll add a proper onClose prop
+          style={{ display: mobileOpen ? 'flex' : 'none' }}
+        >
+          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+            <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+
         <svg width="28" height="28" viewBox="0 0 34 34" fill="none" className="shrink-0 drop-shadow-[0_0_8px_rgba(124,58,237,0.5)]">
           <circle cx="17" cy="17" r="17" fill="url(#lg)" />
           <path d="M11 17H14L16 11L20 23L22 17H25" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />

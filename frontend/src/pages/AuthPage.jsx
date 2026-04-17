@@ -296,7 +296,10 @@ export default function AuthPage() {
         @media (max-width: 1100px) { .auth-left { padding: 40px; } }
         @media (max-width: 960px) {
           .auth-left { display: none; }
-          .auth-right { width: 100%; padding: 60px 24px; }
+          .auth-right { width: 100%; padding: 40px 20px; min-height: 100vh; height: auto; display: block; }
+          .auth-form-container { margin: 0 auto; padding-top: 20px; }
+          .auth-mobile-logo { display: flex !important; margin-bottom: 40px; justify-content: center; }
+          .auth-grid-stack { grid-template-columns: 1fr !important; }
         }
       `}</style>
 
@@ -347,7 +350,22 @@ export default function AuthPage() {
         {/* ── Right Action Panel ── */}
         <div className="auth-right">
           <div className="auth-form-container" key={isLogin ? 'login' : 'signup'}>
-            <div style={{ marginBottom: 36 }}>
+            
+            {/* Mobile-only Logo */}
+            <div className="auth-mobile-logo" style={{ display: 'none', alignItems: 'center', gap: 12 }}>
+              <svg width="32" height="32" viewBox="0 0 34 34" fill="none">
+                <circle cx="17" cy="17" r="17" fill="url(#logo_grad_mobile)" />
+                <path d="M11 17H14L16 11L20 23L22 17H25" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                <defs>
+                  <linearGradient id="logo_grad_mobile" x1="0" y1="0" x2="34" y2="34">
+                    <stop stopColor="#6366f1" /><stop offset="1" stopColor="#a855f7" />
+                  </linearGradient>
+                </defs>
+              </svg>
+              <span className="auth-logo-text" style={{ color: '#fff', fontSize: 18 }}>EVOFIT</span>
+            </div>
+
+            <div style={{ marginBottom: 36, textAlign: 'center' }}>
                <h1 className="auth-title">{isLogin ? 'Welcome Back' : 'Join the Elite'}</h1>
                <p className="auth-subtitle">
                  {isLogin ? 'Continue your AI-powered fitness journey.' : 'Create your pro profile and start training today.'}
@@ -408,7 +426,7 @@ export default function AuthPage() {
                       <input name="fullName" className="auth-input" placeholder="Alex Johnson" onChange={handleSignupChange} />
                     </div>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                  <div className="auth-grid-stack" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                     <div className="auth-field">
                       <label className="auth-label">Username</label>
                       <div className="auth-input-wrap">
@@ -432,7 +450,7 @@ export default function AuthPage() {
                       </div>
                     </div>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                  <div className="auth-grid-stack" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                     <div className="auth-field">
                       <label className="auth-label">Password</label>
                       <div className="auth-input-wrap">
@@ -455,7 +473,7 @@ export default function AuthPage() {
 
                 <div className="auth-section">
                    <div className="auth-section-title">Physical Profile</div>
-                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                   <div className="auth-grid-stack" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                       <div className="auth-field">
                         <label className="auth-label">Age</label>
                         <div className="auth-input-wrap">
@@ -481,7 +499,7 @@ export default function AuthPage() {
                         </div>
                       </div>
                    </div>
-                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                   <div className="auth-grid-stack" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                       <div className="auth-field">
                         <label className="auth-label">Weight (kg)</label>
                         <div className="auth-input-wrap">

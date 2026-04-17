@@ -119,7 +119,7 @@ export default function SessionHistory() {
               <div 
                 key={s.id} 
                 onClick={() => viewSessionDetail(s.id)}
-                className="glass-card p-5 shadow-premium-card hover:border-evofit-purple-main/40 transition-all group cursor-pointer grid grid-cols-1 md:grid-cols-[2fr_1fr_1fr_1fr_80px] items-center gap-6"
+                className="glass-card p-6 md:p-5 shadow-premium-card hover:border-evofit-purple-main/40 transition-all group cursor-pointer grid grid-cols-1 md:grid-cols-[2fr_1fr_1fr_1fr_80px] items-start md:items-center gap-4 md:gap-6"
               >
                  <div className="flex items-center gap-5">
                     <div className="w-12 h-12 rounded-2xl bg-evofit-bg-secondary border border-evofit-border flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-300">

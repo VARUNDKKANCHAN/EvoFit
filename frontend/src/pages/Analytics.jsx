@@ -205,7 +205,7 @@ export default function Analytics() {
   }
 
   return (
-    <div ref={reportRef} className="flex-1 p-8 md:p-10 overflow-y-auto relative z-10 bg-evofit-bg-primary font-inter animate-page-enter">
+    <div ref={reportRef} className="flex-1 p-4 md:p-10 overflow-y-auto relative z-10 bg-evofit-bg-primary font-inter animate-page-enter">
       
       {/* ── RETURN BUTTON + SHARE ─────────────────────────────────────────── */}
       <div className="mb-4 flex items-center justify-between">
@@ -227,7 +227,7 @@ export default function Analytics() {
       </div>
 
       {/* ── TABS ───────────────────────────────────────────────────────── */}
-      <div className="flex border-b border-evofit-border mb-6">
+      <div className="flex border-b border-evofit-border mb-6 overflow-x-auto no-scrollbar scroll-smooth whitespace-nowrap">
         {availableExercises.map(tab => {
           const isActive = activeTab === tab;
           return (
@@ -481,7 +481,7 @@ export default function Analytics() {
                <h4 className="text-[15px] font-bold m-0 text-evofit-text-primary">Endurance & Recovery</h4>
                <span className="text-[11px] text-evofit-text-muted font-bold uppercase tracking-wider">Power Fatigue Map</span>
             </div>
-            <div className="flex gap-3 h-40 items-flex-end justify-between flex-1 pb-6 pt-4 px-2">
+            <div className="flex gap-3 h-40 items-flex-end justify-between flex-1 pb-6 pt-4 px-2 overflow-x-auto no-scrollbar">
                {setBySetData.map((set, i) => {
                  const maxHeight = Math.max(...setBySetData.map(s => s.reps)) || 15;
                  const hPct = `${(set.reps/maxHeight)*100}%`;

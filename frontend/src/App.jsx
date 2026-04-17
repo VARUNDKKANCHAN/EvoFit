@@ -29,16 +29,26 @@ function AnimatedPage({ children }) {
 /* ══════════════════════════════════════════════════
    Shared top header
    ══════════════════════════════════════════════════ */
-function PageHeader({ title }) {
+function PageHeader({ title, onMenuClick }) {
   const today = new Date().toLocaleDateString('en-US', {
     weekday: 'short', month: 'short', day: 'numeric',
   });
   const [bellHover, setBellHover] = useState(false);
 
   return (
-    <header className="bg-evofit-bg-secondary border-b border-evofit-border h-16 flex items-center px-7 gap-4 animate-fade-in shrink-0">
-      <div className="flex-1">
-        <h1 className="text-[18px] font-bold m-0 text-evofit-text-primary animate-slide-in-left">
+    <header className="bg-evofit-bg-secondary border-b border-evofit-border h-16 flex items-center px-4 md:px-7 gap-3 md:gap-4 animate-fade-in shrink-0">
+      {/* Mobile Menu Btn */}
+      <button 
+        onClick={onMenuClick}
+        className="lg:hidden p-2 rounded-lg hover:bg-evofit-purple-main/10 text-evofit-text-secondary hover:text-evofit-purple-main transition-colors"
+      >
+        <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+          <line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="18" x2="21" y2="18" />
+        </svg>
+      </button>
+
+      <div className="flex-1 min-w-0">
+        <h1 className="text-[16px] md:text-[18px] font-bold m-0 text-evofit-text-primary animate-slide-in-left truncate">
           {title}
         </h1>
       </div>
@@ -129,20 +139,12 @@ function AppShell() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, loading, isAuthenticated } = useAuth();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  /* 
+  // Close mobile menu on route change
   useEffect(() => {
-    // Redirect logic: If not logged in and not on login/signup, go to login
-    if (!loading && !isAuthenticated && location.pathname !== '/login' && location.pathname !== '/signup') {
-      navigate('/login');
-    }
-    
-    // If logged in and on login/signup, go to dashboard
-    if (!loading && isAuthenticated && (location.pathname === '/login' || location.pathname === '/signup')) {
-      navigate('/dashboard');
-    }
-  }, [isAuthenticated, loading, location.pathname, navigate]);
-  */
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
 
   const getPageTitle = (path) => {
     switch (path) {
@@ -162,10 +164,26 @@ function AppShell() {
   const isAuthPage = location.pathname === '/login' || location.pathname === '/signup';
 
   return (
-    <div className="flex min-h-screen bg-evofit-bg-primary font-inter">
-      {!isAuthPage && <Sidebar />}
+    <div className="flex min-h-screen bg-evofit-bg-primary font-inter relative overflow-hidden">
+      {!isAuthPage && (
+        <>
+          {/* Mobile Backdrop */}
+          {mobileMenuOpen && (
+            <div 
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[60] lg:hidden animate-fade-in" 
+              onClick={() => setMobileMenuOpen(false)}
+            />
+          )}
+          <Sidebar mobileOpen={mobileMenuOpen} />
+        </>
+      )}
       <div className={`flex-1 flex flex-col min-w-0 overflow-hidden ${isAuthPage ? 'w-full' : ''}`}>
-        {!isAuthPage && <PageHeader title={getPageTitle(location.pathname)} />}
+        {!isAuthPage && (
+          <PageHeader 
+            title={getPageTitle(location.pathname)} 
+            onMenuClick={() => setMobileMenuOpen(true)}
+          />
+        )}
         <div className="flex-1 overflow-y-auto overflow-x-hidden">
           <AnimatedPage>
             <Routes location={location}>
