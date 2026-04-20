@@ -16,6 +16,7 @@ import os
 import sys
 import json
 import joblib
+from datetime import date
 import numpy as np
 import pandas as pd
 
@@ -164,6 +165,7 @@ def predict_from_dataframe(df_raw: pd.DataFrame) -> dict:
     # Extract time metadata from index if exists
     duration_str = "Unknown"
     time_range = "N/A"
+    session_date = date.today().isoformat()
     
     # Mathematical fallback calculation based on 5 Hz frequency
     duration_sec = int(len(df_raw) / 5.0)
@@ -175,6 +177,7 @@ def predict_from_dataframe(df_raw: pd.DataFrame) -> dict:
         start_time = df_raw.index[0]
         end_time = df_raw.index[-1]
         time_range = f"{start_time.strftime('%I:%M %p')} - {end_time.strftime('%I:%M %p')}"
+        session_date = start_time.date().isoformat()
 
     # Segment into sets using scalar magnitude inactivity logic
     df_raw = segment_sets_by_inactivity(df_raw, gap_seconds=3.0, fs=5.0)
@@ -243,6 +246,9 @@ def predict_from_dataframe(df_raw: pd.DataFrame) -> dict:
     breakdown_list = []
     for k, v in ex_map.items():
         v["label"] = k
+        # Calculate per-exercise average confidence across sets
+        sets = v.get("set_details", [])
+        v["avg_confidence"] = sum(s.get("confidence", 0) for s in sets) / len(sets) if sets else 0.0
         breakdown_list.append(v)
         
     global_results["exercise_breakdown"] = breakdown_list
@@ -271,6 +277,7 @@ def predict_from_dataframe(df_raw: pd.DataFrame) -> dict:
 
     global_results["duration"] = duration_str
     global_results["time_range"] = time_range
+    global_results["session_date"] = session_date
     global_results["overall_consistency"] = f"{overall_consistency}%"
     global_results["best_set_summary"] = best_set_summary
     

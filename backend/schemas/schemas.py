@@ -244,3 +244,23 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: Optional[str] = None
+
+class MeResponse(BaseModel):
+    """Combined User + Profile response for a single-call login/auth check."""
+    id: int
+    username: str
+    email: str
+    xp: int
+    level: int
+    created_at: datetime
+    is_active: bool
+    # Profile fields
+    full_name: Optional[str] = None
+    age: Optional[int] = None
+    weight_kg: Optional[float] = None
+    height_cm: Optional[float] = None
+    gender: Optional[str] = None
+    fitness_goal: Optional[str] = None
+
+    class Config:
+        from_attributes = True

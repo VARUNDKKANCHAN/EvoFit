@@ -3,9 +3,25 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>EvoFit Tracker</title>
-    <script type="module" crossorigin src="/assets/index-DyinYYus.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-A8iWE3Yt.css">
+    <meta name="description" content="EvoFit — AI-powered fitness tracking with rep counting, form analysis, and personalized progression." />
+    <title>EvoFit — AI Fitness Tracker</title>
+    <!-- 
+      Anti-flash theme script: runs synchronously BEFORE React loads.
+      Reads saved theme from localStorage, defaults to dark.
+      Prevents white flash for dark mode users on page load.
+    -->
+    <script>
+      (function() {
+        var theme = localStorage.getItem('evofit-theme');
+        // Default to dark mode if no preference saved
+        if (!theme || theme === 'dark') {
+          document.documentElement.classList.add('dark');
+          if (!theme) localStorage.setItem('evofit-theme', 'dark');
+        }
+      })();
+    </script>
+    <script type="module" crossorigin src="/assets/index-BByj0b33.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CHiOPl0e.css">
   </head>
   <body>
     <div id="root"></div>

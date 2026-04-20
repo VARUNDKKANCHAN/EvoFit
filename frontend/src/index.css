@@ -4,97 +4,155 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─────────────────────────────────────────────────────────
+   LIGHT MODE (default :root)  — Professional & Clean
+───────────────────────────────────────────────────────── */
 :root {
-  --bg-primary: #F8FAFC;
-  --bg-secondary: #F1F5F9;
-  --bg-card: #FFFFFF;
-  --bg-sidebar: #FFFFFF;
-  --purple-main: #7C3AED;
-  --purple-light: #8B5CF6;
-  --text-primary: #0F172A;
-  --text-secondary: #334155;
-  --text-muted: #64748B;
-  --border: #E2E8F0;
-  --border-hover: #CBD5E1;
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(0, 0, 0, 0.12);
-  --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  --bg-primary:     #F4F6FB;
+  --bg-secondary:   #FFFFFF;
+  --bg-card:        #FFFFFF;
+  --bg-sidebar:     #FFFFFF;
+  --purple-main:    #7C3AED;
+  --purple-light:   #8B5CF6;
+  --text-primary:   #0F172A;
+  --text-secondary: #475569;
+  --text-muted:     #94A3B8;
+  --border:         #E2E8F0;
+  --border-hover:   #CBD5E1;
+  --glass-bg:       rgba(255, 255, 255, 0.85);
+  --glass-border:   rgba(0, 0, 0, 0.08);
+  --card-shadow:    0 2px 16px rgba(0, 0, 0, 0.07);
 }
 
+/* ─────────────────────────────────────────────────────────
+   DARK MODE — Premium & Immersive (the primary design)
+───────────────────────────────────────────────────────── */
 .dark {
-  --bg-primary: #0A0A0F;
-  --bg-secondary: #111118;
-  --bg-card: #16161F;
-  --bg-sidebar: #0E0E15;
-  --purple-main: #7C3AED;
-  --purple-light: #A78BFA;
-  --text-primary: #F0F0F5;
+  --bg-primary:     #0A0A0F;
+  --bg-secondary:   #111118;
+  --bg-card:        #16161F;
+  --bg-sidebar:     #0E0E15;
+  --purple-main:    #7C3AED;
+  --purple-light:   #A78BFA;
+  --text-primary:   #F0F0F5;
   --text-secondary: #9090A8;
-  --text-muted: #5A5A72;
-  --border: #2A2A3A;
-  --border-hover: #4A4A6A;
-  --glass-bg: rgba(22, 22, 31, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.05);
-  --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  --text-muted:     #5A5A72;
+  --border:         #2A2A3A;
+  --border-hover:   #4A4A6A;
+  --glass-bg:       rgba(22, 22, 31, 0.75);
+  --glass-border:   rgba(255, 255, 255, 0.06);
+  --card-shadow:    0 4px 24px rgba(0, 0, 0, 0.45);
 }
 
+/* ─────────────────────────────────────────────────────────
+   BASE
+───────────────────────────────────────────────────────── */
 @layer base {
   body {
-    @apply bg-evofit-bg-primary text-evofit-text-primary transition-colors duration-300;
+    @apply bg-evofit-bg-primary text-evofit-text-primary;
+    transition: background-color 0.3s ease, color 0.3s ease;
     margin: 0;
     font-family: 'Inter', -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
 }
 
+/* ─────────────────────────────────────────────────────────
+   COMPONENTS
+───────────────────────────────────────────────────────── */
 @layer components {
+
+  /* Glass card — adapts to theme via CSS vars */
   .glass-card {
     background: var(--glass-bg);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--glass-border);
+    box-shadow: var(--card-shadow);
     @apply rounded-2xl transition-all duration-300;
+  }
+
+  /* In light mode, glass cards need a proper border */
+  :root .glass-card {
+    background: var(--bg-card);
+    border-color: var(--border);
   }
 
   .premium-gradient {
     @apply bg-gradient-to-br from-evofit-purple-main to-evofit-purple-light;
   }
+
+  /* Light mode: recharts tooltips fix */
+  :root .recharts-tooltip-wrapper .recharts-default-tooltip {
+    background-color: #FFFFFF !important;
+    border-color: #E2E8F0 !important;
+    color: #0F172A !important;
+  }
 }
 
+/* ─────────────────────────────────────────────────────────
+   KEYFRAME ANIMATIONS
+───────────────────────────────────────────────────────── */
 @keyframes page-enter {
   from { opacity: 0; transform: translateY(12px); filter: blur(4px); }
-  to   { opacity: 1; transform: translateY(0); filter: blur(0); }
+  to   { opacity: 1; transform: translateY(0);    filter: blur(0);   }
 }
-
 @keyframes fade-in {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
-
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
 @keyframes slide-in-left {
   from { opacity: 0; transform: translateX(-16px); }
-  to   { opacity: 1; transform: translateX(0); }
+  to   { opacity: 1; transform: translateX(0);     }
 }
-
 @keyframes fill-in {
   from { width: 0; }
 }
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-8px); }
+}
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(124, 58, 237, 0.25); }
+  50%       { box-shadow: 0 0 45px rgba(124, 58, 237, 0.55); }
+}
+@keyframes shimmer {
+  from { background-position: 200% center; }
+  to   { background-position: -200% center; }
+}
+@keyframes shimmer-fast {
+  from { background-position: 200% center; }
+  to   { background-position: -200% center; }
+}
 
-.animate-page-enter { animation: page-enter 0.5s cubic-bezier(0.4, 0, 0.2, 1) both; }
-.animate-fade-in    { animation: fade-in 0.6s ease both; }
-.animate-fade-in-up { animation: fade-in-up 0.5s ease both; }
-.animate-float      { animation: float 6s ease-in-out infinite; }
-.animate-pulse-glow { animation: pulse-glow 3s ease-in-out infinite; }
-.animate-shimmer    { animation: shimmer 2s infinite; }
-.animate-fill-in    { animation: fill-in 1.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
+/* ─────────────────────────────────────────────────────────
+   ANIMATION UTILITY CLASSES
+───────────────────────────────────────────────────────── */
+.animate-page-enter   { animation: page-enter 0.5s cubic-bezier(0.4, 0, 0.2, 1) both; }
+.animate-fade-in      { animation: fade-in 0.6s ease both; }
+.animate-fade-in-up   { animation: fade-in-up 0.5s ease both; }
+.animate-float        { animation: float 6s ease-in-out infinite; }
+.animate-pulse-glow   { animation: pulse-glow 3s ease-in-out infinite; }
+.animate-shimmer      { animation: shimmer 3s linear infinite; }
+.animate-shimmer-fast { animation: shimmer-fast 2s linear infinite; }
+.animate-fill-in      { animation: fill-in 1.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.animate-slide-in-left{ animation: slide-in-left 0.4s ease both; }
 
-/* ── Staggered Delays ─────────────────────────────────────────── */
+/* Staggered delays */
 .delay-100 { animation-delay: 100ms; }
+.delay-150 { animation-delay: 150ms; }
 .delay-200 { animation-delay: 200ms; }
 .delay-300 { animation-delay: 300ms; }
 .delay-400 { animation-delay: 400ms; }
 .delay-500 { animation-delay: 500ms; }
 
+/* ─────────────────────────────────────────────────────────
+   PAGE CONTAINERS
+───────────────────────────────────────────────────────── */
 .evofit-page-container {
   @apply w-full max-w-[1440px] animate-page-enter;
 }
@@ -103,8 +161,51 @@
   @apply opacity-0 animate-fade-in-up;
 }
 
-/* ── Scrollbar ─────────────────────────────────────────────── */
-::-webkit-scrollbar { width: 6px; }
+/* ─────────────────────────────────────────────────────────
+   SCROLLBAR — themed
+───────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg-secondary); }
-::-webkit-scrollbar-thumb { background: #3A3A55; border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--purple-main); }
+
+/* ─────────────────────────────────────────────────────────
+   LIGHT MODE OVERRIDES
+   For components that use hardcoded dark bg colors via
+   inline styles or Tailwind bg-[#...] classes.
+───────────────────────────────────────────────────────── */
+
+/* App header in light mode */
+:root header {
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border) !important;
+}
+
+/* Sidebar in light mode */
+:root aside {
+  background-color: var(--bg-sidebar) !important;
+  border-color: var(--border) !important;
+}
+
+/* Make sure inputs use theme colors */
+:root input,
+:root select,
+:root textarea {
+  color: var(--text-primary);
+  border-color: var(--border);
+}
+
+/* Recharts axis text fix for light mode */
+:root .recharts-cartesian-axis-tick-value {
+  fill: var(--text-muted) !important;
+}
+
+:root .recharts-grid line {
+  stroke: var(--border) !important;
+}
+
+/* UserProfile hardcoded dark backgrounds — override in light */
+:root .profile-dark-card {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border) !important;
+}

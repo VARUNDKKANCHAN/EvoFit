@@ -147,7 +147,11 @@ def get_dashboard_summary(current_user: models.User = Depends(auth_service.get_c
     DEFAULT_TARGETS = {"bench": 300, "dead": 150, "squat": 250, "ohp": 200, "row": 300}
     EXERCISE_LABELS_MAP = {"bench": "Bench Press", "dead": "Deadlift", "squat": "Back Squat", "ohp": "Overhead Press", "row": "Barbell Row"}
 
-    user_target_rows = db.query(models.Target).filter(models.Target.user_id == user_id).all()
+    user_target_rows = db.query(models.Target).filter(
+        models.Target.user_id == user_id,
+        models.Target.start_date <= today,
+        models.Target.end_date >= today
+    ).order_by(models.Target.created_at.asc()).all()
     target_map = {t.exercise: t.weekly_rep_target for t in user_target_rows}
 
     # Step B: actual reps for each exercise in last 7 days

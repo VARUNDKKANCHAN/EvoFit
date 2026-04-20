@@ -157,23 +157,30 @@ export default function Sidebar({ mobileOpen }) {
         
         {/* User Stats Card (Only if not collapsed) */}
         {!collapsed && user && (
-          <div className="mx-2 mb-4 p-3 rounded-xl bg-evofit-bg-secondary border border-evofit-border flex items-center gap-3 shadow-inner">
-            <div className="w-10 h-10 rounded-full bg-evofit-purple-main/20 flex items-center justify-center text-evofit-purple-light font-bold border border-evofit-purple-main/30">
-              {user.fullName?.charAt(0) || user.username?.charAt(0) || '?'}
+          <div
+            className="mx-2 mb-4 p-3 rounded-xl bg-evofit-bg-secondary border border-evofit-border flex items-center gap-3 shadow-inner cursor-pointer hover:border-evofit-purple-main/50 hover:bg-evofit-purple-main/5 transition-all duration-200 group"
+            onClick={() => navigate('/profile')}
+            title="View Profile"
+          >
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#6D28D9] to-[#A78BFA] flex items-center justify-center text-white font-bold text-sm border border-evofit-purple-main/30 group-hover:ring-2 group-hover:ring-evofit-purple-main/50 transition-all">
+              {(user.fullName || user.username || '?').charAt(0).toUpperCase()}
             </div>
             <div className="flex-1 overflow-hidden">
               <p className="text-[13px] font-bold text-evofit-text-primary truncate m-0">{user.fullName || user.username}</p>
               <div className="flex items-center justify-between mt-0.5">
                 <span className="text-[10px] font-bold text-evofit-purple-light">LVL {user.level || 1}</span>
-                <span className="text-[9px] text-evofit-text-muted">{user.xp || 0} XP</span>
+                <span className="text-[9px] text-evofit-text-muted">{(user.xp || 0).toLocaleString()} XP</span>
               </div>
               <div className="w-full h-1 bg-evofit-bg-primary rounded-full mt-1.5 overflow-hidden">
                 <div 
-                  className="h-full bg-evofit-purple-main transition-all duration-1000" 
-                  style={{ width: `${(user.xp / ((user.level || 1) * 1000)) * 100}%` }}
+                  className="h-full bg-gradient-to-r from-[#6D28D9] to-[#A78BFA] transition-all duration-1000" 
+                  style={{ width: `${Math.min(100, ((user.xp || 0) / ((user.level || 1) * 1000)) * 100)}%` }}
                 ></div>
               </div>
             </div>
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" className="shrink-0 text-evofit-text-muted group-hover:text-evofit-purple-light transition-colors">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
           </div>
         )}
 

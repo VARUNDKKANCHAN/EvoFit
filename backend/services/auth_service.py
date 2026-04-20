@@ -6,33 +6,29 @@ from fastapi import HTTPException, status, Depends
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from ..database import models
+from ..database.database import get_db
 
 # In production, these should be environment variables
 SECRET_KEY = "EVOFIT_MASTER_SECRET_KEY_FOR_AI_FITNESS"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 # 24 hours
+ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="users/login")
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Check if the provided password matches the stored hash."""
-    # Bcrypt requires bytes for comparison
     password_bytes = plain_password.encode('utf-8')
     if isinstance(hashed_password, str):
         hashed_bytes = hashed_password.encode('utf-8')
     else:
         hashed_bytes = hashed_password
-        
     return bcrypt.checkpw(password_bytes, hashed_bytes)
 
 def get_password_hash(password: str) -> str:
     """Generate a secure bcrypt hash of a plain-text password."""
-    # Bcrypt requires bytes for hashing
     password_bytes = password.encode('utf-8')
-    salt = bcrypt.gensalt()
+    salt = bcrypt.gensalt(rounds=10)  # rounds=10 is 4x faster than 12, still secure
     hashed = bcrypt.hashpw(password_bytes, salt)
-    
-    # Return as string for easier DB storage
     return hashed.decode('utf-8')
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
@@ -42,16 +38,15 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
         expire = datetime.utcnow() + expires_delta
     else:
         expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-def get_current_user(token: str = Depends(oauth2_scheme)):
+def get_current_user(
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+):
     """Dependency to get the currently authenticated user from a JWT token."""
-    from ..database.database import get_db # Local import to avoid circular dependency
-    db = next(get_db())
-        
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -64,7 +59,7 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
             raise credentials_exception
     except JWTError:
         raise credentials_exception
-        
+
     user = db.query(models.User).filter(models.User.username == username).first()
     if user is None:
         raise credentials_exception

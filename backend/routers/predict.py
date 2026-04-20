@@ -3,6 +3,7 @@ from backend.database.database import get_db
 from backend.services import auth_service
 from backend.database import models
 from sqlalchemy.orm import Session
+from datetime import date
 from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 from fastapi.responses import JSONResponse
 import json
@@ -36,10 +37,13 @@ async def predict_exercise(file: UploadFile = File(...), current_user: models.Us
         
         # --- SAVE TO DATABASE ---
         user_id = current_user.id
+        session_date_str = result.get("session_date")
+        session_date = date.fromisoformat(session_date_str) if session_date_str else date.today()
+        
         for ex in result.get("exercise_breakdown", []):
             label = ex.get("label")
             reps = ex.get("rep_count", 0)
-            avg_conf = result.get("confidence", 0)
+            avg_conf = ex.get("avg_confidence", result.get("confidence", 0))
             
             sets = ex.get("set_details", [])
             avg_power = sum(s.get("mean_power", 0) for s in sets) / len(sets) if sets else 0
@@ -58,6 +62,7 @@ async def predict_exercise(file: UploadFile = File(...), current_user: models.Us
             }
 
             session_row = models.WorkoutSession(
+                date=session_date,
                 exercise=label,
                 reps_actual=reps,
                 form_score=float(avg_conf * 100),

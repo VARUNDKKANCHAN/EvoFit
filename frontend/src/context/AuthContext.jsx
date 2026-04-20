@@ -1,88 +1,156 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { authApi } from '../api/auth';
 import { toast } from 'react-toastify';
 
 const AuthContext = createContext();
 
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+/**
+ * Normalizes the raw API response into a consistent user object.
+ * Works with both old ProfileResponse and new MeResponse shapes.
+ */
+function normalizeUser(data) {
+  return {
+    id: data.id,
+    username: data.username,
+    email: data.email,
+    fullName: data.full_name || data.fullName || null,
+    full_name: data.full_name || data.fullName || null,
+    xp: data.xp ?? 0,
+    level: data.level ?? 1,
+    age: data.age || null,
+    weight_kg: data.weight_kg || null,
+    height_cm: data.height_cm || null,
+    gender: data.gender || null,
+    fitness_goal: data.fitness_goal || null,
+    created_at: data.created_at || null,
+    is_active: data.is_active ?? true,
+  };
+}
 
+export function AuthProvider({ children }) {
+  // Immediately restore user from localStorage for INSTANT UI (no flicker)
+  const [user, setUser] = useState(() => {
+    try {
+      const cached = localStorage.getItem('evofit_user');
+      return cached ? JSON.parse(cached) : null;
+    } catch {
+      return null;
+    }
+  });
+  // Loading is false by default since we restore from cache instantly
+  const [loading, setLoading] = useState(false);
+
+  const saveUser = useCallback((userObj) => {
+    setUser(userObj);
+    localStorage.setItem('evofit_user', JSON.stringify(userObj));
+  }, []);
+
+  const logout = useCallback(() => {
+    localStorage.removeItem('evofit_token');
+    localStorage.removeItem('evofit_user');
+    setUser(null);
+    toast.info('Logged out from EvoFit.');
+  }, []);
+
+  // Background sync on mount: silently refresh user data from backend
   useEffect(() => {
-    // Check if user is logged in on mount
-    const checkAuth = async () => {
-      const token = localStorage.getItem('evofit_token');
-      if (token) {
-        try {
-          const profile = await authApi.getProfile();
-          const userObj = { 
-            username: profile.username,
-            fullName: profile.full_name,
-            profileId: profile.id,
-            ...profile
-          };
-          setUser(userObj);
-          localStorage.setItem('evofit_user', JSON.stringify(userObj));
-        } catch (error) {
-          console.error("Auth initialization failed:", error);
+    const token = localStorage.getItem('evofit_token');
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+
+    // If we already have cached user, don't block the UI — sync silently
+    const syncUser = async () => {
+      try {
+        const data = await authApi.getMe();
+        const userObj = normalizeUser(data);
+        saveUser(userObj);
+      } catch (error) {
+        console.error('Session sync failed:', error);
+        // Only logout if it's truly a 401 (token expired/invalid)
+        if (error.response?.status === 401) {
           logout();
-        } finally {
-          setLoading(false);
         }
-      } else {
-        setLoading(false);
       }
     };
-    
-    checkAuth();
-  }, []);
+
+    syncUser();
+  }, [saveUser, logout]);
 
   const login = async (username, password) => {
     try {
-      const data = await authApi.login(username, password);
-      localStorage.setItem('evofit_token', data.access_token);
-      
-      // Fetch full profile after login
-      const profile = await authApi.getProfile();
-      
-      const userObj = { 
-        username,
-        fullName: profile.full_name,
-        profileId: profile.id,
-        ...profile
-      };
-      
-      setUser(userObj);
-      localStorage.setItem('evofit_user', JSON.stringify(userObj));
-      
-      toast.success('Successfully logged in! ⚡');
+      setLoading(true);
+      // Step 1: Get token
+      const tokenData = await authApi.login(username, password);
+      localStorage.setItem('evofit_token', tokenData.access_token);
+
+      // Step 2: Fetch full profile (single call)
+      const meData = await authApi.getMe();
+      const userObj = normalizeUser(meData);
+      saveUser(userObj);
+
+      toast.success(`Welcome back, ${userObj.fullName || userObj.username}! ⚡`);
       return true;
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Login failed. Please check your credentials.');
+      const msg = error.response?.data?.detail || 'Login failed. Please check your credentials.';
+      toast.error(msg);
       return false;
+    } finally {
+      setLoading(false);
     }
   };
 
   const register = async (userData) => {
     try {
+      setLoading(true);
       await authApi.register(userData);
-      toast.success('Account created! You can now log in.');
+      toast.success('Account created! You can now log in. 🎉');
       return true;
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Registration failed.');
+      const msg = error.response?.data?.detail || 'Registration failed. Please try again.';
+      toast.error(msg);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateProfile = async (profileData) => {
+    try {
+      const updated = await authApi.updateProfile(profileData);
+      const userObj = normalizeUser(updated);
+      saveUser(userObj);
+      toast.success('Profile updated successfully! ✅');
+      return true;
+    } catch (error) {
+      toast.error('Failed to update profile.');
       return false;
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('evofit_token');
-    localStorage.removeItem('evofit_user');
-    setUser(null);
-    toast.info('Logged out from EvoFit.');
+  // Refresh user data from backend (call this after XP changes, etc.)
+  const refreshUser = async () => {
+    try {
+      const data = await authApi.getMe();
+      const userObj = normalizeUser(data);
+      saveUser(userObj);
+    } catch (error) {
+      console.error('Failed to refresh user:', error);
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, loading, isAuthenticated: !!user }}>
+    <AuthContext.Provider value={{
+      user,
+      loading,
+      login,
+      register,
+      logout,
+      updateProfile,
+      refreshUser,
+      isAuthenticated: !!user,
+    }}>
       {children}
     </AuthContext.Provider>
   );
