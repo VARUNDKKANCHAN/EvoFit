@@ -12,8 +12,8 @@ function Particles() {
     x: Math.random() * 100,
     y: Math.random() * 100,
     delay: Math.random() * 4,
-    dur: Math.random() * 4 + 4,
-    opacity: Math.random() * 0.4 + 0.1,
+    dur: Math.random() * 6 + 6,         // Slower floating
+    opacity: Math.random() * 0.2 + 0.05, // More subtle
   }));
 
   return (
@@ -28,7 +28,7 @@ function Particles() {
             width: d.size,
             height: d.size,
             borderRadius: '50%',
-            background: 'rgba(167,139,250,0.6)',
+            background: 'rgba(167,139,250,0.3)', // Softer color
             animation: `floatDot ${d.dur}s ${d.delay}s ease-in-out infinite alternate`,
             opacity: d.opacity,
           }}
@@ -118,8 +118,17 @@ export default function Login() {
         .login-left-bg {
           position: absolute;
           inset: 0;
-          background: radial-gradient(circle at 20% 30%, #1e1b4b 0%, #0f172a 50%, #020617 100%);
+          background: radial-gradient(circle at 20% 30%, #1e1b4b 0%, #0f172a 45%, #020617 100%);
           z-index: 0;
+        }
+        .login-left-bg::before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+          opacity: 0.04;
+          pointer-events: none;
+          z-index: 1;
         }
         .login-left-mesh {
           position: absolute;
@@ -128,7 +137,7 @@ export default function Login() {
             radial-gradient(ellipse 70% 60% at 30% 20%, rgba(99,102,241,0.15) 0%, transparent 80%),
             radial-gradient(ellipse 50% 50% at 80% 80%, rgba(139,92,246,0.12) 0%, transparent 80%),
             radial-gradient(circle at 50% 50%, rgba(30,27,75,0.4) 0%, transparent 100%);
-          animation: meshShift 10s ease-in-out infinite alternate;
+          animation: meshShift 14s ease-in-out infinite alternate; /* Slower mesh */
           z-index: 0;
         }
         .login-left-lighting {
@@ -144,7 +153,7 @@ export default function Login() {
             linear-gradient(135deg, rgba(2,6,23,0.4) 0%, rgba(2,6,23,0.95) 100%),
             url('https://images.unsplash.com/photo-1541534741688-6078c64b5913?w=1200&q=80') center/cover no-repeat;
           z-index: 0;
-          opacity: 0.6;
+          opacity: 0.2; /* Reduced noise */
           filter: contrast(1.1) brightness(0.8);
         }
         .login-left-content {
@@ -163,12 +172,12 @@ export default function Login() {
           animation: fadeUp 0.6s ease both;
         }
         .login-logo-icon {
-          width: 36px; height: 36px;
-          border-radius: 10px;
-          background: linear-gradient(135deg,#7C3AED,#A78BFA);
+          width: 32px; height: 32px;
+          border-radius: 8px;
+          background: linear-gradient(135deg,#5B21B6,#7C3AED);
           display: flex; align-items: center; justify-content: center;
-          font-size: 18px;
-          box-shadow: 0 0 20px rgba(124,58,237,0.5);
+          font-size: 16px;
+          box-shadow: 0 0 15px rgba(124,58,237,0.3);
         }
         .login-logo-text {
           font-size: 20px; font-weight: 800;
@@ -189,16 +198,16 @@ export default function Login() {
           color: #A78BFA;
           letter-spacing: 0.08em;
           text-transform: uppercase;
-          margin-bottom: 18px;
+          margin-bottom: 24px; /* More vertical space */
         }
         .login-tagline-badge span { width: 6px; height: 6px; border-radius: 50%; background: #A78BFA; animation: pulseGlow 2s infinite; }
         .login-headline {
           font-size: clamp(34px, 4vw, 54px);
-          font-weight: 950;
+          font-weight: 700;
           color: #fff;
-          line-height: 1.05;
-          letter-spacing: -2px;
-          margin: 0 0 16px;
+          line-height: 1.12;
+          letter-spacing: -1.5px;
+          margin: 0 0 12px;
         }
         .login-headline em {
           font-style: normal;
@@ -211,38 +220,51 @@ export default function Login() {
         }
         .login-subtext {
           font-size: 16px;
-          color: rgba(255,255,255,0.6);
+          color: rgba(255,255,255,0.75);
           line-height: 1.6;
           max-width: 380px;
-          margin: 0 0 40px;
+          margin: 0 0 48px;
           font-weight: 400;
         }
         .login-stats {
           display: flex;
-          gap: 16px;
+          gap: 12px;
           animation: fadeUp 0.8s 0.3s ease both;
         }
         .login-stat-card {
           flex: 1;
-          background: rgba(255,255,255,0.03);
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
-          border: 1px solid rgba(255,255,255,0.08);
-          border-radius: 16px;
-          padding: 16px;
-          transition: transform 0.3s ease, background 0.3s ease;
+          background: rgba(255, 255, 255, 0.03);
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+          border: 1px solid rgba(255, 255, 255, 0.06);
+          border-radius: 12px;
+          padding: 12px;
+          transition: transform 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          box-shadow: 
+            inset 0 1px 0 rgba(255,255,255,0.05),
+            0 4px 20px rgba(0,0,0,0.2);
         }
         .login-stat-card:hover {
-          background: rgba(255,255,255,0.06);
-          transform: translateY(-5px);
-          border-color: rgba(167,139,250,0.3);
+          background: rgba(255, 255, 255, 0.06);
+          transform: translateY(-4px);
+          box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+          border-color: rgba(255,255,255,0.1);
+        }
+        .login-stat-head {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          color: rgba(255,255,255,0.8);
         }
         .login-stat-num {
-          font-size: 24px; font-weight: 900; color: #fff; display: block;
-          margin-bottom: 4px; letter-spacing: -0.5px;
+          font-size: 22px; font-weight: 800; color: #fff;
+          letter-spacing: -0.5px;
         }
         .login-stat-label {
-          font-size: 11px; color: rgba(255,255,255,0.4); font-weight: 600;
+          font-size: 10px; color: rgba(255,255,255,0.4); font-weight: 600;
           text-transform: uppercase; letter-spacing: 0.05em;
         }
 
@@ -250,8 +272,10 @@ export default function Login() {
         .login-right {
           width: 460px;
           min-width: 380px;
-          background: #0E0E16;
-          border-left: 1px solid rgba(255,255,255,0.05);
+          background: rgba(255, 255, 255, 0.05);
+          backdrop-filter: blur(20px) saturate(140%);
+          -webkit-backdrop-filter: blur(20px) saturate(140%);
+          border-left: 1px solid rgba(255, 255, 255, 0.08);
           display: flex;
           flex-direction: column;
           align-items: center;
@@ -259,15 +283,28 @@ export default function Login() {
           padding: 48px 44px;
           position: relative;
           overflow: hidden;
+          transition: transform 0.3s ease;
+          box-shadow: 
+            0 8px 32px rgba(0, 0, 0, 0.35),
+            inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+        .login-right:hover {
+          transform: translateY(-2px);
         }
         .login-right::before {
-          content: '';
+          content: "";
           position: absolute;
-          top: -120px; right: -120px;
-          width: 300px; height: 300px;
-          border-radius: 50%;
-          background: radial-gradient(circle, rgba(124,58,237,0.12) 0%, transparent 70%);
+          inset: 0;
+          border-radius: 12px;
+          background: linear-gradient(
+            120deg,
+            rgba(255,255,255,0.15),
+            rgba(255,255,255,0.02),
+            transparent
+          );
+          opacity: 0.3;
           pointer-events: none;
+          z-index: 2;
         }
         .login-right::after {
           content: '';
@@ -351,9 +388,11 @@ export default function Login() {
         }
         .login-input {
           width: 100%;
-          background: rgba(255,255,255,0.04);
-          border: 1px solid rgba(255,255,255,0.08);
-          border-radius: 12px;
+          background: rgba(255, 255, 255, 0.04);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 10px;
           padding: 13px 14px 13px 42px;
           font-family: 'Inter',sans-serif;
           font-size: 14px;
@@ -362,11 +401,11 @@ export default function Login() {
           transition: all 0.25s ease;
           box-sizing: border-box;
         }
-        .login-input::placeholder { color: rgba(240,240,245,0.25); }
+        .login-input::placeholder { color: rgba(240,240,245,0.35); }
         .login-input:focus {
-          border-color: rgba(124,58,237,0.6);
-          background: rgba(124,58,237,0.06);
-          box-shadow: 0 0 0 4px rgba(124,58,237,0.12);
+          border-color: rgba(124, 58, 237, 0.6);
+          background: rgba(255, 255, 255, 0.06);
+          box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.2);
         }
         .login-pass-toggle {
           position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
@@ -401,8 +440,8 @@ export default function Login() {
         .login-btn {
           width: 100%;
           padding: 14px;
-          border: none; border-radius: 12px;
-          background: linear-gradient(135deg, #7C3AED 0%, #A78BFA 100%);
+          border: none; border-radius: 10px;
+          background: linear-gradient(135deg, #5B21B6, #6D28D9);
           background-size: 200% auto;
           font-family: 'Inter',sans-serif;
           font-size: 14px; font-weight: 700;
@@ -411,10 +450,15 @@ export default function Login() {
           position: relative; overflow: hidden;
           animation: fadeUp 0.6s 0.3s ease both;
           letter-spacing: 0.02em;
+          box-shadow:
+            0 6px 20px rgba(109, 40, 217, 0.4),
+            inset 0 1px 0 rgba(255,255,255,0.2);
         }
         .login-btn:hover {
-          background-position: right center;
-          box-shadow: 0 8px 30px rgba(124,58,237,0.45);
+          background: linear-gradient(135deg, #6D28D9, #7C3AED);
+          box-shadow: 
+            0 8px 30px rgba(124,58,237,0.5),
+            inset 0 1px 0 rgba(255,255,255,0.3);
           transform: translateY(-1px);
         }
         .login-btn:active { transform: translateY(0); }
@@ -472,6 +516,19 @@ export default function Login() {
         }
         .login-signup-link a:hover { opacity: 0.75; }
 
+        .login-trust {
+          text-align: center;
+          margin-top: 24px;
+          font-size: 11px;
+          color: rgba(240,240,245,0.3);
+          font-weight: 500;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          animation: fadeUp 0.6s 0.5s ease both;
+        }
+
         @media (max-width: 768px) {
           .login-left { display: none; }
           .login-right { width: 100%; min-width: unset; }
@@ -488,16 +545,16 @@ export default function Login() {
 
           {/* Logo */}
           <div className="login-logo">
-            <svg width="34" height="34" viewBox="0 0 34 34" fill="none" className="drop-shadow-[0_0_12px_rgba(124,58,237,0.6)]">
+            <svg width="28" height="28" viewBox="0 0 34 34" fill="none" className="drop-shadow-[0_0_12px_rgba(124,58,237,0.6)]">
               <circle cx="17" cy="17" r="17" fill="url(#logo_grad)" />
               <path d="M11 17H14L16 11L20 23L22 17H25" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
               <defs>
                 <linearGradient id="logo_grad" x1="0" y1="0" x2="34" y2="34">
-                  <stop stopColor="#7C3AED" /><stop offset="1" stopColor="#A78BFA" />
+                  <stop stopColor="#5B21B6" /><stop offset="1" stopColor="#7C3AED" />
                 </linearGradient>
               </defs>
             </svg>
-            <span className="login-logo-text">EVOFIT</span>
+            <span className="login-logo-text" style={{ marginLeft: '4px' }}>EVOFIT</span>
           </div>
 
           {/* Bottom content */}
@@ -509,20 +566,29 @@ export default function Login() {
               Elevate Your<br /><em>Performance.</em>
             </h2>
             <p className="login-subtext">
-              Experience the future of fitness with intelligent tracking, hyper-personalized insights, and cinematic workout analysis.
+              Track progress, analyze performance, and optimize your training with AI-driven insights.
             </p>
             <div className="login-stats">
               <div className="login-stat-card">
-                <span className="login-stat-num">10k+</span>
-                <span className="login-stat-label">Active Users</span>
+                <div className="login-stat-head">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                  <span className="login-stat-num">10k+</span>
+                </div>
+                <span className="login-stat-label">Active Athletes</span>
               </div>
               <div className="login-stat-card">
-                <span className="login-stat-num">98%</span>
-                <span className="login-stat-label">Accuracy</span>
+                <div className="login-stat-head">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3"/><path d="M12 19v3"/><path d="M22 12h-3"/><path d="M5 12H2"/></svg>
+                  <span className="login-stat-num">98%</span>
+                </div>
+                <span className="login-stat-label">Tracking Accuracy</span>
               </div>
               <div className="login-stat-card">
-                <span className="login-stat-num">5</span>
-                <span className="login-stat-label">Classes</span>
+                <div className="login-stat-head">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5h11"/><path d="M6.5 9h11"/><path d="M6.5 11.5h11"/><path d="M6.5 14h11"/><path d="M6.5 16.5h11"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+                  <span className="login-stat-num">5</span>
+                </div>
+                <span className="login-stat-label">Training Programs</span>
               </div>
             </div>
           </div>
@@ -533,8 +599,8 @@ export default function Login() {
           <div className="login-form-wrap">
             <div className="login-form-header">
               <p className="login-form-label">Welcome back</p>
-              <h1 className="login-form-title">Sign in to EvoFit</h1>
-              <p className="login-form-sub">Continue your AI-powered fitness journey.</p>
+              <h1 className="login-form-title">Sign in</h1>
+              <p className="login-form-sub">Access your personalized fitness dashboard.</p>
             </div>
 
             {/* Tab switcher */}
@@ -609,7 +675,7 @@ export default function Login() {
               onClick={handleSubmit}
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Authenticating...' : 'Sign In to EvoFit ⚡'}
+              {isSubmitting ? 'Authenticating...' : 'Sign In'}
             </button>
 
             <div className="login-divider"><span>or continue with</span></div>
@@ -626,8 +692,13 @@ export default function Login() {
             </button>
 
             <p className="login-signup-link">
-              Don't have an account? <Link to="/signup">Create one free</Link>
+              Don't have an account? <Link to="/signup">Create an account</Link>
             </p>
+
+            <div className="login-trust">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              Secure login • Encrypted data
+            </div>
           </div>
         </div>
       </div>

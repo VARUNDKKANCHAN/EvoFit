@@ -5,18 +5,36 @@ import { toast } from 'react-toastify';
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState({ username: 'Guest_User', fullName: 'Guest Athlete' });
-  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Check if user is logged in on mount
-    const token = localStorage.getItem('evofit_token');
-    const savedUser = localStorage.getItem('evofit_user');
+    const checkAuth = async () => {
+      const token = localStorage.getItem('evofit_token');
+      if (token) {
+        try {
+          const profile = await authApi.getProfile();
+          const userObj = { 
+            username: profile.username,
+            fullName: profile.full_name,
+            profileId: profile.id,
+            ...profile
+          };
+          setUser(userObj);
+          localStorage.setItem('evofit_user', JSON.stringify(userObj));
+        } catch (error) {
+          console.error("Auth initialization failed:", error);
+          logout();
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        setLoading(false);
+      }
+    };
     
-    if (token && savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
-    // setLoading(false); // Already false for bypass
+    checkAuth();
   }, []);
 
   const login = async (username, password) => {
@@ -24,9 +42,16 @@ export function AuthProvider({ children }) {
       const data = await authApi.login(username, password);
       localStorage.setItem('evofit_token', data.access_token);
       
-      // For now, we manually set a user object. 
-      // In a real app, we'd fetch the user profile here.
-      const userObj = { username };
+      // Fetch full profile after login
+      const profile = await authApi.getProfile();
+      
+      const userObj = { 
+        username,
+        fullName: profile.full_name,
+        profileId: profile.id,
+        ...profile
+      };
+      
       setUser(userObj);
       localStorage.setItem('evofit_user', JSON.stringify(userObj));
       

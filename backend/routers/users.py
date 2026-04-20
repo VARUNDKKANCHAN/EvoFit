@@ -34,11 +34,18 @@ def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_user)
     
-    # Initialize blank profile
-    new_profile = models.UserProfile(user_id=new_user.id)
+    # Initialize profile with provided data
+    new_profile = models.UserProfile(
+        user_id=new_user.id,
+        full_name=user.full_name,
+        age=user.age,
+        weight_kg=user.weight_kg,
+        height_cm=user.height_cm,
+        gender=user.gender,
+        fitness_goal=user.fitness_goal
+    )
     db.add(new_profile)
     db.commit()
-    
     
     return new_user
 
@@ -65,17 +72,17 @@ def login_for_access_token(user_credentials: schemas.UserLogin, db: Session = De
     return {"access_token": access_token, "token_type": "bearer"}
 
 @router.get("/me/profile", response_model=schemas.ProfileResponse)
-def get_user_profile(user_id: int = 1, db: Session = Depends(get_db)):
-    """Fetch profile stats for a user (Defaulted to ID 1 for now)."""
-    profile = db.query(models.UserProfile).filter(models.UserProfile.user_id == user_id).first()
+def get_user_profile(current_user: models.User = Depends(auth_service.get_current_user), db: Session = Depends(get_db)):
+    """Fetch profile stats for the current authenticated user."""
+    profile = db.query(models.UserProfile).filter(models.UserProfile.user_id == current_user.id).first()
     if not profile:
         raise HTTPException(status_code=404, detail="Profile not found")
     return profile
 
 @router.put("/me/profile", response_model=schemas.ProfileResponse)
-def update_user_profile(profile_data: schemas.ProfileBase, user_id: int = 1, db: Session = Depends(get_db)):
-    """Update personal and physical stats."""
-    db_profile = db.query(models.UserProfile).filter(models.UserProfile.user_id == user_id).first()
+def update_user_profile(profile_data: schemas.ProfileBase, current_user: models.User = Depends(auth_service.get_current_user), db: Session = Depends(get_db)):
+    """Update personal and physical stats for the current user."""
+    db_profile = db.query(models.UserProfile).filter(models.UserProfile.user_id == current_user.id).first()
     if not db_profile:
         raise HTTPException(status_code=404, detail="Profile not found")
     

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const NAV = [
   {
@@ -71,7 +72,13 @@ const NAV = [
 
 export default function Sidebar({ mobileOpen }) {
   const navigate    = useNavigate();
+  const { user, logout } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   return (
     <aside 
@@ -145,8 +152,40 @@ export default function Sidebar({ mobileOpen }) {
         ))}
       </nav>
 
-      {/* ── Bottom controls ───────────────────── */}
+      {/* ── User Profile & Bottom controls ───────────────────── */}
       <div className={`border-t border-evofit-border animate-fade-in-up duration-500 delay-300 ${collapsed ? 'p-3 pb-5' : 'p-[10px] pb-5'}`}>
+        
+        {/* User Stats Card (Only if not collapsed) */}
+        {!collapsed && user && (
+          <div className="mx-2 mb-4 p-3 rounded-xl bg-evofit-bg-secondary border border-evofit-border flex items-center gap-3 shadow-inner">
+            <div className="w-10 h-10 rounded-full bg-evofit-purple-main/20 flex items-center justify-center text-evofit-purple-light font-bold border border-evofit-purple-main/30">
+              {user.fullName?.charAt(0) || user.username?.charAt(0) || '?'}
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <p className="text-[13px] font-bold text-evofit-text-primary truncate m-0">{user.fullName || user.username}</p>
+              <div className="flex items-center justify-between mt-0.5">
+                <span className="text-[10px] font-bold text-evofit-purple-light">LVL {user.level || 1}</span>
+                <span className="text-[9px] text-evofit-text-muted">{user.xp || 0} XP</span>
+              </div>
+              <div className="w-full h-1 bg-evofit-bg-primary rounded-full mt-1.5 overflow-hidden">
+                <div 
+                  className="h-full bg-evofit-purple-main transition-all duration-1000" 
+                  style={{ width: `${(user.xp / ((user.level || 1) * 1000)) * 100}%` }}
+                ></div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* User Mini Icon (If collapsed) */}
+        {collapsed && user && (
+          <div className="flex justify-center mb-4">
+             <div className="w-8 h-8 rounded-full bg-evofit-purple-main/20 flex items-center justify-center text-evofit-purple-light text-xs font-bold border border-evofit-purple-main/30" title={`${user.fullName} (Lvl ${user.level})`}>
+              {user.fullName?.charAt(0) || user.username?.charAt(0) || '?'}
+            </div>
+          </div>
+        )}
+
         {/* Collapse / Expand */}
         <button
           id="btn-collapse-sidebar"
@@ -168,8 +207,8 @@ export default function Sidebar({ mobileOpen }) {
         <button
           id="btn-logout"
           title="Logout"
-          onClick={() => navigate('/')}
-          className={`flex items-center gap-[10px] w-full py-[10px] rounded-xl bg-transparent border-none cursor-pointer text-evofit-text-secondary text-sm font-medium transition-all duration-200 hover:bg-red-500/10 hover:text-[#F87171] ${collapsed ? 'justify-center' : 'justify-start px-[10px]'}`}
+          onClick={handleLogout}
+          className={`group flex items-center gap-[10px] w-full py-[10px] rounded-xl bg-transparent border-none cursor-pointer text-evofit-text-secondary text-sm font-medium transition-all duration-200 hover:bg-red-500/10 hover:text-[#F87171] ${collapsed ? 'justify-center' : 'justify-start px-[10px]'}`}
         >
           <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" className="shrink-0 transition-transform duration-200 group-hover:translate-x-0.5">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />

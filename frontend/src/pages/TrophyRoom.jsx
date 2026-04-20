@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api/auth';
 import { Award, Star, Trophy, Target, Zap, Shield, Flame, Sparkles, Clock, ChevronRight } from 'lucide-react';
 
 const ICON_MAP = {
@@ -18,7 +18,7 @@ export default function TrophyRoom() {
 
   const fetchAchievements = async () => {
     try {
-      const res = await axios.get('http://127.0.0.1:8000/achievements/');
+      const res = await api.get('/achievements/');
       setData(res.data);
     } catch (err) {
       console.error("Failed to fetch achievements", err);

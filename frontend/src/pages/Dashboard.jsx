@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api/auth';
+import { useAuth } from '../context/AuthContext';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
   AreaChart, Area, LineChart, Line, ComposedChart, Cell, PieChart, Pie
@@ -32,12 +33,13 @@ const EXERCISE_LABELS = {
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const fetchDashboardData = async () => {
     try {
-      const res = await axios.get('http://127.0.0.1:8000/dashboard/summary');
+      const res = await api.get('/dashboard/summary');
       setData(res.data);
     } catch (err) {
       console.error("Failed to fetch dashboard data", err);
@@ -69,7 +71,7 @@ export default function Dashboard() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
           <div>
             <h1 className="text-[28px] md:text-[32px] font-extrabold m-0 tracking-tight text-evofit-text-primary">
-              Welcome back, Alex 👋
+              Welcome back, {user?.fullName || user?.username || 'Fitness Warrior'} 👋
             </h1>
             <p className="text-evofit-text-secondary text-sm md:text-base m-0 mt-1 font-medium">
               Today is {new Date().toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} · Your training performance is peaking.

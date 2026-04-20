@@ -1,6 +1,7 @@
 from backend.services.ml_service import predict_from_upload, get_metrics
 from backend.database.database import get_db
-from backend.database.models import WorkoutSession, Achievement, User
+from backend.services import auth_service
+from backend.database import models
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 from fastapi.responses import JSONResponse
@@ -15,7 +16,7 @@ router = APIRouter(
 ALLOWED_EXTENSIONS = {".csv", ".pkl"}
 
 @router.post("/")
-async def predict_exercise(file: UploadFile = File(...), db: Session = Depends(get_db)):
+async def predict_exercise(file: UploadFile = File(...), current_user: models.User = Depends(auth_service.get_current_user), db: Session = Depends(get_db)):
     """
     Upload a sensor data file (.csv or .pkl).
     Saves results to the database and detects new achievements.
@@ -34,7 +35,7 @@ async def predict_exercise(file: UploadFile = File(...), db: Session = Depends(g
         result = predict_from_upload(file_bytes, file.filename)
         
         # --- SAVE TO DATABASE ---
-        user_id = 1
+        user_id = current_user.id
         for ex in result.get("exercise_breakdown", []):
             label = ex.get("label")
             reps = ex.get("rep_count", 0)
@@ -56,7 +57,7 @@ async def predict_exercise(file: UploadFile = File(...), db: Session = Depends(g
                 }
             }
 
-            session_row = WorkoutSession(
+            session_row = models.WorkoutSession(
                 exercise=label,
                 reps_actual=reps,
                 form_score=float(avg_conf * 100),
@@ -76,14 +77,14 @@ async def predict_exercise(file: UploadFile = File(...), db: Session = Depends(g
             reps = ex.get("rep_count", 0)
             avg_conf = result.get("confidence", 0) * 100
             
-            total_ever = db.query(func.sum(WorkoutSession.reps_actual)).filter(WorkoutSession.exercise == label).scalar() or 0
+            total_ever = db.query(func.sum(models.WorkoutSession.reps_actual)).filter(models.WorkoutSession.exercise == label, models.WorkoutSession.user_id == user_id).scalar() or 0
             
             # Badge 1: 500 Club
             if total_ever >= 500:
                 badge = f"500 {label.capitalize()} Reps Club"
-                exists = db.query(Achievement).filter(Achievement.badge_name == badge).first()
+                exists = db.query(models.Achievement).filter(models.Achievement.badge_name == badge, models.Achievement.user_id == user_id).first()
                 if not exists:
-                    new_achive = Achievement(
+                    new_achive = models.Achievement(
                         badge_name=badge, 
                         description=f"You've smashed 500 total reps of {label}!", 
                         icon="star",
@@ -95,9 +96,9 @@ async def predict_exercise(file: UploadFile = File(...), db: Session = Depends(g
             # Badge 2: Volume King (100+ reps in one session)
             if reps >= 100:
                 badge = f"{label.capitalize()} Volume King"
-                exists = db.query(Achievement).filter(Achievement.badge_name == badge).first()
+                exists = db.query(models.Achievement).filter(models.Achievement.badge_name == badge, models.Achievement.user_id == user_id).first()
                 if not exists:
-                    new_achive = Achievement(
+                    new_achive = models.Achievement(
                         badge_name=badge, 
                         description=f"Over 100 reps of {label} in a single session! Unstoppable.", 
                         icon="flame",
@@ -109,9 +110,9 @@ async def predict_exercise(file: UploadFile = File(...), db: Session = Depends(g
             # Badge 3: Set Sniper (Form >= 95%)
             if avg_conf >= 95.0 and reps >= 10:
                 badge = f"{label.capitalize()} Set Sniper"
-                exists = db.query(Achievement).filter(Achievement.badge_name == badge).first()
+                exists = db.query(models.Achievement).filter(models.Achievement.badge_name == badge, models.Achievement.user_id == user_id).first()
                 if not exists:
-                    new_achive = Achievement(
+                    new_achive = models.Achievement(
                         badge_name=badge, 
                         description=f"Near perfect form on {label} for a full set. Flawless execution.", 
                         icon="target",
@@ -121,12 +122,12 @@ async def predict_exercise(file: UploadFile = File(...), db: Session = Depends(g
                     new_badges.append(badge)
             
             # Badge 4: New Ground (First time)
-            session_count = db.query(WorkoutSession).filter(WorkoutSession.exercise == label).count()
+            session_count = db.query(models.WorkoutSession).filter(models.WorkoutSession.exercise == label, models.WorkoutSession.user_id == user_id).count()
             if session_count == 1: # Only the one we just inserted
                 badge = f"New Ground: {label.capitalize()}"
-                exists = db.query(Achievement).filter(Achievement.badge_name == badge).first()
+                exists = db.query(models.Achievement).filter(models.Achievement.badge_name == badge, models.Achievement.user_id == user_id).first()
                 if not exists:
-                    new_achive = Achievement(
+                    new_achive = models.Achievement(
                         badge_name=badge, 
                         description=f"Welcome to {label}. The journey of a thousand reps begins here.", 
                         icon="pulse",
@@ -139,7 +140,7 @@ async def predict_exercise(file: UploadFile = File(...), db: Session = Depends(g
         result["new_achievements"] = new_badges
 
         # --- XP LOGIC ---
-        user = db.query(User).filter(User.id == user_id).first()
+        user = db.query(models.User).filter(models.User.id == user_id).first()
         leveled_up = False
         if user:
             gained_xp = 0

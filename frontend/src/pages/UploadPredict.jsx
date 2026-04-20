@@ -1,6 +1,7 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import api from '../api/auth';
 
 const REQUIRED_COLS = ['acc_x', 'acc_y', 'acc_z', 'gyr_x', 'gyr_y', 'gyr_z'];
 const ALLOWED_EXT   = ['.csv', '.pkl'];
@@ -90,9 +91,10 @@ export default function UploadPredict() {
     try {
       const form = new FormData();
       form.append('file', file);
-      const res  = await fetch('http://localhost:8000/predict/', { method: 'POST', body: form });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || 'Prediction failed');
+      const res  = await api.post('/predict/', form, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      const data = res.data;
       // Save to sessionStorage and navigate
       sessionStorage.setItem('lastPrediction', JSON.stringify({ result: data, filename: file.name }));
 

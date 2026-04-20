@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api/auth';
 import { 
   History, Search, Filter, Calendar, Activity, 
   ChevronRight, Dumbbell, Sparkles, ArrowRight, Clock
@@ -27,11 +27,11 @@ export default function SessionHistory() {
   const fetchSessions = async () => {
     try {
       setLoading(true);
-      let url = 'http://127.0.0.1:8000/sessions/';
+      let url = '/sessions/';
       if (daysFilter !== null) {
         url += `?days=${daysFilter}`;
       }
-      const res = await axios.get(url);
+      const res = await api.get(url);
       setSessions(res.data);
     } catch (err) {
       console.error("Failed to fetch sessions", err);
@@ -50,7 +50,7 @@ export default function SessionHistory() {
 
   const viewSessionDetail = async (sessionId) => {
     try {
-      const res = await axios.get(`http://127.0.0.1:8000/sessions/${sessionId}`);
+      const res = await api.get(`/sessions/${sessionId}`);
       // Store in session storage to "mimic" a fresh prediction and navigate to Analytics
       sessionStorage.setItem('lastPrediction', JSON.stringify({ result: res.data }));
       navigate('/analytics');

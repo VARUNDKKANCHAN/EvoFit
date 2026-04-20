@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api/auth';
 import { useNavigate } from 'react-router-dom';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
@@ -34,7 +34,7 @@ export default function Targets() {
 
   const fetchProgress = async () => {
     try {
-      const res = await axios.get('http://localhost:8000/targets/progress');
+      const res = await api.get('/targets/progress');
       setProgressData(res.data);
     } catch (err) {
       console.error("Failed to fetch progress", err);
@@ -46,7 +46,7 @@ export default function Targets() {
   const fetchAllAchievements = async () => {
     setLoadingBadges(true);
     try {
-      const res = await axios.get('http://localhost:8000/targets/achievements');
+      const res = await api.get('/targets/achievements');
       setAllAchievements(res.data);
     } catch (err) {
       console.error("Failed to fetch achievements", err);
@@ -74,7 +74,7 @@ export default function Targets() {
     if (!repTarget || isNaN(repTarget)) return;
     setSaving(true);
     try {
-      await axios.post('http://localhost:8000/targets/', {
+      await api.post('/targets/', {
         exercise: selectedExercise,
         weekly_rep_target: parseInt(repTarget)
       });

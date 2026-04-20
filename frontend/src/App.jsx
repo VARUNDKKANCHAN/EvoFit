@@ -30,6 +30,7 @@ function AnimatedPage({ children }) {
    Shared top header
    ══════════════════════════════════════════════════ */
 function PageHeader({ title, onMenuClick }) {
+  const { user } = useAuth();
   const today = new Date().toLocaleDateString('en-US', {
     weekday: 'short', month: 'short', day: 'numeric',
   });
@@ -84,11 +85,11 @@ function PageHeader({ title, onMenuClick }) {
         {/* User chip */}
         <div className="flex items-center gap-[10px] cursor-pointer group">
           <div className="text-right hidden sm:block">
-            <p className="m-0 text-[13px] font-semibold text-evofit-text-primary">Alex Johnson</p>
-            <p className="m-0 text-[11px] text-evofit-purple-light">Pro Member</p>
+            <p className="m-0 text-[13px] font-semibold text-evofit-text-primary">{user?.fullName || user?.username || 'Guest'}</p>
+            <p className="m-0 text-[11px] text-evofit-purple-light">{user ? 'Pro Member' : 'Standard'}</p>
           </div>
           <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#6D28D9] to-[#A78BFA] flex items-center justify-center text-[14px] font-bold text-white border border-white/10 group-hover:ring-2 group-hover:ring-evofit-purple-main transition-all duration-200">
-            AJ
+            {user?.fullName?.charAt(0) || user?.username?.charAt(0) || '?'}
           </div>
         </div>
       </div>
@@ -141,10 +142,19 @@ function AppShell() {
   const { user, loading, isAuthenticated } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/signup';
+
   // Close mobile menu on route change
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [location.pathname]);
+
+  // Route Protection logic
+  useEffect(() => {
+    if (!loading && !user && !isAuthPage) {
+      navigate('/login');
+    }
+  }, [user, loading, isAuthPage, navigate]);
 
   const getPageTitle = (path) => {
     switch (path) {
@@ -160,8 +170,6 @@ function AppShell() {
       default: return 'EvoFit Dashboard';
     }
   };
-
-  const isAuthPage = location.pathname === '/login' || location.pathname === '/signup';
 
   return (
     <div className="flex min-h-screen bg-evofit-bg-primary font-inter relative overflow-hidden">

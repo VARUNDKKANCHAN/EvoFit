@@ -6,7 +6,8 @@ import json
 from typing import List
 
 from backend.database.database import get_db
-from backend.database.models import WorkoutSession, Target, User, Achievement
+from backend.services import auth_service
+from backend.database import models
 from backend.schemas.schemas import DashboardSummaryResponse, KPIStats, TrendPoint, SessionItem, DistributionItem, DashboardTargetItem, UserProgression
 
 router = APIRouter(
@@ -25,9 +26,9 @@ EXERCISE_COLORS = {
 def get_active_streak(db: Session, user_id: int) -> int:
     """Calculate the current consecutive day streak for a user."""
     # Simple Python implementation for SQLite compatibility and clarity
-    dates_raw = db.query(WorkoutSession.date).filter(
-        WorkoutSession.user_id == user_id
-    ).distinct().order_by(desc(WorkoutSession.date)).all()
+    dates_raw = db.query(models.WorkoutSession.date).filter(
+        models.WorkoutSession.user_id == user_id
+    ).distinct().order_by(desc(models.WorkoutSession.date)).all()
     
     dates = [d[0] for d in dates_raw]
     
@@ -47,28 +48,26 @@ def get_active_streak(db: Session, user_id: int) -> int:
     return streak
 
 @router.get("/summary", response_model=DashboardSummaryResponse)
-def get_dashboard_summary(db: Session = Depends(get_db)):
-    user_id = 1 # Default user
+def get_dashboard_summary(current_user: models.User = Depends(auth_service.get_current_user), db: Session = Depends(get_db)):
+    user_id = current_user.id
     today = date.today()
     last_week = today - timedelta(days=7)
 
     # 1. KPI Aggregations
-    reps_week = db.query(func.sum(WorkoutSession.reps_actual)).filter(
-        WorkoutSession.user_id == user_id,
-        WorkoutSession.date >= last_week
+    reps_week = db.query(func.sum(models.WorkoutSession.reps_actual)).filter(
+        models.WorkoutSession.user_id == user_id,
+        models.WorkoutSession.date >= last_week
     ).scalar() or 0
 
-    avg_form = db.query(func.avg(WorkoutSession.form_score)).filter(
-        WorkoutSession.user_id == user_id,
-        WorkoutSession.date >= last_week
+    avg_form = db.query(func.avg(models.WorkoutSession.form_score)).filter(
+        models.WorkoutSession.user_id == user_id,
+        models.WorkoutSession.date >= last_week
     ).scalar() or 0.0
 
     # For consistency, we'll fetch recently processed sessions to pull rhythm from JSON if available
-    # But for a summary, we use a proxy from form scores or average rhythm stored in sessions
-    # Here we'll take the global avg of rhythm stored in the most recent sessions
-    recent_sessions_raw = db.query(WorkoutSession).filter(
-        WorkoutSession.user_id == user_id
-    ).order_by(desc(WorkoutSession.date)).limit(10).all()
+    recent_sessions_raw = db.query(models.WorkoutSession).filter(
+        models.WorkoutSession.user_id == user_id
+    ).order_by(desc(models.WorkoutSession.date)).limit(10).all()
 
     total_rhythm = 0
     rhythm_count = 0
@@ -88,13 +87,13 @@ def get_dashboard_summary(db: Session = Depends(get_db)):
     trend_data = []
     for i in range(6, -1, -1):
         d = today - timedelta(days=i)
-        day_reps = db.query(func.sum(WorkoutSession.reps_actual)).filter(
-            WorkoutSession.user_id == user_id,
-            WorkoutSession.date == d
+        day_reps = db.query(func.sum(models.WorkoutSession.reps_actual)).filter(
+            models.WorkoutSession.user_id == user_id,
+            models.WorkoutSession.date == d
         ).scalar() or 0
-        day_quality = db.query(func.avg(WorkoutSession.form_score)).filter(
-            WorkoutSession.user_id == user_id,
-            WorkoutSession.date == d
+        day_quality = db.query(func.avg(models.WorkoutSession.form_score)).filter(
+            models.WorkoutSession.user_id == user_id,
+            models.WorkoutSession.date == d
         ).scalar() or 0.0
         
         trend_data.append(TrendPoint(
@@ -129,12 +128,12 @@ def get_dashboard_summary(db: Session = Depends(get_db)):
 
     # 4. Exercise Distribution
     dist_raw = db.query(
-        WorkoutSession.exercise,
-        func.sum(WorkoutSession.reps_actual)
+        models.WorkoutSession.exercise,
+        func.sum(models.WorkoutSession.reps_actual)
     ).filter(
-        WorkoutSession.user_id == user_id,
-        WorkoutSession.date >= last_week
-    ).group_by(WorkoutSession.exercise).all()
+        models.WorkoutSession.user_id == user_id,
+        models.WorkoutSession.date >= last_week
+    ).group_by(models.WorkoutSession.exercise).all()
 
     distribution = [
         DistributionItem(
@@ -144,22 +143,21 @@ def get_dashboard_summary(db: Session = Depends(get_db)):
         ) for ex, reps in dist_raw
     ]
 
-    # 5. Targets — mirror targets/progress logic so Dashboard shows the SAME data
-    # Step A: get user-set targets
+    # 5. Targets logic
     DEFAULT_TARGETS = {"bench": 300, "dead": 150, "squat": 250, "ohp": 200, "row": 300}
     EXERCISE_LABELS_MAP = {"bench": "Bench Press", "dead": "Deadlift", "squat": "Back Squat", "ohp": "Overhead Press", "row": "Barbell Row"}
 
-    user_target_rows = db.query(Target).filter(Target.user_id == user_id).all()
+    user_target_rows = db.query(models.Target).filter(models.Target.user_id == user_id).all()
     target_map = {t.exercise: t.weekly_rep_target for t in user_target_rows}
 
     # Step B: actual reps for each exercise in last 7 days
     session_totals = db.query(
-        WorkoutSession.exercise,
-        func.sum(WorkoutSession.reps_actual).label("total_reps")
+        models.WorkoutSession.exercise,
+        func.sum(models.WorkoutSession.reps_actual).label("total_reps")
     ).filter(
-        WorkoutSession.user_id == user_id,
-        WorkoutSession.date >= last_week
-    ).group_by(WorkoutSession.exercise).all()
+        models.WorkoutSession.user_id == user_id,
+        models.WorkoutSession.date >= last_week
+    ).group_by(models.WorkoutSession.exercise).all()
     actual_map = {s.exercise: int(s.total_reps) for s in session_totals}
 
     # Step C: build target cards for the 5 main exercises, capped at 4 for dashboard
@@ -184,7 +182,7 @@ def get_dashboard_summary(db: Session = Depends(get_db)):
     targets.sort(key=lambda x: (-x["is_achieved"], -x["completion_pct"]))
     targets = targets[:4]
 
-    # 6. AI Insights (Only added if there's enough data)
+    # 6. AI Insights
     insights = []
     if reps_week > 100:
         insights.append(f"You've lifted {reps_week} reps this week. Keep up the momentum!")
@@ -194,8 +192,8 @@ def get_dashboard_summary(db: Session = Depends(get_db)):
     if not recent_sessions and not reps_week:
         insights = [] # Keep empty if new user
 
-    user = db.query(User).filter(User.id == user_id).first()
-    recent_achievements = db.query(Achievement).filter(Achievement.user_id == user_id).order_by(Achievement.unlocked_at.desc()).limit(3).all()
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    recent_achievements = db.query(models.Achievement).filter(models.Achievement.user_id == user_id).order_by(models.Achievement.unlocked_at.desc()).limit(3).all()
     
     return DashboardSummaryResponse(
         kpis=KPIStats(

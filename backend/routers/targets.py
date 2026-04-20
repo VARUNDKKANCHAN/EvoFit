@@ -6,7 +6,8 @@ from sqlalchemy import func
 import random
 
 from backend.database.database import get_db
-from backend.database.models import Target, WorkoutSession, Achievement
+from backend.services import auth_service
+from backend.database import models
 from backend.schemas.schemas import TargetCreate, TargetResponse, OverallProgressResponse, WeeklyExerciseProgress, AchievementResponse
 
 router = APIRouter(
@@ -16,11 +17,11 @@ router = APIRouter(
 
 def calculate_streak(db: Session, user_id: int, exercise: Optional[str] = None) -> int:
     """Calculate the current consecutive day streak for a user/exercise."""
-    query = db.query(WorkoutSession.date).filter(WorkoutSession.user_id == user_id).distinct()
+    query = db.query(models.WorkoutSession.date).filter(models.WorkoutSession.user_id == user_id).distinct()
     if exercise:
-        query = query.filter(WorkoutSession.exercise == exercise)
+        query = query.filter(models.WorkoutSession.exercise == exercise)
     
-    dates = [row[0] for row in query.order_by(WorkoutSession.date.desc()).all()]
+    dates = [row[0] for row in query.order_by(models.WorkoutSession.date.desc()).all()]
     if not dates:
         return 0
     
@@ -49,17 +50,17 @@ def calculate_weekly_trend(db: Session, user_id: int) -> List[dict]:
         week_label = f"Wk {5-i:02d}"
         
         # Get target for this period (using current target as proxy if no historical record)
-        target_sum = db.query(func.sum(Target.weekly_rep_target)).filter(
-            Target.user_id == user_id,
-            Target.start_date <= end_date,
-            Target.end_date >= start_date
+        target_sum = db.query(func.sum(models.Target.weekly_rep_target)).filter(
+            models.Target.user_id == user_id,
+            models.Target.start_date <= end_date,
+            models.Target.end_date >= start_date
         ).scalar() or 500 # Global fallback
         
         # Get actual reps for this period
-        actual_sum = db.query(func.sum(WorkoutSession.reps_actual)).filter(
-            WorkoutSession.user_id == user_id,
-            WorkoutSession.date <= end_date,
-            WorkoutSession.date >= start_date
+        actual_sum = db.query(func.sum(models.WorkoutSession.reps_actual)).filter(
+            models.WorkoutSession.user_id == user_id,
+            models.WorkoutSession.date <= end_date,
+            models.WorkoutSession.date >= start_date
         ).scalar() or 0
         
         completion = int((actual_sum / target_sum) * 100) if target_sum > 0 else 0
@@ -68,22 +69,22 @@ def calculate_weekly_trend(db: Session, user_id: int) -> List[dict]:
     return trend
 
 @router.get("/", response_model=List[TargetResponse])
-def get_targets(db: Session = Depends(get_db)):
-    """Fetch all active targets for the default user (ID: 1)."""
-    return db.query(Target).filter(Target.user_id == 1).all()
+def get_targets(current_user: models.User = Depends(auth_service.get_current_user), db: Session = Depends(get_db)):
+    """Fetch all active targets for the authenticated user."""
+    return db.query(models.Target).filter(models.Target.user_id == current_user.id).all()
 
 @router.post("/", response_model=TargetResponse)
-def create_target(target_in: TargetCreate, db: Session = Depends(get_db)):
+def create_target(target_in: TargetCreate, current_user: models.User = Depends(auth_service.get_current_user), db: Session = Depends(get_db)):
     """Set a new weekly target starting from today for 7 days."""
     today = date.today()
     end = today + timedelta(days=7)
     
-    new_target = Target(
+    new_target = models.Target(
         exercise=target_in.exercise,
         weekly_rep_target=target_in.weekly_rep_target,
         start_date=today,
         end_date=end,
-        user_id=1
+        user_id=current_user.id
     )
     db.add(new_target)
     db.commit()
@@ -91,10 +92,10 @@ def create_target(target_in: TargetCreate, db: Session = Depends(get_db)):
     return new_target
 
 @router.get("/progress", response_model=OverallProgressResponse)
-def get_progress(db: Session = Depends(get_db)):
+def get_progress(current_user: models.User = Depends(auth_service.get_current_user), db: Session = Depends(get_db)):
     """Calculate dynamic progress for every exercise based on active targets and actual sessions."""
     # 1. Get targets
-    targets = db.query(Target).filter(Target.user_id == 1).all()
+    targets = db.query(models.Target).filter(models.Target.user_id == current_user.id).all()
     
     # 2. Map of exercise -> target_reps
     target_map = {t.exercise: t.weekly_rep_target for t in targets}
@@ -104,19 +105,19 @@ def get_progress(db: Session = Depends(get_db)):
     
     # Rep totals
     session_totals = db.query(
-        WorkoutSession.exercise,
-        func.sum(WorkoutSession.reps_actual).label("total_reps")
+        models.WorkoutSession.exercise,
+        func.sum(models.WorkoutSession.reps_actual).label("total_reps")
     ).filter(
-        WorkoutSession.user_id == 1,
-        WorkoutSession.date >= lookback
-    ).group_by(WorkoutSession.exercise).all()
+        models.WorkoutSession.user_id == current_user.id,
+        models.WorkoutSession.date >= lookback
+    ).group_by(models.WorkoutSession.exercise).all()
     
     # Average form score for the week
     avg_form = db.query(
-        func.avg(WorkoutSession.form_score)
+        func.avg(models.WorkoutSession.form_score)
     ).filter(
-        WorkoutSession.user_id == 1,
-        WorkoutSession.date >= lookback
+        models.WorkoutSession.user_id == current_user.id,
+        models.WorkoutSession.date >= lookback
     ).scalar() or 0.0
 
     actual_map = {s.exercise: s.total_reps for s in session_totals}
@@ -133,7 +134,7 @@ def get_progress(db: Session = Depends(get_db)):
     }
 
     # 4. Global Streak
-    overall_streak = calculate_streak(db, 1)
+    overall_streak = calculate_streak(db, current_user.id)
 
     # 5. Default Target Mapping (If no target set by user)
     DEFAULT_TARGETS = {
@@ -158,7 +159,7 @@ def get_progress(db: Session = Depends(get_db)):
         total_reps_target += target
         
         # Calculate per-exercise streak
-        ex_streak = calculate_streak(db, 1, exercise=ex)
+        ex_streak = calculate_streak(db, current_user.id, exercise=ex)
 
         exercise_progress.append(WeeklyExerciseProgress(
             exercise=ex,
@@ -170,15 +171,15 @@ def get_progress(db: Session = Depends(get_db)):
         ))
 
     # 5. Dynamic Trend
-    weekly_trend = calculate_weekly_trend(db, 1)
+    weekly_trend = calculate_weekly_trend(db, current_user.id)
 
     # 6. Check for Dynamic "High Consistency Award"
     if avg_form > 92.0:
         badge = "High Consistency Award"
-        exists = db.query(Achievement).filter(Achievement.user_id == 1, Achievement.badge_name == badge).first()
+        exists = db.query(models.Achievement).filter(models.Achievement.user_id == current_user.id, models.Achievement.badge_name == badge).first()
         if not exists:
-            new_achieve = Achievement(
-                user_id=1,
+            new_achieve = models.Achievement(
+                user_id=current_user.id,
                 badge_name=badge,
                 description="Your average form score this week is over 92%! Exceptional control.",
                 icon="shield-check"
@@ -187,7 +188,7 @@ def get_progress(db: Session = Depends(get_db)):
             db.commit()
 
     # 7. Achievements
-    achievements = db.query(Achievement).filter(Achievement.user_id == 1).order_by(Achievement.unlocked_at.desc()).limit(3).all()
+    achievements = db.query(models.Achievement).filter(models.Achievement.user_id == current_user.id).order_by(models.Achievement.unlocked_at.desc()).limit(3).all()
 
     overall_perc = int((total_reps_done / total_reps_target) * 100) if total_reps_target > 0 else 0
 
@@ -204,6 +205,6 @@ def get_progress(db: Session = Depends(get_db)):
 
 
 @router.get("/achievements", response_model=List[AchievementResponse])
-def get_all_achievements(db: Session = Depends(get_db)):
-    """Fetch all achievements for the default user (ID: 1), most recent first."""
-    return db.query(Achievement).filter(Achievement.user_id == 1).order_by(Achievement.unlocked_at.desc()).all()
+def get_all_achievements(current_user: models.User = Depends(auth_service.get_current_user), db: Session = Depends(get_db)):
+    """Fetch all achievements for the authenticated user, most recent first."""
+    return db.query(models.Achievement).filter(models.Achievement.user_id == current_user.id).order_by(models.Achievement.unlocked_at.desc()).all()

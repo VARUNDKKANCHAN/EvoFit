@@ -5,7 +5,8 @@ from typing import List, Optional
 import json
 from datetime import date, timedelta
 from backend.database.database import get_db
-from backend.database.models import WorkoutSession
+from backend.services import auth_service
+from backend.database import models
 from backend.schemas.schemas import SessionItem
 
 router = APIRouter(
@@ -17,19 +18,19 @@ router = APIRouter(
 def get_all_sessions(
     days: Optional[int] = None,
     exercise: Optional[str] = None,
+    current_user: models.User = Depends(auth_service.get_current_user),
     db: Session = Depends(get_db)
 ):
-    user_id = 1
-    query = db.query(WorkoutSession).filter(WorkoutSession.user_id == user_id)
+    query = db.query(models.WorkoutSession).filter(models.WorkoutSession.user_id == current_user.id)
     
     if days is not None:
         lookback = date.today() - timedelta(days=days)
-        query = query.filter(WorkoutSession.date >= lookback)
+        query = query.filter(models.WorkoutSession.date >= lookback)
         
     if exercise:
-        query = query.filter(WorkoutSession.exercise.ilike(f"%{exercise}%"))
+        query = query.filter(models.WorkoutSession.exercise.ilike(f"%{exercise}%"))
         
-    sessions = query.order_by(desc(WorkoutSession.date), desc(WorkoutSession.created_at)).all()
+    sessions = query.order_by(desc(models.WorkoutSession.date), desc(models.WorkoutSession.created_at)).all()
     
     # Map to SessionItem format
     result = []
@@ -56,8 +57,8 @@ def get_all_sessions(
     return result
 
 @router.get("/{session_id}")
-def get_session_detail(session_id: int, db: Session = Depends(get_db)):
-    session = db.query(WorkoutSession).filter(WorkoutSession.id == session_id).first()
+def get_session_detail(session_id: int, current_user: models.User = Depends(auth_service.get_current_user), db: Session = Depends(get_db)):
+    session = db.query(models.WorkoutSession).filter(models.WorkoutSession.id == session_id, models.WorkoutSession.user_id == current_user.id).first()
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
     

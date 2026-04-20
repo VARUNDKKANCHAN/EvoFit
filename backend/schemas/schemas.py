@@ -78,6 +78,12 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str
+    full_name: Optional[str] = None
+    age: Optional[int] = None
+    weight_kg: Optional[float] = None
+    height_cm: Optional[float] = None
+    gender: Optional[str] = None
+    fitness_goal: Optional[str] = None
 
 class UserResponse(UserBase):
     id: int

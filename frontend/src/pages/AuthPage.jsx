@@ -125,7 +125,13 @@ export default function AuthPage() {
     const success = await register({
       username: signupForm.username,
       email: signupForm.email,
-      password: signupForm.password
+      password: signupForm.password,
+      full_name: signupForm.fullName,
+      age: parseInt(signupForm.age) || null,
+      weight_kg: parseFloat(signupForm.weight) || null,
+      height_cm: parseFloat(signupForm.height) || null,
+      gender: signupForm.gender,
+      fitness_goal: signupForm.fitnessGoal
     });
     setIsSubmitting(false);
     if (success) navigate('/login');
