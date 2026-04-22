@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from backend.routers import predict, targets, users, dashboard, achievements, sessions
+from backend.routers import predict, targets, users, dashboard, achievements, sessions, chat
 from backend.database.database import engine, Base
 import backend.database.models as models
 
@@ -32,6 +32,7 @@ app.include_router(users.router)
 app.include_router(dashboard.router)
 app.include_router(achievements.router)
 app.include_router(sessions.router)
+app.include_router(chat.router)
 
 @app.get("/")
 async def root():

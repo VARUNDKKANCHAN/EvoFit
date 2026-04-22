@@ -10,6 +10,7 @@ import Targets from './pages/Targets';
 import TrophyRoom from './pages/TrophyRoom';
 import SessionHistory from './pages/SessionHistory';
 import UserProfile from './pages/UserProfile';
+import Chatbot from './pages/Chatbot';
 import ThemeToggle from './components/ThemeToggle';
 import { useAuth } from './context/AuthContext';
 import { ToastContainer } from 'react-toastify';
@@ -380,10 +381,7 @@ function AppShell() {
               <Route path="/history"   element={<SessionHistory />} />
               <Route path="/trophy"    element={<TrophyRoom />} />
               <Route path="/profile"   element={<UserProfile />} />
-              <Route path="/chatbot"   element={
-                <ComingSoon title="AI Chatbot" icon="🤖"
-                  description="Ask the EvoFit AI coach anything about your training — powered by RAG on your personal workout data." />
-              } />
+              <Route path="/chatbot"   element={<Chatbot />} />
             </Routes>
           </AnimatedPage>
         </div>

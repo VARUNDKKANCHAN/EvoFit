@@ -41,8 +41,12 @@ python-multipart>=0.0.9
 # AI CHATBOT (RAG)
 # ========================
 langchain
+langchain-groq
+langchain-huggingface
+langchain-community
 chromadb
 sentence-transformers
+python-dotenv
 
 # ========================
 # EXPERIMENT TRACKING
