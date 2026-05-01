@@ -197,13 +197,13 @@ export default function Leaderboard() {
           </motion.div>
         </div>
 
-        {/* Podium Grid - Enhanced Depth and Scaling */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end mt-4 h-[auto] md:h-[380px] px-2 max-w-5xl mx-auto w-full">
+        {/* Podium Grid - Fixed Alignment and Overflow */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end mt-4 md:mt-8 min-h-[420px] px-2 max-w-5xl mx-auto w-full relative">
           
           {/* 2nd Place (Silver) */}
           {top3[1] && (
             <motion.div variants={itemVariants} className="relative group md:order-1 order-2">
-              <div className="glass-card flex flex-col items-center p-8 border-t-4 border-t-slate-300 bg-gradient-to-b from-slate-400/10 to-evofit-bg-secondary relative z-10 transform md:translate-y-8 hover:-translate-y-2 transition-all duration-300 shadow-premium-card">
+              <div className="glass-card flex flex-col items-center p-8 border-t-4 border-t-slate-300 bg-gradient-to-b from-slate-400/10 to-evofit-bg-secondary relative z-10 hover:-translate-y-2 transition-all duration-300 shadow-premium-card">
                 <div className="absolute -top-6 w-12 h-12 rounded-full bg-gradient-to-br from-slate-100 to-slate-400 text-slate-900 flex items-center justify-center font-black text-xl shadow-lg border-4 border-evofit-bg-secondary">
                   2
                 </div>
@@ -247,7 +247,7 @@ export default function Leaderboard() {
           {/* 3rd Place (Bronze) */}
           {top3[2] && (
             <motion.div variants={itemVariants} className="relative group md:order-3 order-3">
-              <div className="glass-card flex flex-col items-center p-8 border-t-4 border-t-orange-700 bg-gradient-to-b from-orange-900/10 to-evofit-bg-secondary relative z-10 transform md:translate-y-12 hover:-translate-y-2 transition-all duration-300 shadow-premium-card">
+              <div className="glass-card flex flex-col items-center p-8 border-t-4 border-t-orange-700 bg-gradient-to-b from-orange-900/10 to-evofit-bg-secondary relative z-10 hover:-translate-y-2 transition-all duration-300 shadow-premium-card">
                 <div className="absolute -top-6 w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-orange-800 text-white flex items-center justify-center font-black text-xl shadow-lg border-4 border-evofit-bg-secondary">
                   3
                 </div>
