@@ -106,8 +106,44 @@ class ChatService:
                     WorkoutSession.date >= t.start_date,
                     WorkoutSession.date <= t.end_date
                 ).scalar() or 0
-                context += f"- {t.exercise.capitalize()}: {reps_done}/{t.weekly_rep_target} reps completed.\n"
+        # Recovery Estimator Engine
+        from datetime import timedelta
+        from sqlalchemy import func
+        forty_eight_hours_ago = today - timedelta(days=2)
+        recent_volume = db.query(
+            WorkoutSession.exercise,
+            func.sum(WorkoutSession.reps_actual).label("reps")
+        ).filter(
+            WorkoutSession.user_id == user_id,
+            WorkoutSession.date >= forty_eight_hours_ago
+        ).group_by(WorkoutSession.exercise).all()
+
+        muscle_map = {
+            "bench": "Chest & Triceps",
+            "ohp": "Shoulders & Triceps",
+            "squat": "Legs",
+            "dead": "Legs & Lower Back",
+            "row": "Back & Biceps"
+        }
+
+        recovering_muscles = []
+        for ex, reps in recent_volume:
+            if reps and reps > 40:
+                muscle = muscle_map.get(ex, ex.capitalize())
+                if muscle not in recovering_muscles:
+                    recovering_muscles.append(muscle)
+                    
+        all_muscles = list(set(muscle_map.values()))
+        fresh_muscles = [m for m in all_muscles if m not in recovering_muscles]
         
+        context += "\nRecovery Status:\n"
+        if recovering_muscles:
+            rec_str = " & ".join(recovering_muscles[:2])
+            suggest_str = fresh_muscles[0] if fresh_muscles else "Light Cardio"
+            context += f"- {rec_str} require 48 hours of recovery.\n- Suggested next workout focus: {suggest_str}.\n"
+        else:
+            context += "- All muscle groups are fully recovered. Ready for any workout.\n"
+
         return context
 
     def get_chat_response(self, query: str, user_id: int):
