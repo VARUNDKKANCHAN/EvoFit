@@ -6,7 +6,7 @@ from langchain_community.vectorstores import Chroma
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.messages import SystemMessage, HumanMessage
 from sqlalchemy.orm import Session
-from backend.database.models import WorkoutSession, User
+from backend.database.models import WorkoutSession, User, UserProfile, BodyMetric
 from backend.database.database import SessionLocal
 
 load_dotenv()
@@ -54,14 +54,29 @@ class ChatService:
         print(f"Successfully indexed {len(chunks)} chunks into ChromaDB.")
 
     def get_user_context(self, user_id: int, db: Session):
-        """Fetch user-specific workout data to personalize the chat."""
+        """Fetch user-specific workout data and body metrics to personalize the chat."""
         user = db.query(User).filter(User.id == user_id).first()
         if not user:
             return "No user data found."
 
+        # Fetch Profile and latest Body Metrics
+        profile = db.query(UserProfile).filter(UserProfile.user_id == user_id).first()
+        latest_metric = db.query(BodyMetric).filter(BodyMetric.user_id == user_id).order_by(BodyMetric.log_date.desc()).first()
+        
+        context = f"User Profile:\n- Name: {user.username}\n- Level: {user.level}\n- Total XP: {user.xp}\n"
+        
+        if profile:
+            context += f"- Age: {profile.age if profile.age else 'N/A'}\n"
+            context += f"- Gender: {profile.gender if profile.gender else 'N/A'}\n"
+            context += f"- Height: {profile.height_cm if profile.height_cm else 'N/A'} cm\n"
+            context += f"- Fitness Goal: {profile.fitness_goal if profile.fitness_goal else 'N/A'}\n"
+        
+        # Priority on dynamic weight log, fallback to profile static weight
+        current_weight = latest_metric.weight if latest_metric else (profile.weight_kg if profile else None)
+        context += f"- Current Weight: {current_weight if current_weight else 'N/A'} kg\n\n"
+
         sessions = db.query(WorkoutSession).filter(WorkoutSession.user_id == user_id).order_by(WorkoutSession.created_at.desc()).limit(5).all()
         
-        context = f"User Profile:\n- Name: {user.username}\n- Level: {user.level}\n- Total XP: {user.xp}\n\n"
         context += "Recent Workout History:\n"
         if not sessions:
             context += "- No sessions recorded yet."
