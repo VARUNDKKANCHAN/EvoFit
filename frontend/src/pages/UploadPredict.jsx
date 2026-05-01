@@ -2,6 +2,8 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import api from '../api/auth';
+import Confetti from 'react-confetti';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const REQUIRED_COLS = ['acc_x', 'acc_y', 'acc_z', 'gyr_x', 'gyr_y', 'gyr_z'];
 const ALLOWED_EXT   = ['.csv', '.pkl'];
@@ -67,6 +69,8 @@ export default function UploadPredict() {
   const [dragOver, setDragOver] = useState(false);
   const [loading, setLoading]   = useState(false);
   const [error, setError]       = useState('');
+  const [showLevelUp, setShowLevelUp] = useState(false);
+  const [levelUpData, setLevelUpData] = useState(null);
   const inputRef                = useRef();
 
   const isAllowed = (f) => ALLOWED_EXT.some(ext => f.name.toLowerCase().endsWith(ext));
@@ -107,15 +111,26 @@ export default function UploadPredict() {
         });
       }
 
-      // Delay navigation slightly if there are achievements so user can see the toast
-      const delay = data.new_achievements?.length > 0 ? 2000 : 0;
-      setTimeout(() => {
-        navigate('/analytics', { state: { result: data, filename: file.name } });
-      }, delay);
+      // Delay navigation slightly if there are achievements
+      if (data.leveled_up) {
+        setLoading(false);
+        setLevelUpData({ xp: data.new_xp_total, filename: file.name, result: data });
+        setShowLevelUp(true);
+      } else {
+        const delay = data.new_achievements?.length > 0 ? 2000 : 0;
+        setTimeout(() => {
+          navigate('/analytics', { state: { result: data, filename: file.name } });
+        }, delay);
+      }
     } catch (err) {
       setError(err.message || 'Could not reach the API. Is the backend running on port 8000?');
       setLoading(false); // only stop loading on error, so UI doesn't flash before nav
     }
+  };
+
+  const handleContinueAfterLevelUp = () => {
+    setShowLevelUp(false);
+    navigate('/analytics', { state: { result: levelUpData.result, filename: levelUpData.filename } });
   };
 
   const reset = () => { setFile(null); setError(''); };
@@ -126,6 +141,40 @@ export default function UploadPredict() {
     <div className="flex-1 flex flex-col items-center py-6 md:py-8 px-4 md:px-6 overflow-y-auto relative z-10 bg-evofit-bg-primary font-inter min-h-full animate-page-enter">
       <BackgroundOrbs />
       
+      <AnimatePresence>
+        {showLevelUp && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <Confetti width={window.innerWidth} height={window.innerHeight} recycle={false} numberOfPieces={500} colors={['#7C3AED', '#3B82F6', '#34D399', '#F472B6', '#F59E0B']} />
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }} 
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ scale: 0.8, opacity: 0, y: 50 }} 
+              animate={{ scale: 1, opacity: 1, y: 0 }} 
+              exit={{ scale: 0.8, opacity: 0 }} 
+              className="relative z-10 bg-gradient-to-br from-[#16161F] to-[#0D0D14] p-10 rounded-3xl border border-evofit-purple-main/50 text-center max-w-sm w-full shadow-[0_0_80px_rgba(124,58,237,0.3)]"
+            >
+              <div className="w-24 h-24 mx-auto bg-gradient-to-br from-amber-400 to-amber-600 rounded-full flex items-center justify-center mb-6 shadow-xl shadow-amber-500/20">
+                <svg width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="white" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <h2 className="text-3xl font-black text-white mb-2 tracking-tight">LEVEL UP!</h2>
+              <p className="text-evofit-text-secondary font-medium mb-8">You've reached a new rank. Your power grows!</p>
+              <button 
+                onClick={handleContinueAfterLevelUp}
+                className="w-full bg-gradient-to-r from-evofit-purple-light to-evofit-purple-main text-white py-3.5 rounded-xl font-bold shadow-lg hover:shadow-evofit-purple-main/40 transition-all hover:scale-105"
+              >
+                Continue to Analytics
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* ── Heading ───────────────────────────────── */}
       <div className="w-full max-w-[760px] mb-6">
       </div>

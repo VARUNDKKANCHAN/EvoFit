@@ -79,10 +79,34 @@ class ChatService:
         
         context += "Recent Workout History:\n"
         if not sessions:
-            context += "- No sessions recorded yet."
+            context += "- No sessions recorded yet.\n"
         else:
             for s in sessions:
                 context += f"- Date: {s.date}, Exercise: {s.exercise}, Reps: {s.reps_actual}, Form Score: {s.form_score}%\n"
+
+        # Fetch Weekly Targets
+        from backend.database.models import Target
+        from datetime import date
+        today = date.today()
+        targets = db.query(Target).filter(
+            Target.user_id == user_id,
+            Target.end_date >= today
+        ).all()
+        
+        context += "\nCurrent Weekly Targets:\n"
+        if not targets:
+            context += "- No active targets.\n"
+        else:
+            for t in targets:
+                # Get current reps done towards this target
+                from sqlalchemy import func
+                reps_done = db.query(func.sum(WorkoutSession.reps_actual)).filter(
+                    WorkoutSession.user_id == user_id,
+                    WorkoutSession.exercise == t.exercise,
+                    WorkoutSession.date >= t.start_date,
+                    WorkoutSession.date <= t.end_date
+                ).scalar() or 0
+                context += f"- {t.exercise.capitalize()}: {reps_done}/{t.weekly_rep_target} reps completed.\n"
         
         return context
 

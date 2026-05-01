@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
+import { motion } from 'framer-motion';
 
 const EXERCISE_COLORS = {
   bench: '#7C3AED',
@@ -62,13 +63,31 @@ export default function Dashboard() {
 
   const { kpis, trend_data, recent_sessions, distribution, targets, insights } = data || {};
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } }
+  };
+
   return (
     <div className="flex-1 flex flex-col items-center py-6 md:py-10 px-4 md:px-7 overflow-y-auto bg-evofit-bg-primary min-h-screen font-inter">
       {/* ── CENTRAL ARTBOARD (1440px) ─────────────────────────────────── */}
-      <div className="evofit-page-container">
+      <motion.div 
+        className="evofit-page-container"
+        initial="hidden"
+        animate="show"
+        variants={containerVariants}
+      >
         
         {/* ── TOP HEADER (Welcome) ─────────────────────────────────────────── */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
+        <motion.div variants={itemVariants} className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
           <div>
             <h1 className="text-[28px] md:text-[32px] font-extrabold m-0 tracking-tight text-evofit-text-primary">
               Welcome back, {user?.fullName || user?.username || 'Fitness Warrior'} 👋
@@ -85,11 +104,11 @@ export default function Dashboard() {
                 Go Premium
              </button>
           </div>
-        </div>
+        </motion.div>
 
         {/* ── XP LEVEL PROGRESS BAR ────────────────────────────────────────── */}
         {data?.user_progression && (
-          <div className="glass-card p-6 mb-7 flex items-center justify-between gap-6 shadow-premium-card animate-fade-in-up">
+          <motion.div variants={itemVariants} className="glass-card p-6 mb-7 flex items-center justify-between gap-6 shadow-premium-card">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-[0_0_20px_rgba(245,158,11,0.3)] shrink-0 group-hover:scale-105 transition-transform">
                 <Trophy size={24} className="text-white" strokeWidth={2.5} />
@@ -113,14 +132,14 @@ export default function Dashboard() {
                 />
               </div>
             </div>
-          </div>
+          </motion.div>
         )}
 
         {/* ── HERO KPI ROW (4 Cards) ────────────────────────────────────────── */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-7 mb-7">
+        <motion.div variants={containerVariants} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-7 mb-7">
           
           {/* KPI 1: Total Reps */}
-          <div className="glass-card p-7 shadow-premium-card hover:border-evofit-purple-main/30 transition-all group relative overflow-hidden">
+          <motion.div variants={itemVariants} className="glass-card p-7 shadow-premium-card hover:border-evofit-purple-main/30 transition-all group relative overflow-hidden">
              <div className="flex justify-between items-start mb-4">
                 <p className="text-[13px] text-evofit-text-muted font-bold uppercase tracking-widest m-0">This Week's Reps</p>
                 <div className="w-9 h-9 rounded-lg bg-evofit-purple-main/10 flex items-center justify-center text-evofit-purple-light group-hover:scale-110 transition-transform">
@@ -137,10 +156,10 @@ export default function Dashboard() {
                   </div>
                 )}
              </div>
-           </div>
+           </motion.div>
 
           {/* KPI 2: Avg Form Score */}
-          <div className="glass-card p-7 shadow-premium-card hover:border-evofit-purple-main/30 transition-all group">
+          <motion.div variants={itemVariants} className="glass-card p-7 shadow-premium-card hover:border-evofit-purple-main/30 transition-all group">
              <div className="flex justify-between items-start mb-1">
                 <p className="text-[13px] text-evofit-text-muted font-bold uppercase tracking-widest m-0">Avg. Form Score</p>
                 <div className="w-[45px] h-[45px]">
@@ -163,10 +182,10 @@ export default function Dashboard() {
                   {kpis?.avg_form_score >= 90 ? 'Excellent' : kpis?.avg_form_score >= 70 ? 'Good' : 'N/A'}
                 </p>
              </div>
-           </div>
+           </motion.div>
 
           {/* KPI 3: Consistency */}
-          <div className="glass-card p-7 shadow-premium-card border-evofit-purple-main/40 bg-evofit-purple-main/[0.03] hover:bg-evofit-purple-main/[0.05] transition-all group">
+          <motion.div variants={itemVariants} className="glass-card p-7 shadow-premium-card border-evofit-purple-main/40 bg-evofit-purple-main/[0.03] hover:bg-evofit-purple-main/[0.05] transition-all group">
              <div className="flex justify-between items-start mb-4">
                 <p className="text-[13px] text-evofit-purple-light font-bold uppercase tracking-widest m-0">Consistency</p>
                 <div className="flex gap-0.5 items-end h-6">
@@ -184,10 +203,10 @@ export default function Dashboard() {
                   {kpis?.consistency_score > 0 ? `${kpis.consistency_score}%` : '0%'}
                 </h2>
              </div>
-           </div>
+           </motion.div>
 
           {/* KPI 4: Streak */}
-          <div className="glass-card p-7 shadow-premium-card hover:border-amber-500/30 transition-all group">
+          <motion.div variants={itemVariants} className="glass-card p-7 shadow-premium-card hover:border-amber-500/30 transition-all group">
              <div className="flex justify-between items-start mb-4">
                 <p className="text-[13px] text-evofit-text-muted font-bold uppercase tracking-widest m-0">Active Streak</p>
                 <div className="w-9 h-9 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500 group-hover:scale-110 transition-transform">
@@ -202,8 +221,8 @@ export default function Dashboard() {
                   <div className="px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-[10px] text-amber-500 font-black mb-2 uppercase">Record High</div>
                 )}
              </div>
-           </div>
-        </div>
+           </motion.div>
+        </motion.div>
 
         {/* ── QUICK UPLOAD + LAST SESSION ───────────────────────────────── */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-7 mb-7">
@@ -563,14 +582,35 @@ export default function Dashboard() {
               </div>
 
               {/* Key Insights */}
-              <div className="flex items-center gap-3">
-                 <div className="w-8 h-8 rounded-lg bg-evofit-purple-main/10 flex items-center justify-center text-evofit-purple-light">
-                    <Sparkles size={18} />
+              <div className="flex items-center justify-between gap-3 mb-2">
+                 <div className="flex items-center gap-3">
+                   <div className="w-8 h-8 rounded-lg bg-evofit-purple-main/10 flex items-center justify-center text-evofit-purple-light">
+                      <Sparkles size={18} />
+                   </div>
+                   <h3 className="text-xl font-extrabold text-evofit-text-primary m-0 tracking-tight">Key Insights & Recovery</h3>
                  </div>
-                 <h3 className="text-xl font-extrabold text-evofit-text-primary m-0 tracking-tight">Key Insights</h3>
+                 
+                 <button 
+                   onClick={() => window.location.href='/chatbot?action=generate_workout'}
+                   className="flex items-center gap-2 bg-gradient-to-r from-evofit-purple-light to-evofit-purple-main text-white px-4 py-2 rounded-xl text-[13px] font-bold shadow-lg shadow-evofit-purple-main/20 hover:shadow-evofit-purple-main/40 transition-all hover:scale-[1.02]"
+                 >
+                   <Activity size={16} /> Generate AI Workout
+                 </button>
               </div>
               
               <div className="space-y-5">
+                 {/* Recovery Estimator */}
+                 {data?.recovery_estimate && (
+                    <div className="glass-card p-6 border-l-4 border-l-evofit-purple-light border-evofit-border flex items-start gap-4">
+                       <div className="w-12 h-12 rounded-full bg-evofit-bg-secondary flex items-center justify-center shrink-0 border border-evofit-border">
+                          <Activity size={20} className="text-amber-400" />
+                       </div>
+                       <div>
+                          <p className="text-[15px] font-extrabold text-evofit-text-primary m-0 mb-1">Recovery Engine</p>
+                          <p className="text-[13px] text-evofit-text-secondary m-0 leading-relaxed font-medium">{data.recovery_estimate}</p>
+                       </div>
+                    </div>
+                 )}
                  {insights?.length > 0 ? (
                     insights.map((insight, i) => (
                       <div key={i} className="glass-card p-6 border-evofit-border hover:border-evofit-purple-main/30 transition-all flex items-start gap-4">
@@ -658,7 +698,7 @@ export default function Dashboard() {
            </div>
         </footer>
 
-      </div>
+      </motion.div>
     </div>
   );
 }

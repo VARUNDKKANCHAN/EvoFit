@@ -12,9 +12,12 @@ import SessionHistory from './pages/SessionHistory';
 import UserProfile from './pages/UserProfile';
 import Chatbot from './pages/Chatbot';
 import ThemeToggle from './components/ThemeToggle';
+import FloatingChatbot from './components/FloatingChatbot';
 import { useAuth } from './context/AuthContext';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+
+import { AnimatePresence, motion } from 'framer-motion';
 
 /* ══════════════════════════════════════════════════
    Animated page wrapper — fades + slides on route change
@@ -23,9 +26,16 @@ function AnimatedPage({ children }) {
   const location = useLocation();
 
   return (
-    <div key={location.pathname} className="contents animate-page-enter">
+    <motion.div
+      key={location.pathname}
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -15 }}
+      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+      className="contents"
+    >
       {children}
-    </div>
+    </motion.div>
   );
 }
 
@@ -366,26 +376,29 @@ function AppShell() {
           />
         )}
         <div className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col">
-          <AnimatedPage>
-            <Routes location={location}>
-              {/* Auth Routes */}
-              <Route path="/login" element={<AuthPage />} />
-              <Route path="/signup" element={<AuthPage />} />
+          <AnimatePresence mode="wait">
+            <AnimatedPage>
+              <Routes location={location} key={location.pathname}>
+                {/* Auth Routes */}
+                <Route path="/login" element={<AuthPage />} />
+                <Route path="/signup" element={<AuthPage />} />
 
-              {/* Main App Routes */}
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/upload"    element={<UploadPredict />} />
-              <Route path="/analytics" element={<Analytics />} />
-              <Route path="/targets"   element={<Targets />} />
-              <Route path="/history"   element={<SessionHistory />} />
-              <Route path="/trophy"    element={<TrophyRoom />} />
-              <Route path="/profile"   element={<UserProfile />} />
-              <Route path="/chatbot"   element={<Chatbot />} />
-            </Routes>
-          </AnimatedPage>
+                {/* Main App Routes */}
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/upload"    element={<UploadPredict />} />
+                <Route path="/analytics" element={<Analytics />} />
+                <Route path="/targets"   element={<Targets />} />
+                <Route path="/history"   element={<SessionHistory />} />
+                <Route path="/trophy"    element={<TrophyRoom />} />
+                <Route path="/profile"   element={<UserProfile />} />
+                <Route path="/chatbot"   element={<Chatbot />} />
+              </Routes>
+            </AnimatedPage>
+          </AnimatePresence>
         </div>
       </div>
+      {!isAuthPage && <FloatingChatbot />}
     </div>
   );
 }

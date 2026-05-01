@@ -231,6 +231,7 @@ class DashboardSummaryResponse(BaseModel):
     distribution: List[DistributionItem]
     targets: List[DashboardTargetItem]
     insights: List[str]
+    recovery_estimate: Optional[str] = None
 
 # --- AUTH SCHEMAS ---
 

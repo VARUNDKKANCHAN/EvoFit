@@ -213,6 +213,41 @@ def get_dashboard_summary(current_user: models.User = Depends(auth_service.get_c
 
     recent_achievements = db.query(models.Achievement).filter(models.Achievement.user_id == user_id).order_by(models.Achievement.unlocked_at.desc()).limit(3).all()
     
+    # 7. Recovery Estimator Engine
+    forty_eight_hours_ago = today - timedelta(days=2)
+    recent_volume = db.query(
+        models.WorkoutSession.exercise,
+        func.sum(models.WorkoutSession.reps_actual).label("reps")
+    ).filter(
+        models.WorkoutSession.user_id == user_id,
+        models.WorkoutSession.date >= forty_eight_hours_ago
+    ).group_by(models.WorkoutSession.exercise).all()
+
+    muscle_map = {
+        "bench": "Chest & Triceps",
+        "ohp": "Shoulders & Triceps",
+        "squat": "Legs",
+        "dead": "Legs & Lower Back",
+        "row": "Back & Biceps"
+    }
+
+    recovering_muscles = []
+    for ex, reps in recent_volume:
+        if reps and reps > 40:
+            muscle = muscle_map.get(ex, ex.capitalize())
+            if muscle not in recovering_muscles:
+                recovering_muscles.append(muscle)
+                
+    all_muscles = list(set(muscle_map.values()))
+    fresh_muscles = [m for m in all_muscles if m not in recovering_muscles]
+    
+    if recovering_muscles:
+        rec_str = " & ".join(recovering_muscles[:2])
+        suggest_str = fresh_muscles[0] if fresh_muscles else "Light Cardio"
+        recovery_estimate = f"{rec_str} require 48 hours of recovery. Suggested next workout: {suggest_str}."
+    else:
+        recovery_estimate = "All muscle groups are fully recovered. You are ready to crush any workout!"
+        
     return DashboardSummaryResponse(
         kpis=KPIStats(
             total_reps_lifted=reps_week,
@@ -230,5 +265,6 @@ def get_dashboard_summary(current_user: models.User = Depends(auth_service.get_c
         recent_sessions=recent_sessions,
         distribution=distribution,
         targets=targets,
-        insights=insights
+        insights=insights,
+        recovery_estimate=recovery_estimate
     )

@@ -23,19 +23,28 @@ const Chatbot = () => {
         scrollToBottom();
     }, [messages]);
 
-    const handleSend = async (e) => {
-        e.preventDefault();
-        if (!input.trim() || isLoading) return;
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const action = urlParams.get('action');
+        if (action === 'generate_workout') {
+            window.history.replaceState({}, document.title, window.location.pathname);
+            setTimeout(() => {
+                sendMessage("Please generate an optimal workout for me today based on my recovery, recent sessions, and weekly targets. Be specific about sets and reps.");
+            }, 500);
+        }
+    }, []);
 
-        const userMessage = { role: 'user', content: input };
+    const sendMessage = async (text) => {
+        if (!text.trim()) return;
+
+        const userMessage = { role: 'user', content: text };
         setMessages(prev => [...prev, userMessage]);
-        setInput('');
         setIsLoading(true);
 
         try {
             const token = localStorage.getItem('evofit_token');
             const response = await axios.post(`${API_BASE_URL}/chat/`, 
-                { query: input },
+                { query: text },
                 { 
                     headers: { 
                         'Authorization': `Bearer ${token}`,
@@ -55,6 +64,15 @@ const Chatbot = () => {
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const handleSend = async (e) => {
+        e.preventDefault();
+        if (!input.trim() || isLoading) return;
+        
+        const currentInput = input;
+        setInput('');
+        await sendMessage(currentInput);
     };
 
     const clearChat = () => {
