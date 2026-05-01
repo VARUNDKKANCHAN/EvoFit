@@ -55,12 +55,12 @@ export default function FloatingChatbot() {
   return (
     <>
       <motion.button
-        className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-gradient-to-r from-evofit-purple-light to-evofit-purple-main flex items-center justify-center text-white shadow-lg shadow-evofit-purple-main/40 z-50 hover:scale-110 transition-transform"
+        className="fixed bottom-6 right-6 w-12 h-12 rounded-full bg-gradient-to-r from-evofit-purple-light/80 to-evofit-purple-main/80 hover:from-evofit-purple-light hover:to-evofit-purple-main flex items-center justify-center text-white shadow-lg shadow-evofit-purple-main/20 z-50 transition-all opacity-70 hover:opacity-100"
         onClick={() => setIsOpen(true)}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
       >
-        <MessageCircle size={28} />
+        <MessageCircle size={24} />
       </motion.button>
 
       <AnimatePresence>
