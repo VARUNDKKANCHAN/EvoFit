@@ -61,10 +61,11 @@ def get_dashboard_summary(current_user: models.User = Depends(auth_service.get_c
         models.WorkoutSession.date >= last_week
     ).scalar() or 0
 
-    avg_form = db.query(func.avg(models.WorkoutSession.form_score)).filter(
+    avg_form_raw = db.query(func.avg(models.WorkoutSession.form_score)).filter(
         models.WorkoutSession.user_id == user_id,
         models.WorkoutSession.date >= last_week
     ).scalar() or 0.0
+    avg_form = round(avg_form_raw, 2)
 
     # For consistency, we'll fetch recently processed sessions to pull rhythm from JSON if available
     recent_sessions_raw = db.query(models.WorkoutSession).filter(
