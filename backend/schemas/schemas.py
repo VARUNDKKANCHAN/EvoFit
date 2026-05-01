@@ -265,3 +265,16 @@ class MeResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class LeaderboardUser(BaseModel):
+    id: int
+    username: str
+    xp: int
+    level: int
+    rank: int
+    is_current_user: bool
+
+class LeaderboardResponse(BaseModel):
+    leaderboard: List[LeaderboardUser]
+    current_user_rank: int
+    current_user_xp: int

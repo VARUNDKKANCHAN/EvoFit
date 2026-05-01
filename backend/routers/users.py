@@ -120,3 +120,32 @@ def get_user_profile(current_user: models.User = Depends(auth_service.get_curren
     if not profile:
         raise HTTPException(status_code=404, detail="Profile not found")
     return profile
+
+@router.get("/leaderboard", response_model=schemas.LeaderboardResponse)
+def get_leaderboard(current_user: models.User = Depends(auth_service.get_current_user), db: Session = Depends(get_db)):
+    """Get the global XP leaderboard and the current user's rank."""
+    # Note: Using python sort for simplicity; for large DBs, use an explicit indexed SQL order_by and rank() window function.
+    users = db.query(models.User).order_by(models.User.xp.desc()).all()
+    
+    leaderboard = []
+    current_user_rank = -1
+    for idx, user in enumerate(users):
+        rank = idx + 1
+        is_current = (user.id == current_user.id)
+        if is_current:
+            current_user_rank = rank
+            
+        leaderboard.append({
+            "id": user.id,
+            "username": user.username,
+            "xp": user.xp,
+            "level": user.level,
+            "rank": rank,
+            "is_current_user": is_current
+        })
+        
+    return schemas.LeaderboardResponse(
+        leaderboard=leaderboard,
+        current_user_rank=current_user_rank,
+        current_user_xp=current_user.xp
+    )

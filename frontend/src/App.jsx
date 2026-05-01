@@ -11,6 +11,7 @@ import TrophyRoom from './pages/TrophyRoom';
 import SessionHistory from './pages/SessionHistory';
 import UserProfile from './pages/UserProfile';
 import Chatbot from './pages/Chatbot';
+import Leaderboard from './pages/Leaderboard';
 import ThemeToggle from './components/ThemeToggle';
 import FloatingChatbot from './components/FloatingChatbot';
 import { useAuth } from './context/AuthContext';
@@ -349,6 +350,7 @@ function AppShell() {
       case '/history': return 'Workout History';
       case '/trophy': return 'EvoFit Trophy Room';
       case '/chatbot': return 'EvoFit AI Assistant';
+      case '/leaderboard': return 'Global Leaderboard';
       case '/profile': return 'My Profile';
       default: return 'EvoFit Dashboard';
     }
@@ -391,6 +393,7 @@ function AppShell() {
                 <Route path="/targets"   element={<Targets />} />
                 <Route path="/history"   element={<SessionHistory />} />
                 <Route path="/trophy"    element={<TrophyRoom />} />
+                <Route path="/leaderboard" element={<Leaderboard />} />
                 <Route path="/profile"   element={<UserProfile />} />
                 <Route path="/chatbot"   element={<Chatbot />} />
               </Routes>
