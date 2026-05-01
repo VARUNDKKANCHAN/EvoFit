@@ -4,7 +4,7 @@ const API_BASE_URL = 'http://localhost:8000';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000, // 10 second timeout to prevent hanging requests
+  timeout: 60000, // 60 second timeout to prevent hanging requests during ML predictions
 });
 
 // Interceptor: automatically inject JWT token into every request
