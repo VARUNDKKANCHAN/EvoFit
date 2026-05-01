@@ -365,7 +365,7 @@ function AppShell() {
             onMenuClick={() => setMobileMenuOpen(true)}
           />
         )}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col">
           <AnimatedPage>
             <Routes location={location}>
               {/* Auth Routes */}

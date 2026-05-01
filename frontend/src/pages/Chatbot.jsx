@@ -62,7 +62,7 @@ const Chatbot = () => {
     };
 
     return (
-        <div className="w-full h-full flex flex-col animate-page-enter bg-evofit-bg-secondary">
+        <div className="w-full flex-1 flex flex-col animate-page-enter bg-evofit-bg-secondary">
             {/* Header section with branding */}
             <div className="flex items-center justify-between p-4 md:p-6 border-b border-evofit-border/40 shrink-0">
                 <div className="animate-fade-in">
