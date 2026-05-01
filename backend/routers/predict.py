@@ -8,6 +8,8 @@ from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 from fastapi.responses import JSONResponse
 import json
 from typing import List
+from backend.services.chat_service import chat_service
+from langchain_core.messages import SystemMessage, HumanMessage
 
 router = APIRouter(
     prefix="/predict",
@@ -57,9 +59,19 @@ async def predict_exercise(file: UploadFile = File(...), current_user: models.Us
                     "duration": result.get("duration"),
                     "time_range": result.get("time_range"),
                     "overall_consistency": result.get("overall_consistency"),
-                    "best_set_summary": result.get("best_set_summary", "N/A")
+                    "best_set_summary": result.get("best_set_summary", "N/A"),
+                    "ai_insight": "Your strongest recorded performance interval was based on combined volume density."
                 }
             }
+            
+            try:
+                prompt = f"User finished {label} exercise. Reps: {reps}. Form: {avg_conf * 100}%. Best set: {result.get('best_set_summary')}. Consistency: {result.get('overall_consistency')}. Give a SINGLE short, punchy sentence of game-style motivation and observation (e.g. 'Stellar {label} run! Set 2 was an absolute powerhouse of precision.'). Keep it under 15 words. No quotes, no intro."
+                msg = [SystemMessage(content="You are a fitness RPG game announcer."), HumanMessage(content=prompt)]
+                ai_text = f"AI Analysis: {chat_service.llm.invoke(msg).content.strip().replace('\"', '')}"
+                report_data["summary"]["ai_insight"] = ai_text
+                result["ai_insight"] = ai_text # Expose to frontend immediately
+            except Exception:
+                pass
 
             session_row = models.WorkoutSession(
                 date=session_date,

@@ -9,6 +9,8 @@ from backend.database.database import get_db
 from backend.services import auth_service
 from backend.database import models
 from backend.schemas.schemas import DashboardSummaryResponse, KPIStats, TrendPoint, SessionItem, DistributionItem, DashboardTargetItem, UserProgression
+from backend.services.chat_service import chat_service
+from langchain_core.messages import SystemMessage, HumanMessage
 
 router = APIRouter(
     prefix="/dashboard",
@@ -186,17 +188,29 @@ def get_dashboard_summary(current_user: models.User = Depends(auth_service.get_c
     targets.sort(key=lambda x: (-x["is_achieved"], -x["completion_pct"]))
     targets = targets[:4]
 
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    
     # 6. AI Insights
     insights = []
+    
+    streak = get_active_streak(db, user_id)
+    if reps_week > 0 and user:
+        try:
+            prompt = f"User level {user.level}, {user.xp} XP, {streak} day streak, did {reps_week} reps this week with {avg_form}% form. Give a SINGLE short, punchy sentence of game-style motivation (e.g. 'Level {user.level} warrior! Your {avg_form}% form is carrying you to the next rank.'). Keep it under 15 words. No quotes, no intro."
+            msg = [SystemMessage(content="You are a fitness RPG game announcer."), HumanMessage(content=prompt)]
+            ai_insight = chat_service.llm.invoke(msg).content.strip().replace('"', '')
+            insights.append(ai_insight)
+        except:
+            insights.append(f"Level {user.level} warrior! Keep grinding that XP.")
+            
     if reps_week > 100:
-        insights.append(f"You've lifted {reps_week} reps this week. Keep up the momentum!")
+        insights.append(f"Volume check: You've lifted {reps_week} reps this week. Keep up the momentum!")
     if avg_form >= 90:
         insights.append("Your technique is exceptional. Consider increasing intensity.")
     
     if not recent_sessions and not reps_week:
         insights = [] # Keep empty if new user
 
-    user = db.query(models.User).filter(models.User.id == user_id).first()
     recent_achievements = db.query(models.Achievement).filter(models.Achievement.user_id == user_id).order_by(models.Achievement.unlocked_at.desc()).limit(3).all()
     
     return DashboardSummaryResponse(
@@ -204,7 +218,7 @@ def get_dashboard_summary(current_user: models.User = Depends(auth_service.get_c
             total_reps_lifted=reps_week,
             avg_form_score=round(float(avg_form), 1),
             consistency_score=round(float(avg_consistency), 1),
-            active_streak=get_active_streak(db, user_id)
+            active_streak=streak
         ),
         user_progression=UserProgression(
             xp=user.xp if user else 0,

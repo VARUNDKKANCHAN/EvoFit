@@ -74,6 +74,7 @@ def get_session_detail(session_id: int, current_user: models.User = Depends(auth
         "time_range": report_data.get("summary", {}).get("time_range", "N/A"),
         "overall_consistency": report_data.get("summary", {}).get("overall_consistency", "0%"),
         "best_set_summary": report_data.get("summary", {}).get("best_set_summary", "N/A"),
+        "ai_insight": report_data.get("summary", {}).get("ai_insight", ""),
         "exercise_breakdown": [
             {
                 "label": session.exercise,

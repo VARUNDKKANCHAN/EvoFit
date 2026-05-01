@@ -514,7 +514,7 @@ export default function Analytics() {
                 <Sparkles size={14} className="text-amber-400" /> Key Observation
               </h5>
               <p className="text-[12px] text-evofit-text-secondary leading-relaxed font-medium">
-                Your strongest recorded performance interval was {bestSetSummaryStr} based on combined volume density.
+                {predictionResult?.ai_insight || `Your strongest recorded performance interval was ${bestSetSummaryStr} based on combined volume density.`}
               </p>
             </div>
           </div>
