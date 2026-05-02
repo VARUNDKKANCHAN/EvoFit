@@ -1,6 +1,7 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import SuccessToast from '../components/SuccessToast';
 import api from '../api/auth';
 import Confetti from 'react-confetti';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -105,9 +106,7 @@ export default function UploadPredict() {
       // Achievement notifications
       if (data.new_achievements && data.new_achievements.length > 0) {
         data.new_achievements.forEach(badge => {
-          toast.success(`🏆 Achievement Unlocked: ${badge}`, {
-            style: { border: '1px solid #7C3AED', background: '#16161F', color: '#fff' }
-          });
+          toast.success(<SuccessToast title="🏆 Achievement Unlocked!" subtitle={badge} />, { icon: false });
         });
       }
 

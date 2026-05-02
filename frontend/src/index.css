@@ -125,6 +125,10 @@
   from { background-position: 200% center; }
   to   { background-position: -200% center; }
 }
+@keyframes toast-slide-in {
+  from { opacity: 0; transform: translateX(20px) translateY(-10px); }
+  to   { opacity: 1; transform: translateX(0) translateY(0); }
+}
 
 /* ─────────────────────────────────────────────────────────
    ANIMATION UTILITY CLASSES
@@ -136,6 +140,7 @@
 .animate-pulse-glow   { animation: pulse-glow 3s ease-in-out infinite; }
 .animate-shimmer      { animation: shimmer 3s linear infinite; }
 .animate-shimmer-fast { animation: shimmer-fast 2s linear infinite; }
+.animate-toast-slide-in{ animation: toast-slide-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
 .animate-fill-in      { animation: fill-in 1.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
 .animate-slide-in-left{ animation: slide-in-left 0.4s ease both; }
 
@@ -202,4 +207,34 @@ html:not(.dark) .recharts-grid line {
 html:not(.dark) .profile-dark-card {
   background: var(--bg-secondary) !important;
   border-color: var(--border) !important;
+}
+
+/* ─────────────────────────────────────────────────────────
+   CUSTOM TOAST OVERRIDES (react-toastify)
+───────────────────────────────────────────────────────── */
+.Toastify__toast-container {
+  padding: 16px !important;
+  width: auto !important;
+  min-width: 350px;
+}
+
+.Toastify__toast {
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin-bottom: 12px !important;
+  border-radius: 12px !important;
+}
+
+.Toastify__toast-body {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.Toastify__close-button {
+  display: none !important; /* We use our own close button */
+}
+
+.Toastify__progress-bar {
+  display: none !important; /* No progress bar as requested */
 }

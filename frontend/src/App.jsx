@@ -411,22 +411,16 @@ export default function App() {
     <Router>
       <AppShell />
       <ToastContainer
-        position="bottom-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
+        position="top-right"
+        autoClose={4000}
+        hideProgressBar={true}
+        newestOnTop={true}
+        closeOnClick={false}
         rtl={false}
         pauseOnFocusLoss
         draggable
         pauseOnHover
-        theme="dark"
-        toastStyle={{
-          background: '#16161F',
-          border: '1px solid #2A2A3A',
-          color: '#F0F0F5',
-          borderRadius: '12px'
-        }}
+        theme="light"
       />
     </Router>
   );

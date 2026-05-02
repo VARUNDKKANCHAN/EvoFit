@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { authApi } from '../api/auth';
 import { toast } from 'react-toastify';
+import SuccessToast from '../components/SuccessToast';
 
 const AuthContext = createContext();
 
@@ -90,7 +91,8 @@ export function AuthProvider({ children }) {
       const userObj = normalizeUser(meData);
       saveUser(userObj);
 
-      toast.success(`Welcome back, ${userObj.fullName || userObj.username}! ⚡`);
+
+      toast.success(<SuccessToast title="Welcome back!" subtitle={`${userObj.fullName || userObj.username}, your session is ready.`} />, { icon: false });
       return true;
     } catch (error) {
       const msg = error.response?.data?.detail || 'Login failed. Please check your credentials.';
@@ -105,7 +107,7 @@ export function AuthProvider({ children }) {
     try {
       setLoading(true);
       await authApi.register(userData);
-      toast.success('Account created! You can now log in. 🎉');
+      toast.success(<SuccessToast title="Account created!" subtitle="You can now log in to your dashboard." />, { icon: false });
       return true;
     } catch (error) {
       const msg = error.response?.data?.detail || 'Registration failed. Please try again.';
@@ -121,7 +123,7 @@ export function AuthProvider({ children }) {
       const updated = await authApi.updateProfile(profileData);
       const userObj = normalizeUser(updated);
       saveUser(userObj);
-      toast.success('Profile updated successfully! ✅');
+      toast.success(<SuccessToast title="Profile updated successfully" subtitle="Changes saved instantly" />, { icon: false });
       return true;
     } catch (error) {
       toast.error('Failed to update profile.');
