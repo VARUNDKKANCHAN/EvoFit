@@ -149,7 +149,7 @@ export default function Sidebar({ mobileOpen }) {
               ${collapsed ? 'justify-center py-2.5 px-0 mx-1.5' : 'justify-start py-2.5 px-4 mx-3'}
               ${isActive 
                 ? 'bg-evofit-purple-main/5 text-evofit-purple-main' 
-                : 'text-evofit-text-secondary hover:bg-[#F1F5F9] hover:text-evofit-text-primary'}
+                : 'text-evofit-text-secondary hover:bg-evofit-purple-main/5 hover:text-evofit-purple-main'}
               rounded-lg
             `}
             style={{ animationDelay: `${0.05 * idx}s` }}
@@ -173,7 +173,7 @@ export default function Sidebar({ mobileOpen }) {
         {/* User Stats Card (Only if not collapsed) */}
         {!collapsed && user && (
           <div
-            className="mx-2 mb-4 p-3 rounded-xl bg-evofit-bg-secondary border border-evofit-border flex items-center gap-3 cursor-pointer hover:border-evofit-border-hover hover:bg-[#F8FAFC] transition-all duration-200 group"
+            className="mx-2 mb-4 p-3 rounded-xl bg-evofit-bg-secondary border border-evofit-border flex items-center gap-3 cursor-pointer hover:border-evofit-border-hover hover:bg-evofit-purple-main/5 transition-all duration-200 group"
             onClick={() => navigate('/profile')}
             title="View Profile"
           >

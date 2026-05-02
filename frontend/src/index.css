@@ -167,42 +167,39 @@
 ::-webkit-scrollbar-thumb:hover { background: var(--purple-main); }
 
 /* ─────────────────────────────────────────────────────────
-   LIGHT MODE OVERRIDES
+   LIGHT MODE ONLY OVERRIDES
    For components that use hardcoded dark bg colors via
    inline styles or Tailwind bg-[#...] classes.
 ───────────────────────────────────────────────────────── */
-
-/* App header in light mode */
-:root header {
+html:not(.dark) header {
   background-color: var(--bg-secondary) !important;
   border-color: var(--border) !important;
 }
 
-/* Sidebar in light mode */
-:root aside {
+html:not(.dark) aside {
   background-color: var(--bg-sidebar) !important;
   border-color: var(--border) !important;
 }
 
 /* Make sure inputs use theme colors */
-:root input,
-:root select,
-:root textarea {
+html:not(.dark) input,
+html:not(.dark) select,
+html:not(.dark) textarea {
   color: var(--text-primary);
   border-color: var(--border);
 }
 
 /* Recharts axis text fix for light mode */
-:root .recharts-cartesian-axis-tick-value {
+html:not(.dark) .recharts-cartesian-axis-tick-value {
   fill: var(--text-muted) !important;
 }
 
-:root .recharts-grid line {
+html:not(.dark) .recharts-grid line {
   stroke: var(--border) !important;
 }
 
 /* UserProfile hardcoded dark backgrounds — override in light */
-:root .profile-dark-card {
+html:not(.dark) .profile-dark-card {
   background: var(--bg-secondary) !important;
   border-color: var(--border) !important;
 }

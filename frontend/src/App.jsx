@@ -130,7 +130,7 @@ function PageHeader({ title, onMenuClick }) {
         
         {/* Bell */}
         <div
-          className="relative p-2 rounded-lg hover:bg-[#F1F5F9] cursor-pointer transition-all duration-200"
+          className="relative p-2 rounded-lg hover:bg-evofit-purple-main/10 cursor-pointer transition-all duration-200"
           onMouseEnter={() => setBellHover(true)}
           onMouseLeave={() => setBellHover(false)}
         >
@@ -150,15 +150,15 @@ function PageHeader({ title, onMenuClick }) {
             id="user-menu-btn"
             ref={btnRef}
             onClick={() => setDropdownOpen(prev => !prev)}
-            className="flex items-center gap-2.5 p-1.5 rounded-xl hover:bg-[#F1F5F9] transition-all duration-200 focus:outline-none"
+            className="flex items-center gap-2.5 p-1.5 rounded-xl hover:bg-evofit-purple-main/10 transition-all duration-200 focus:outline-none"
             aria-haspopup="true"
             aria-expanded={dropdownOpen}
           >
             <div className="text-right hidden sm:block">
-              <p className="m-0 text-[13px] font-bold text-[#0F172A] leading-tight">
+              <p className="m-0 text-[13px] font-bold text-evofit-text-primary leading-tight">
                 {user?.fullName || user?.username || 'Guest'}
               </p>
-              <p className="m-0 text-[11px] font-medium text-[#64748B] leading-tight mt-0.5">
+              <p className="m-0 text-[11px] font-medium text-evofit-text-muted leading-tight mt-0.5">
                 {user ? `Lv.${level} · ${xp.toLocaleString()} XP` : 'Standard User'}
               </p>
             </div>

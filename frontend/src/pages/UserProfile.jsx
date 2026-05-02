@@ -23,7 +23,7 @@ const genderOptions = ['Male', 'Female', 'Other', 'Prefer not to say'];
 
 function StatCard({ label, value, unit, icon, color = 'bg-evofit-purple-main/10', textColor = 'text-evofit-purple-main' }) {
   return (
-    <div className="bg-white border border-evofit-border rounded-2xl p-5 flex flex-col gap-3 hover:shadow-lg hover:-translate-y-1 transition-all duration-200">
+    <div className="bg-evofit-bg-card border border-evofit-border rounded-2xl p-5 flex flex-col gap-3 hover:shadow-lg hover:-translate-y-1 transition-all duration-200">
       <div className="flex items-center gap-3">
         <div className={`w-8 h-8 rounded-full ${color} flex items-center justify-center text-[14px]`}>
           {icon}
@@ -174,7 +174,7 @@ export default function UserProfile() {
       <div className="max-w-5xl mx-auto space-y-6 animate-fade-in-up">
 
         {/* ── Hero Card ── */}
-        <div className="relative rounded-2xl overflow-hidden border border-evofit-border bg-white shadow-sm">
+        <div className="relative rounded-2xl overflow-hidden border border-evofit-border bg-evofit-bg-card shadow-sm">
           <div className="p-8 md:p-10 flex flex-col md:flex-row items-start md:items-center gap-8">
             {/* Avatar */}
             <div className="relative shrink-0">
@@ -199,7 +199,7 @@ export default function UserProfile() {
             {/* Info */}
             <div className="flex-1 min-w-0">
               <div className="flex flex-wrap items-center gap-3 mb-2">
-                <h1 className="text-3xl md:text-4xl font-black text-[#0F172A] tracking-tight">
+                <h1 className="text-3xl md:text-4xl font-black text-evofit-text-primary tracking-tight">
                   {user.fullName || user.username}
                 </h1>
                 <span
@@ -218,7 +218,7 @@ export default function UserProfile() {
                   <span style={{ color: tier.color }}>Progression — {xpProgress}%</span>
                   <span className="text-evofit-text-muted">{xp.toLocaleString()} / {xpToNext.toLocaleString()} XP</span>
                 </div>
-                <div className="h-2.5 rounded-full bg-[#F1F5F9] overflow-hidden border border-evofit-border/50">
+                <div className="h-2.5 rounded-full bg-evofit-bg-primary overflow-hidden border border-evofit-border/50">
                   <div
                     className="h-full rounded-full transition-all duration-1000"
                     style={{
@@ -249,7 +249,7 @@ export default function UserProfile() {
                   <button
                     id="cancel-profile-btn"
                     onClick={handleCancel}
-                    className="px-5 py-3 rounded-lg text-sm font-bold text-evofit-text-secondary border border-evofit-border hover:bg-[#F8FAFC] transition-all"
+                    className="px-5 py-3 rounded-lg text-sm font-bold text-evofit-text-secondary border border-evofit-border hover:bg-evofit-bg-secondary transition-all"
                   >
                     Cancel
                   </button>
@@ -279,8 +279,8 @@ export default function UserProfile() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
           {/* Personal Information */}
-          <div className="bg-white border border-evofit-border rounded-2xl p-6">
-            <h2 className="text-[13px] font-bold text-[#64748B] uppercase tracking-[0.1em] mb-6 flex items-center gap-2">
+          <div className="bg-evofit-bg-card border border-evofit-border rounded-2xl p-6">
+            <h2 className="text-[13px] font-bold text-evofit-text-muted uppercase tracking-[0.1em] mb-6 flex items-center gap-2">
               <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
               Personal Information
             </h2>
@@ -303,8 +303,8 @@ export default function UserProfile() {
                   { label: 'Gender', value: user.gender || '—' },
                 ].map(({ label, value }) => (
                   <div key={label} className="flex items-center justify-between py-3.5 first:pt-0 last:pb-0">
-                    <span className="text-[13px] font-medium text-[#64748B]">{label}</span>
-                    <span className="text-[14px] font-bold text-[#0F172A]">{value}</span>
+                    <span className="text-[13px] font-medium text-evofit-text-muted">{label}</span>
+                    <span className="text-[14px] font-bold text-evofit-text-primary">{value}</span>
                   </div>
                 ))}
               </div>
@@ -312,8 +312,8 @@ export default function UserProfile() {
           </div>
 
           {/* Fitness Profile */}
-          <div className="bg-white border border-evofit-border rounded-2xl p-6">
-            <h2 className="text-[13px] font-bold text-[#64748B] uppercase tracking-[0.1em] mb-6 flex items-center gap-2">
+          <div className="bg-evofit-bg-card border border-evofit-border rounded-2xl p-6">
+            <h2 className="text-[13px] font-bold text-evofit-text-muted uppercase tracking-[0.1em] mb-6 flex items-center gap-2">
               <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
               Fitness Profile
             </h2>
@@ -335,8 +335,8 @@ export default function UserProfile() {
                   { label: 'BMI', value: bmi ? `${bmi} ${bmi < 18.5 ? '(Underweight)' : bmi < 25 ? '(Normal)' : bmi < 30 ? '(Overweight)' : '(Obese)'}` : '—' },
                 ].map(({ label, value }) => (
                   <div key={label} className="flex items-center justify-between py-3.5 first:pt-0 last:pb-0">
-                    <span className="text-[13px] font-medium text-[#64748B]">{label}</span>
-                    <span className="text-[14px] font-bold text-[#0F172A]">{value}</span>
+                    <span className="text-[13px] font-medium text-evofit-text-muted">{label}</span>
+                    <span className="text-[14px] font-bold text-evofit-text-primary">{value}</span>
                   </div>
                 ))}
               </div>
@@ -345,22 +345,22 @@ export default function UserProfile() {
         </div>
 
         {/* ── Account Info ── */}
-        <div className="bg-white border border-evofit-border rounded-2xl p-6">
-          <h2 className="text-[13px] font-bold text-[#64748B] uppercase tracking-[0.1em] mb-6 flex items-center gap-2">
+        <div className="bg-evofit-bg-card border border-evofit-border rounded-2xl p-6">
+          <h2 className="text-[13px] font-bold text-evofit-text-muted uppercase tracking-[0.1em] mb-6 flex items-center gap-2">
             <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
             Account Details
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="p-4 rounded-xl bg-[#F8FAFC] border border-evofit-border">
-              <p className="text-[11px] font-bold text-[#64748B] uppercase tracking-wider mb-1.5">User ID</p>
-              <p className="font-mono text-sm font-bold text-[#0F172A]">#{user.id}</p>
+            <div className="p-4 rounded-xl bg-evofit-bg-primary border border-evofit-border">
+              <p className="text-[11px] font-bold text-evofit-text-muted uppercase tracking-wider mb-1.5">User ID</p>
+              <p className="font-mono text-sm font-bold text-evofit-text-primary">#{user.id}</p>
             </div>
-            <div className="p-4 rounded-xl bg-[#F8FAFC] border border-evofit-border">
-              <p className="text-[11px] font-bold text-[#64748B] uppercase tracking-wider mb-1.5">Member Since</p>
-              <p className="text-sm font-bold text-[#0F172A]">{memberSince}</p>
+            <div className="p-4 rounded-xl bg-evofit-bg-primary border border-evofit-border">
+              <p className="text-[11px] font-bold text-evofit-text-muted uppercase tracking-wider mb-1.5">Member Since</p>
+              <p className="text-sm font-bold text-evofit-text-primary">{memberSince}</p>
             </div>
-            <div className="p-4 rounded-xl bg-[#F8FAFC] border border-evofit-border">
-              <p className="text-[11px] font-bold text-[#64748B] uppercase tracking-wider mb-1.5">Account Status</p>
+            <div className="p-4 rounded-xl bg-evofit-bg-primary border border-evofit-border">
+              <p className="text-[11px] font-bold text-evofit-text-muted uppercase tracking-wider mb-1.5">Account Status</p>
               <div className="flex items-center gap-2.5 mt-1">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
                 <p className="text-[14px] font-bold text-emerald-600">Verified Active</p>
