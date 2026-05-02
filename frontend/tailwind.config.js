@@ -59,8 +59,8 @@ export default {
         },
       },
       boxShadow: {
-        'purple-glow': '0 0 20px rgba(124, 58, 237, 0.35)',
-        'premium-card': '0 4px 20px rgba(0, 0, 0, 0.4)',
+        'purple-glow': '0 0 20px rgba(124, 58, 237, 0.25)',
+        'premium-card': '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)',
       }
     },
   },
