@@ -116,31 +116,31 @@ function PageHeader({ title, onMenuClick }) {
       </div>
 
       {/* Date */}
-      <div className="hidden md:flex items-center gap-2 text-evofit-text-muted text-[13px] animate-fade-in">
+      <div className="hidden md:flex items-center gap-2 text-evofit-text-muted text-[13px]">
         <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
           <rect x="3" y="4" width="18" height="18" rx="2" />
           <line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
         </svg>
-        Session: {today}
+        {today}
       </div>
 
       {/* Right side */}
-      <div className="flex items-center gap-[14px] ml-4 animate-fade-in delay-100">
+      <div className="flex items-center gap-4 ml-4">
         <ThemeToggle />
         
         {/* Bell */}
         <div
-          className="relative cursor-pointer transition-transform duration-200 hover:scale-110"
+          className="relative p-2 rounded-lg hover:bg-[#F1F5F9] cursor-pointer transition-all duration-200"
           onMouseEnter={() => setBellHover(true)}
           onMouseLeave={() => setBellHover(false)}
         >
           <svg width="20" height="20" fill="none" viewBox="0 0 24 24"
-            stroke={bellHover ? '#A78BFA' : 'var(--text-secondary)'} strokeWidth="2"
+            stroke={bellHover ? '#7C3AED' : '#64748B'} strokeWidth="2"
             className="transition-colors duration-200">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
             <path d="M13.73 21a2 2 0 0 1-3.46 0" />
           </svg>
-          <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-[#EF4444] rounded-full border border-evofit-bg-secondary animate-pulse-glow" />
+          <span className="absolute top-2 right-2 w-2 h-2 bg-[#EF4444] rounded-full border-2 border-white" />
         </div>
 
         {/* User chip + dropdown */}
@@ -150,19 +150,19 @@ function PageHeader({ title, onMenuClick }) {
             id="user-menu-btn"
             ref={btnRef}
             onClick={() => setDropdownOpen(prev => !prev)}
-            className="flex items-center gap-[10px] group focus:outline-none"
+            className="flex items-center gap-2.5 p-1.5 rounded-xl hover:bg-[#F1F5F9] transition-all duration-200 focus:outline-none"
             aria-haspopup="true"
             aria-expanded={dropdownOpen}
           >
             <div className="text-right hidden sm:block">
-              <p className="m-0 text-[13px] font-semibold text-evofit-text-primary leading-tight">
+              <p className="m-0 text-[13px] font-bold text-[#0F172A] leading-tight">
                 {user?.fullName || user?.username || 'Guest'}
               </p>
-              <p className="m-0 text-[11px] text-evofit-purple-light leading-tight">
-                {user ? `Lv.${level} · ${xp.toLocaleString()} XP` : 'Standard'}
+              <p className="m-0 text-[11px] font-medium text-[#64748B] leading-tight mt-0.5">
+                {user ? `Lv.${level} · ${xp.toLocaleString()} XP` : 'Standard User'}
               </p>
             </div>
-            <div className={`w-9 h-9 rounded-full bg-gradient-to-br from-[#6D28D9] to-[#A78BFA] flex items-center justify-center text-[14px] font-bold text-white border-2 transition-all duration-200 ${dropdownOpen ? 'ring-2 ring-evofit-purple-main border-transparent' : 'border-white/10 group-hover:ring-2 group-hover:ring-evofit-purple-main/60'}`}>
+            <div className={`w-8 h-8 rounded-full bg-gradient-to-br from-[#7C3AED] to-[#8B5CF6] flex items-center justify-center text-[12px] font-black text-white border border-white/20 shadow-sm transition-all duration-200 ${dropdownOpen ? 'ring-2 ring-[#7C3AED]/30' : ''}`}>
               {initials}
             </div>
           </button>

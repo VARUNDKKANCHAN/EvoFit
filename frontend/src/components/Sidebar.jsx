@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const NAV = [
@@ -81,6 +81,7 @@ const NAV = [
 
 export default function Sidebar({ mobileOpen }) {
   const navigate    = useNavigate();
+  const location    = useLocation();
   const { user, logout } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
 
@@ -105,7 +106,7 @@ export default function Sidebar({ mobileOpen }) {
         {/* Mobile Close Btn */}
         <button 
           className="lg:hidden absolute right-4 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-evofit-purple-main/10 text-evofit-purple-light hover:bg-evofit-purple-main/20"
-          onClick={() => navigate(location.pathname)} // This is a placeholder since AppShell handles backdrop clicks, but I'll add a proper onClose prop
+          onClick={() => setCollapsed(false)} // Or handle close properly via prop
           style={{ display: mobileOpen ? 'flex' : 'none' }}
         >
           <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
@@ -144,18 +145,23 @@ export default function Sidebar({ mobileOpen }) {
             end={to === '/'}
             title={collapsed ? label : undefined}
             className={({ isActive }) => `
-              group flex items-center gap-3 transition-all duration-200 no-underline text-sm font-medium
-              ${collapsed ? 'justify-center py-[11px] px-0 mx-1.5' : 'justify-start py-[11px] px-5 mx-[10px]'}
+              group relative flex items-center gap-3 transition-all duration-200 no-underline text-sm font-medium
+              ${collapsed ? 'justify-center py-2.5 px-0 mx-1.5' : 'justify-start py-2.5 px-4 mx-3'}
               ${isActive 
-                ? 'premium-gradient text-white shadow-lg rounded-xl scale-[1.02]' 
-                : 'text-evofit-text-secondary hover:bg-evofit-purple-main/5 hover:text-evofit-purple-main rounded-xl'}
-              animate-slide-in-left
+                ? 'bg-evofit-purple-main/5 text-evofit-purple-main' 
+                : 'text-evofit-text-secondary hover:bg-[#F1F5F9] hover:text-evofit-text-primary'}
+              rounded-lg
             `}
             style={{ animationDelay: `${0.05 * idx}s` }}
           >
-            <span className="shrink-0 transition-transform duration-200 group-hover:translate-x-0.5">{icon}</span>
+            {/* Active Indicator Bar */}
+            <div className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-evofit-purple-main rounded-r-full transition-all duration-200 ${location.pathname === (to === '/' ? '/' : to) ? 'opacity-100' : 'opacity-0'}`} />
+            
+            <span className={`shrink-0 transition-all duration-200 ${location.pathname === (to === '/' ? '/' : to) ? 'text-evofit-purple-main' : 'text-evofit-text-muted group-hover:text-evofit-text-primary'}`}>
+              {icon}
+            </span>
             {!collapsed && (
-              <span className="whitespace-nowrap animate-fade-in duration-200">{label}</span>
+              <span className="whitespace-nowrap">{label}</span>
             )}
           </NavLink>
         ))}
@@ -167,29 +173,26 @@ export default function Sidebar({ mobileOpen }) {
         {/* User Stats Card (Only if not collapsed) */}
         {!collapsed && user && (
           <div
-            className="mx-2 mb-4 p-3 rounded-xl bg-evofit-bg-secondary border border-evofit-border flex items-center gap-3 shadow-inner cursor-pointer hover:border-evofit-purple-main/50 hover:bg-evofit-purple-main/5 transition-all duration-200 group"
+            className="mx-2 mb-4 p-3 rounded-xl bg-evofit-bg-secondary border border-evofit-border flex items-center gap-3 cursor-pointer hover:border-evofit-border-hover hover:bg-[#F8FAFC] transition-all duration-200 group"
             onClick={() => navigate('/profile')}
             title="View Profile"
           >
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#6D28D9] to-[#A78BFA] flex items-center justify-center text-white font-bold text-sm border border-evofit-purple-main/30 group-hover:ring-2 group-hover:ring-evofit-purple-main/50 transition-all">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#7C3AED] to-[#8B5CF6] flex items-center justify-center text-white font-bold text-sm border border-white/20 shadow-sm transition-all">
               {(user.fullName || user.username || '?').charAt(0).toUpperCase()}
             </div>
             <div className="flex-1 overflow-hidden">
               <p className="text-[13px] font-bold text-evofit-text-primary truncate m-0">{user.fullName || user.username}</p>
               <div className="flex items-center justify-between mt-0.5">
-                <span className="text-[10px] font-bold text-evofit-purple-light">LVL {user.level || 1}</span>
-                <span className="text-[9px] text-evofit-text-muted">{(user.xp || 0).toLocaleString()} XP</span>
+                <span className="text-[10px] font-bold text-evofit-purple-light uppercase tracking-wider">Lvl {user.level || 1}</span>
+                <span className="text-[10px] text-evofit-text-muted">{(user.xp || 0).toLocaleString()} XP</span>
               </div>
-              <div className="w-full h-1 bg-evofit-bg-primary rounded-full mt-1.5 overflow-hidden">
+              <div className="w-full h-1.5 bg-evofit-bg-primary rounded-full mt-2 overflow-hidden border border-evofit-border/50">
                 <div 
-                  className="h-full bg-gradient-to-r from-[#6D28D9] to-[#A78BFA] transition-all duration-1000" 
+                  className="h-full bg-gradient-to-r from-[#7C3AED] to-[#8B5CF6] transition-all duration-1000" 
                   style={{ width: `${Math.min(100, ((user.xp || 0) / ((user.level || 1) * 1000)) * 100)}%` }}
                 ></div>
               </div>
             </div>
-            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" className="shrink-0 text-evofit-text-muted group-hover:text-evofit-purple-light transition-colors">
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
           </div>
         )}
 

@@ -21,14 +21,16 @@ const fitnessGoals = [
 
 const genderOptions = ['Male', 'Female', 'Other', 'Prefer not to say'];
 
-function StatCard({ label, value, unit, icon }) {
+function StatCard({ label, value, unit, icon, color = 'bg-evofit-purple-main/10', textColor = 'text-evofit-purple-main' }) {
   return (
-    <div className="bg-evofit-bg-card border border-evofit-border rounded-2xl p-5 flex flex-col gap-2 hover:border-evofit-purple-main/40 transition-all duration-200 shadow-sm">
-      <div className="flex items-center gap-2 text-evofit-purple-light text-xs font-bold uppercase tracking-wider">
-        <span>{icon}</span>
-        <span>{label}</span>
+    <div className="bg-white border border-evofit-border rounded-2xl p-5 flex flex-col gap-3 hover:shadow-lg hover:-translate-y-1 transition-all duration-200">
+      <div className="flex items-center gap-3">
+        <div className={`w-8 h-8 rounded-full ${color} flex items-center justify-center text-[14px]`}>
+          {icon}
+        </div>
+        <span className="text-[12px] font-bold text-evofit-text-muted uppercase tracking-wider">{label}</span>
       </div>
-      <div className="text-2xl font-black text-evofit-text-primary">
+      <div className="text-3xl font-black text-evofit-text-primary">
         {value != null ? (
           <>{value}<span className="text-sm font-medium text-evofit-text-muted ml-1">{unit}</span></>
         ) : (
@@ -172,89 +174,82 @@ export default function UserProfile() {
       <div className="max-w-5xl mx-auto space-y-6 animate-fade-in-up">
 
         {/* ── Hero Card ── */}
-        <div className="relative rounded-3xl overflow-hidden border border-evofit-border bg-evofit-bg-card" style={{ boxShadow: `0 0 60px ${tier.glow}20` }}>
-          {/* Background glow */}
-          <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 60% 60% at 20% 50%, ${tier.glow} 0%, transparent 70%)` }} />
-          
-          <div className="relative z-10 p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center gap-6">
+        <div className="relative rounded-2xl overflow-hidden border border-evofit-border bg-white shadow-sm">
+          <div className="p-8 md:p-10 flex flex-col md:flex-row items-start md:items-center gap-8">
             {/* Avatar */}
             <div className="relative shrink-0">
               <div
-                className="w-24 h-24 md:w-28 md:h-28 rounded-3xl flex items-center justify-center text-3xl md:text-4xl font-black text-white border-2"
+                className="w-24 h-24 md:w-32 md:h-32 rounded-full flex items-center justify-center text-4xl md:text-5xl font-black text-white border-4 border-white shadow-xl"
                 style={{
-                  background: `linear-gradient(135deg, #6D28D9, #A78BFA)`,
-                  borderColor: tier.color,
-                  boxShadow: `0 0 30px ${tier.glow}`,
+                  background: `linear-gradient(135deg, #7C3AED, #8B5CF6)`,
+                  boxShadow: `0 0 40px ${tier.glow}40`,
                 }}
               >
                 {initials}
               </div>
               {/* Level badge */}
               <div
-                className="absolute -bottom-2 -right-2 text-xs font-black px-2 py-0.5 rounded-full text-black"
-                style={{ background: `linear-gradient(135deg, ${tier.color}, ${tier.color}CC)` }}
+                className="absolute -bottom-1 -right-1 text-[11px] font-black px-3 py-1 rounded-full text-white shadow-lg border-2 border-white"
+                style={{ background: `linear-gradient(135deg, #7C3AED, #8B5CF6)` }}
               >
-                Lv.{level}
+                LVL {level}
               </div>
             </div>
 
             {/* Info */}
             <div className="flex-1 min-w-0">
-              <div className="flex flex-wrap items-center gap-3 mb-1">
-                <h1 className="text-2xl md:text-3xl font-black text-evofit-text-primary truncate">
+              <div className="flex flex-wrap items-center gap-3 mb-2">
+                <h1 className="text-3xl md:text-4xl font-black text-[#0F172A] tracking-tight">
                   {user.fullName || user.username}
                 </h1>
                 <span
-                  className="text-xs font-bold px-3 py-1 rounded-full"
-                  style={{ background: `${tier.color}20`, color: tier.color, border: `1px solid ${tier.color}40` }}
+                  className="text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-widest"
+                  style={{ background: `${tier.color}15`, color: tier.color, border: `1px solid ${tier.color}30` }}
                 >
                   {tier.name}
                 </span>
               </div>
-              <p className="text-evofit-text-muted text-sm mb-1">@{user.username} · {user.email}</p>
-              <p className="text-evofit-text-muted text-xs mb-4">Member since {memberSince}</p>
+              <p className="text-evofit-text-muted text-[15px] font-medium mb-1">@{user.username} · {user.email}</p>
+              <p className="text-evofit-text-muted text-[13px] mb-6">Member since {memberSince}</p>
 
               {/* XP Bar */}
-              <div>
-                <div className="flex justify-between text-xs mb-1.5">
-                  <span className="font-semibold" style={{ color: tier.color }}>Level {level} — {tier.name}</span>
+              <div className="max-w-md">
+                <div className="flex justify-between text-[12px] font-bold mb-2 uppercase tracking-wide">
+                  <span style={{ color: tier.color }}>Progression — {xpProgress}%</span>
                   <span className="text-evofit-text-muted">{xp.toLocaleString()} / {xpToNext.toLocaleString()} XP</span>
                 </div>
-                <div className="h-2 rounded-full bg-evofit-border overflow-hidden">
+                <div className="h-2.5 rounded-full bg-[#F1F5F9] overflow-hidden border border-evofit-border/50">
                   <div
                     className="h-full rounded-full transition-all duration-1000"
                     style={{
                       width: `${xpProgress}%`,
-                      background: `linear-gradient(90deg, #6D28D9, ${tier.color})`,
-                      boxShadow: `0 0 8px ${tier.glow}`,
+                      background: `linear-gradient(90deg, #7C3AED, #8B5CF6)`,
                     }}
                   />
                 </div>
-                <p className="text-evofit-text-muted text-xs mt-1">{xpToNext - xp} XP to Level {level + 1}</p>
               </div>
             </div>
 
             {/* Edit button */}
-            <div className="shrink-0">
+            <div className="shrink-0 pt-4 md:pt-0">
               {!editing ? (
                 <button
                   id="edit-profile-btn"
                   onClick={() => setEditing(true)}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-all duration-200 hover:scale-105 hover:shadow-lg"
-                  style={{ background: 'linear-gradient(135deg, #7C3AED, #A78BFA)', boxShadow: '0 4px 15px rgba(124,58,237,0.4)' }}
+                  className="flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-bold text-white transition-all duration-200 hover:shadow-lg bg-gradient-to-r from-[#7C3AED] to-[#8B5CF6] hover:-translate-y-0.5 active:translate-y-0"
                 >
-                  <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                  <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
                     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                   </svg>
                   Edit Profile
                 </button>
               ) : (
-                <div className="flex gap-2">
+                <div className="flex gap-3">
                   <button
                     id="cancel-profile-btn"
                     onClick={handleCancel}
-                    className="px-4 py-2.5 rounded-xl text-sm font-bold text-evofit-text-secondary border border-evofit-border hover:border-evofit-border-hover transition-all"
+                    className="px-5 py-3 rounded-lg text-sm font-bold text-evofit-text-secondary border border-evofit-border hover:bg-[#F8FAFC] transition-all"
                   >
                     Cancel
                   </button>
@@ -262,10 +257,9 @@ export default function UserProfile() {
                     id="save-profile-btn"
                     onClick={handleSave}
                     disabled={saving}
-                    className="px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-                    style={{ background: 'linear-gradient(135deg, #10B981, #059669)', boxShadow: '0 4px 15px rgba(16,185,129,0.4)' }}
+                    className="px-6 py-3 rounded-lg text-sm font-bold text-white transition-all bg-[#10B981] hover:bg-[#059669] disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                   >
-                    {saving ? 'Saving...' : '✓ Save Changes'}
+                    {saving ? 'Saving...' : 'Save Changes'}
                   </button>
                 </div>
               )}
@@ -274,43 +268,43 @@ export default function UserProfile() {
         </div>
 
         {/* ── Stats Row ── */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatCard label="Age" value={user.age} unit="yrs" icon="🎂" />
-          <StatCard label="Weight" value={user.weight_kg} unit="kg" icon="⚖️" />
-          <StatCard label="Height" value={user.height_cm} unit="cm" icon="📏" />
-          <StatCard label="BMI" value={bmi} unit="" icon="💪" />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <StatCard label="Age" value={user.age} unit="yrs" icon="🎂" color="bg-blue-50" textColor="text-blue-600" />
+          <StatCard label="Weight" value={user.weight_kg} unit="kg" icon="⚖️" color="bg-orange-50" textColor="text-orange-600" />
+          <StatCard label="Height" value={user.height_cm} unit="cm" icon="📏" color="bg-emerald-50" textColor="text-emerald-600" />
+          <StatCard label="BMI" value={bmi} unit="" icon="💪" color="bg-purple-50" textColor="text-purple-600" />
         </div>
 
         {/* ── Profile Form / Info ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
           {/* Personal Information */}
-          <div className="bg-evofit-bg-card border border-evofit-border rounded-2xl p-6 space-y-5">
-            <h2 className="text-sm font-black text-evofit-purple-light uppercase tracking-wider mb-4 flex items-center gap-2">
-              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <div className="bg-white border border-evofit-border rounded-2xl p-6">
+            <h2 className="text-[13px] font-bold text-[#64748B] uppercase tracking-[0.1em] mb-6 flex items-center gap-2">
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
               Personal Information
             </h2>
 
             {editing ? (
-              <div className="space-y-4">
+              <div className="space-y-5">
                 <InputField label="Full Name" name="full_name" value={form.full_name} onChange={handleChange} icon="👤" placeholder="Alex Johnson" />
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-5">
                   <InputField label="Age" name="age" type="number" value={form.age} onChange={handleChange} icon="🎂" placeholder="24" min="13" max="100" />
                   <SelectField label="Gender" name="gender" value={form.gender} onChange={handleChange} options={genderOptions} icon="⚧" />
                 </div>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="divide-y divide-evofit-border">
                 {[
-                  { label: 'Full Name', value: user.fullName || '—', icon: '👤' },
-                  { label: 'Username', value: `@${user.username}`, icon: '🏷️' },
-                  { label: 'Email', value: user.email, icon: '✉️' },
-                  { label: 'Age', value: user.age ? `${user.age} years old` : '—', icon: '🎂' },
-                  { label: 'Gender', value: user.gender || '—', icon: '⚧' },
-                ].map(({ label, value, icon }) => (
-                  <div key={label} className="flex items-center justify-between py-2 border-b border-evofit-border last:border-0">
-                    <span className="text-xs text-evofit-text-muted flex items-center gap-2"><span>{icon}</span>{label}</span>
-                    <span className="text-sm font-semibold text-evofit-text-primary">{value}</span>
+                  { label: 'Full Name', value: user.fullName || '—' },
+                  { label: 'Username', value: `@${user.username}` },
+                  { label: 'Email', value: user.email },
+                  { label: 'Age', value: user.age ? `${user.age} years old` : '—' },
+                  { label: 'Gender', value: user.gender || '—' },
+                ].map(({ label, value }) => (
+                  <div key={label} className="flex items-center justify-between py-3.5 first:pt-0 last:pb-0">
+                    <span className="text-[13px] font-medium text-[#64748B]">{label}</span>
+                    <span className="text-[14px] font-bold text-[#0F172A]">{value}</span>
                   </div>
                 ))}
               </div>
@@ -318,31 +312,31 @@ export default function UserProfile() {
           </div>
 
           {/* Fitness Profile */}
-          <div className="bg-evofit-bg-card border border-evofit-border rounded-2xl p-6 space-y-5">
-            <h2 className="text-sm font-black text-evofit-purple-light uppercase tracking-wider mb-4 flex items-center gap-2">
-              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          <div className="bg-white border border-evofit-border rounded-2xl p-6">
+            <h2 className="text-[13px] font-bold text-[#64748B] uppercase tracking-[0.1em] mb-6 flex items-center gap-2">
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
               Fitness Profile
             </h2>
 
             {editing ? (
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-5">
+                <div className="grid grid-cols-2 gap-5">
                   <InputField label="Weight (kg)" name="weight_kg" type="number" value={form.weight_kg} onChange={handleChange} icon="⚖️" placeholder="75" min="30" max="300" />
                   <InputField label="Height (cm)" name="height_cm" type="number" value={form.height_cm} onChange={handleChange} icon="📏" placeholder="180" min="100" max="250" />
                 </div>
                 <SelectField label="Primary Goal" name="fitness_goal" value={form.fitness_goal} onChange={handleChange} options={fitnessGoals} icon="🎯" />
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="divide-y divide-evofit-border">
                 {[
-                  { label: 'Primary Goal', value: user.fitness_goal || '—', icon: '🎯' },
-                  { label: 'Weight', value: user.weight_kg ? `${user.weight_kg} kg` : '—', icon: '⚖️' },
-                  { label: 'Height', value: user.height_cm ? `${user.height_cm} cm` : '—', icon: '📏' },
-                  { label: 'BMI', value: bmi ? `${bmi} ${bmi < 18.5 ? '(Underweight)' : bmi < 25 ? '(Normal)' : bmi < 30 ? '(Overweight)' : '(Obese)'}` : '—', icon: '💪' },
-                ].map(({ label, value, icon }) => (
-                  <div key={label} className="flex items-center justify-between py-2 border-b border-evofit-border last:border-0">
-                    <span className="text-xs text-evofit-text-muted flex items-center gap-2"><span>{icon}</span>{label}</span>
-                    <span className="text-sm font-semibold text-evofit-text-primary">{value}</span>
+                  { label: 'Primary Goal', value: user.fitness_goal || '—' },
+                  { label: 'Weight', value: user.weight_kg ? `${user.weight_kg} kg` : '—' },
+                  { label: 'Height', value: user.height_cm ? `${user.height_cm} cm` : '—' },
+                  { label: 'BMI', value: bmi ? `${bmi} ${bmi < 18.5 ? '(Underweight)' : bmi < 25 ? '(Normal)' : bmi < 30 ? '(Overweight)' : '(Obese)'}` : '—' },
+                ].map(({ label, value }) => (
+                  <div key={label} className="flex items-center justify-between py-3.5 first:pt-0 last:pb-0">
+                    <span className="text-[13px] font-medium text-[#64748B]">{label}</span>
+                    <span className="text-[14px] font-bold text-[#0F172A]">{value}</span>
                   </div>
                 ))}
               </div>
@@ -351,25 +345,25 @@ export default function UserProfile() {
         </div>
 
         {/* ── Account Info ── */}
-        <div className="bg-evofit-bg-card border border-evofit-border rounded-2xl p-6">
-          <h2 className="text-sm font-black text-evofit-purple-light uppercase tracking-wider mb-5 flex items-center gap-2">
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            Account
+        <div className="bg-white border border-evofit-border rounded-2xl p-6">
+          <h2 className="text-[13px] font-bold text-[#64748B] uppercase tracking-[0.1em] mb-6 flex items-center gap-2">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Account Details
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <p className="text-xs text-evofit-text-muted mb-1">User ID</p>
-              <p className="font-mono text-sm font-bold text-evofit-text-primary">#{user.id}</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="p-4 rounded-xl bg-[#F8FAFC] border border-evofit-border">
+              <p className="text-[11px] font-bold text-[#64748B] uppercase tracking-wider mb-1.5">User ID</p>
+              <p className="font-mono text-sm font-bold text-[#0F172A]">#{user.id}</p>
             </div>
-            <div>
-              <p className="text-xs text-evofit-text-muted mb-1">Member Since</p>
-              <p className="text-sm font-semibold text-evofit-text-primary">{memberSince}</p>
+            <div className="p-4 rounded-xl bg-[#F8FAFC] border border-evofit-border">
+              <p className="text-[11px] font-bold text-[#64748B] uppercase tracking-wider mb-1.5">Member Since</p>
+              <p className="text-sm font-bold text-[#0F172A]">{memberSince}</p>
             </div>
-            <div>
-              <p className="text-xs text-evofit-text-muted mb-1">Account Status</p>
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                <p className="text-sm font-semibold text-emerald-500">Active</p>
+            <div className="p-4 rounded-xl bg-[#F8FAFC] border border-evofit-border">
+              <p className="text-[11px] font-bold text-[#64748B] uppercase tracking-wider mb-1.5">Account Status</p>
+              <div className="flex items-center gap-2.5 mt-1">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                <p className="text-[14px] font-bold text-emerald-600">Verified Active</p>
               </div>
             </div>
           </div>
