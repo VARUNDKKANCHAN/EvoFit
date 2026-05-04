@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/auth';
 import { 
-  History, Search, Filter, Calendar, Activity, 
-  ChevronRight, Dumbbell, Sparkles, ArrowRight, Clock
+  Search, Filter, Calendar, Activity, 
+  ChevronRight, Dumbbell, ArrowUpRight, 
+  Clock, TrendingUp, Award, BarChart3,
+  ChevronDown, SortDesc
 } from 'lucide-react';
 import { ResponsiveContainer, LineChart, Line } from 'recharts';
 
@@ -17,20 +19,120 @@ const EXERCISE_LABELS = {
   rest:  'Rest / Recovery',
 };
 
+// --- Helper Components ---
+
+const FilterPill = ({ label, icon: Icon, active, onClick }) => (
+  <button
+    onClick={onClick}
+    className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 border ${
+      active 
+        ? 'bg-evofit-purple-main text-white border-evofit-purple-main shadow-md' 
+        : 'bg-white text-evofit-text-secondary border-evofit-border hover:border-evofit-purple-main/30'
+    }`}
+  >
+    {Icon && <Icon size={14} />}
+    {label}
+  </button>
+);
+
+const SummaryCard = ({ label, value, icon: Icon, colorClass }) => (
+  <div className="bg-white border border-evofit-border rounded-xl p-5 flex items-center gap-4 flex-1">
+    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${colorClass}`}>
+      <Icon size={20} />
+    </div>
+    <div>
+      <p className="text-[11px] font-bold text-evofit-text-muted uppercase tracking-wider m-0">{label}</p>
+      <p className="text-xl font-bold text-evofit-text-primary m-0 mt-0.5">{value}</p>
+    </div>
+  </div>
+);
+
+const WorkoutRow = ({ session, onClick }) => {
+  const date = new Date(session.date);
+  const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  const formattedTime = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+
+  return (
+    <div 
+      onClick={() => onClick(session.id)}
+      className="group flex items-center gap-4 py-3 px-4 border-b border-evofit-border last:border-b-0 hover:bg-slate-50/80 transition-colors cursor-pointer"
+    >
+      {/* Left: Icon & Name */}
+      <div className="flex items-center gap-4 flex-[2] min-w-0">
+        <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500 group-hover:bg-evofit-purple-main/10 group-hover:text-evofit-purple-main transition-colors shrink-0">
+          <Dumbbell size={18} />
+        </div>
+        <div className="min-w-0">
+          <p className="text-[14px] font-bold text-evofit-text-primary m-0 truncate">
+            {EXERCISE_LABELS[session.exercise] || session.exercise}
+          </p>
+          <p className="text-[12px] text-evofit-text-muted m-0 mt-0.5">
+            {formattedDate} • {formattedTime}
+          </p>
+        </div>
+      </div>
+
+      {/* Center: Reps */}
+      <div className="flex-[1] text-center hidden sm:block">
+        <p className="text-[11px] font-bold text-evofit-text-muted uppercase m-0">Total Reps</p>
+        <p className="text-[14px] font-bold text-evofit-text-primary m-0">{session.reps}</p>
+      </div>
+
+      {/* Center: Form */}
+      <div className="flex-[1] text-center">
+        <p className="text-[11px] font-bold text-evofit-text-muted uppercase m-0">Avg. Form</p>
+        <p className={`text-[14px] font-bold m-0 ${session.form_score >= 90 ? 'text-green-600' : 'text-amber-500'}`}>
+          {session.form_score}%
+        </p>
+      </div>
+
+      {/* Right: Sparkline */}
+      <div className="flex-[1.5] h-8 hidden md:block">
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={session.sparkline_data.map((v, idx) => ({ v, idx }))}>
+            <Line 
+              type="monotone" 
+              dataKey="v" 
+              stroke="#7C3AED" 
+              strokeWidth={2} 
+              dot={false} 
+              isAnimationActive={true}
+              animationDuration={1500}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* Action */}
+      <div className="w-8 flex justify-end">
+        <div className="w-8 h-8 rounded-full flex items-center justify-center text-slate-300 group-hover:text-evofit-purple-main group-hover:bg-evofit-purple-main/10 transition-all">
+          <ChevronRight size={18} />
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function SessionHistory() {
   const navigate = useNavigate();
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [exerciseFilter, setExerciseFilter] = useState('all');
   const [daysFilter, setDaysFilter] = useState(null);
+  const [sortOrder, setSortOrder] = useState('newest');
 
   const fetchSessions = async () => {
     try {
       setLoading(true);
       let url = '/sessions/';
-      if (daysFilter !== null) {
-        url += `?days=${daysFilter}`;
+      const params = [];
+      if (daysFilter !== null) params.push(`days=${daysFilter}`);
+      
+      if (params.length > 0) {
+        url += `?${params.join('&')}`;
       }
+      
       const res = await api.get(url);
       setSessions(res.data);
     } catch (err) {
@@ -44,14 +146,70 @@ export default function SessionHistory() {
     fetchSessions();
   }, [daysFilter]);
 
-  const filteredSessions = sessions.filter(s => 
-    s.exercise.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Derived data
+  const filteredAndSortedSessions = useMemo(() => {
+    let result = sessions.filter(s => {
+      const matchesSearch = s.exercise.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            (EXERCISE_LABELS[s.exercise] || "").toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesExercise = exerciseFilter === 'all' || s.exercise === exerciseFilter;
+      return matchesSearch && matchesExercise;
+    });
+
+    if (sortOrder === 'newest') {
+      result.sort((a, b) => new Date(b.date) - new Date(a.date));
+    } else if (sortOrder === 'oldest') {
+      result.sort((a, b) => new Date(a.date) - new Date(b.date));
+    } else if (sortOrder === 'highest_form') {
+      result.sort((a, b) => b.form_score - a.form_score);
+    }
+
+    return result;
+  }, [sessions, searchQuery, exerciseFilter, sortOrder]);
+
+  const groupedSessions = useMemo(() => {
+    const groups = {
+      today: [],
+      thisWeek: [],
+      earlier: []
+    };
+
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const oneWeekAgo = new Date(today);
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+    filteredAndSortedSessions.forEach(s => {
+      const d = new Date(s.date);
+      if (d >= today) {
+        groups.today.push(s);
+      } else if (d >= oneWeekAgo) {
+        groups.thisWeek.push(s);
+      } else {
+        groups.earlier.push(s);
+      }
+    });
+
+    return groups;
+  }, [filteredAndSortedSessions]);
+
+  const summaryStats = useMemo(() => {
+    if (sessions.length === 0) return { total: 0, avgForm: 0, bestExercise: '-' };
+    
+    const total = sessions.length;
+    const avgForm = Math.round(sessions.reduce((acc, s) => acc + s.form_score, 0) / total);
+    
+    // Count occurrences for best exercise
+    const counts = {};
+    sessions.forEach(s => counts[s.exercise] = (counts[s.exercise] || 0) + 1);
+    const bestKey = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
+    const bestExercise = EXERCISE_LABELS[bestKey] || bestKey;
+
+    return { total, avgForm, bestExercise };
+  }, [sessions]);
 
   const viewSessionDetail = async (sessionId) => {
     try {
       const res = await api.get(`/sessions/${sessionId}`);
-      // Store in session storage to "mimic" a fresh prediction and navigate to Analytics
       sessionStorage.setItem('lastPrediction', JSON.stringify({ result: res.data }));
       navigate('/analytics');
     } catch (err) {
@@ -61,134 +219,160 @@ export default function SessionHistory() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-full bg-evofit-bg-primary">
-        <div className="w-12 h-12 border-4 border-evofit-border border-t-evofit-purple-main rounded-full animate-spin" />
+      <div className="flex items-center justify-center h-full bg-[#F8FAFC]">
+        <div className="w-10 h-10 border-2 border-slate-200 border-t-evofit-purple-main rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="flex-1 flex flex-col items-center py-10 px-7 overflow-y-auto bg-evofit-bg-primary min-h-screen font-inter">
-      {/* ── CENTRAL ARTBOARD (1200px) ─────────────────────────────────── */}
-      <div className="evofit-page-container">
+    <div className="flex-1 bg-[#F8FAFC] min-h-screen font-inter pb-20">
+      <div className="max-w-[1000px] mx-auto px-6 py-10 animate-fade-in">
         
-        {/* Header section */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
-          <div>
-            <div className="flex items-center gap-3 mb-2 text-evofit-purple-light uppercase tracking-widest font-black text-xs">
-              <History size={14} /> Training Log
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold text-[#0F172A] m-0">Workout History</h1>
+          <p className="text-sm text-[#64748B] mt-1 m-0">Track and analyze your past training sessions to optimize performance.</p>
+        </div>
+
+        {/* Filter Bar */}
+        <div className="flex flex-col gap-4 mb-10">
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <input 
+              type="text" 
+              placeholder="Search exercise history..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-white border border-[#E5E7EB] rounded-xl py-3 pl-12 pr-4 text-sm text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-evofit-purple-main/20 focus:border-evofit-purple-main/40 transition-all placeholder:text-slate-400"
+            />
+          </div>
+
+          {/* Pill Filters */}
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-2 mr-2">
+              <FilterPill 
+                label="All Sessions" 
+                active={exerciseFilter === 'all'} 
+                onClick={() => setExerciseFilter('all')} 
+              />
+              <div className="relative">
+                <select 
+                  value={exerciseFilter}
+                  onChange={(e) => setExerciseFilter(e.target.value)}
+                  className={`appearance-none bg-white border border-[#E5E7EB] rounded-full px-4 py-2 pr-10 text-sm font-medium focus:outline-none hover:border-evofit-purple-main/30 cursor-pointer ${exerciseFilter !== 'all' ? 'border-evofit-purple-main text-evofit-purple-main ring-1 ring-evofit-purple-main/20' : 'text-evofit-text-secondary'}`}
+                >
+                  <option value="all">Exercise Type</option>
+                  {Object.entries(EXERCISE_LABELS).map(([key, label]) => (
+                    <option key={key} value={key}>{label}</option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={14} />
+              </div>
             </div>
-            <h1 className="text-4xl font-extrabold m-0 tracking-tight text-evofit-text-primary">Workout History</h1>
-            <p className="text-evofit-text-secondary text-lg m-0 mt-2 font-medium max-w-[600px]">
-              Every rep, every set, every milestone. Review your past performance and track your evolution.
-            </p>
+
+            <div className="h-6 w-px bg-slate-200 mx-1" />
+
+            <FilterPill 
+              label="Last 7 Days" 
+              icon={Calendar}
+              active={daysFilter === 7} 
+              onClick={() => setDaysFilter(daysFilter === 7 ? null : 7)} 
+            />
+            <FilterPill 
+              label="Last 30 Days" 
+              active={daysFilter === 30} 
+              onClick={() => setDaysFilter(daysFilter === 30 ? null : 30)} 
+            />
+
+            <div className="ml-auto flex items-center gap-2">
+              <p className="text-[12px] font-bold text-slate-400 uppercase tracking-wider mr-1">Sort</p>
+              <select 
+                value={sortOrder}
+                onChange={(e) => setSortOrder(e.target.value)}
+                className="bg-transparent text-sm font-bold text-evofit-text-secondary focus:outline-none cursor-pointer"
+              >
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+                <option value="highest_form">Highest Form</option>
+              </select>
+            </div>
           </div>
         </div>
 
-        {/* Filter & Search Bar */}
-        <div className="flex flex-col md:flex-row gap-4 mb-8">
-           <div className="flex-1 relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-evofit-text-muted" size={18} />
-              <input 
-                type="text" 
-                placeholder="Search by exercise (e.g. Bench, Squat)..." 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-evofit-bg-secondary border border-evofit-border rounded-2xl py-3.5 pl-12 pr-4 text-sm text-evofit-text-primary focus:outline-none focus:border-evofit-purple-main/50 transition-all shadow-inner"
-              />
-           </div>
-           <button className="flex items-center justify-center gap-2 bg-evofit-bg-secondary border border-evofit-border px-6 py-3.5 rounded-2xl text-sm font-bold text-evofit-text-secondary hover:text-evofit-text-primary hover:border-evofit-purple-main/40 transition-all">
-              <Filter size={18} /> Filters
-           </button>
-           <button 
-             onClick={() => setDaysFilter(daysFilter === 30 ? null : 30)}
-             className={`flex items-center justify-center gap-2 border px-6 py-3.5 rounded-2xl text-sm font-bold transition-all ${
-               daysFilter === 30 
-                 ? 'bg-evofit-purple-main/20 border-evofit-purple-main text-evofit-purple-light' 
-                 : 'bg-evofit-bg-secondary border-evofit-border text-evofit-text-secondary hover:text-evofit-text-primary hover:border-evofit-purple-main/40'
-             }`}
-           >
-              <Calendar size={18} /> Last 30 Days
-           </button>
+        {/* Summary Stats */}
+        <div className="flex flex-col md:flex-row gap-4 mb-10">
+          <SummaryCard 
+            label="Total Sessions" 
+            value={summaryStats.total} 
+            icon={Activity} 
+            colorClass="bg-purple-50 text-purple-600" 
+          />
+          <SummaryCard 
+            label="Avg. Form Score" 
+            value={`${summaryStats.avgForm}%`} 
+            icon={TrendingUp} 
+            colorClass="bg-green-50 text-green-600" 
+          />
+          <SummaryCard 
+            label="Main Exercise" 
+            value={summaryStats.bestExercise} 
+            icon={Award} 
+            colorClass="bg-blue-50 text-blue-600" 
+          />
         </div>
 
-        {/* Sessions List */}
-        <div className="space-y-4 pb-12">
-          {filteredSessions.length > 0 ? (
-            filteredSessions.map((s, i) => (
-              <div 
-                key={s.id} 
-                onClick={() => viewSessionDetail(s.id)}
-                className="glass-card p-6 md:p-5 shadow-premium-card hover:border-evofit-purple-main/40 transition-all group cursor-pointer grid grid-cols-1 md:grid-cols-[2fr_1fr_1fr_1fr_80px] items-start md:items-center gap-4 md:gap-6"
-              >
-                 <div className="flex items-center gap-5">
-                    <div className="w-12 h-12 rounded-2xl bg-evofit-bg-secondary border border-evofit-border flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-300">
-                       <Dumbbell size={20} className="text-evofit-purple-light" />
-                    </div>
-                    <div>
-                       <h3 className="text-base font-extrabold text-evofit-text-primary m-0 uppercase tracking-tight">
-                         {EXERCISE_LABELS[s.exercise] || s.exercise}
-                       </h3>
-                       <p className="text-xs text-evofit-text-muted m-0 font-bold mt-0.5">
-                         {new Date(s.date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-                       </p>
-                    </div>
-                 </div>
-
-                 <div className="flex flex-col">
-                    <p className="text-[10px] text-evofit-text-muted font-bold uppercase mb-1">Total Reps</p>
-                    <p className="text-[15px] font-black text-evofit-text-primary m-0">{s.reps} Reps</p>
-                 </div>
-
-                 <div className="flex flex-col">
-                    <p className="text-[10px] text-evofit-text-muted font-bold uppercase mb-1">Avg. Form</p>
-                    <div className="flex items-center gap-2">
-                       <p className={`text-[15px] font-black m-0 ${s.form_score >= 90 ? 'text-cyan-400' : 'text-amber-400'}`}>
-                         {s.form_score}%
-                       </p>
-                       <div className="w-12 h-1 bg-evofit-bg-secondary rounded-full overflow-hidden">
-                          <div className={`h-full rounded-full ${s.form_score >= 90 ? 'bg-cyan-400' : 'bg-amber-400'}`} style={{ width: `${s.form_score}%` }} />
-                       </div>
-                    </div>
-                 </div>
-
-                 <div className="flex flex-col">
-                    <p className="text-[10px] text-evofit-text-muted font-bold uppercase mb-1">Trend Map</p>
-                    <div className="w-20 h-8">
-                       <ResponsiveContainer width="100%" height="100%">
-                          <LineChart data={s.sparkline_data.map((v, idx) => ({ v, idx }))}>
-                             <Line 
-                               type="monotone" 
-                               dataKey="v" 
-                               stroke={s.form_score >= 90 ? '#22D3EE' : '#FBBF24'} 
-                               strokeWidth={2} 
-                               dot={false} 
-                               animationDuration={2000}
-                             />
-                          </LineChart>
-                       </ResponsiveContainer>
-                    </div>
-                 </div>
-
-                 <div className="flex justify-end pr-2">
-                    <button className="w-10 h-10 rounded-xl bg-evofit-bg-secondary border border-evofit-border flex items-center justify-center text-evofit-text-muted group-hover:text-evofit-purple-light group-hover:border-evofit-purple-main/40 transition-all shadow-inner">
-                       <ArrowRight size={18} />
-                    </button>
-                 </div>
+        {/* Activity List */}
+        <div className="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden">
+          {filteredAndSortedSessions.length === 0 ? (
+            <div className="py-20 flex flex-col items-center text-center px-10">
+              <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center text-slate-300 mb-4 border border-slate-100">
+                <BarChart3 size={28} />
               </div>
-            ))
-          ) : (
-            <div className="glass-card py-24 flex flex-col items-center justify-center text-center">
-               <div className="w-20 h-20 rounded-full bg-evofit-bg-secondary flex items-center justify-center mb-6 text-evofit-text-muted border border-evofit-border">
-                  <Activity size={36} opacity={0.3} />
-               </div>
-               <h3 className="text-xl font-bold text-evofit-text-primary mb-2">No Sessions Found</h3>
-               <p className="text-evofit-text-secondary max-w-sm font-medium">
-                 Your training history is empty or matches no search results. Start a session from the upload tab!
-               </p>
+              <h3 className="text-lg font-bold text-slate-700 m-0">No activities found</h3>
+              <p className="text-sm text-slate-400 mt-1 max-w-[280px]">Adjust your filters or start a new workout session to see it here.</p>
             </div>
+          ) : (
+            <>
+              {/* Group: Today */}
+              {groupedSessions.today.length > 0 && (
+                <div>
+                  <div className="bg-slate-50/50 px-5 py-2 border-b border-[#E5E7EB]">
+                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Today</p>
+                  </div>
+                  {groupedSessions.today.map(s => <WorkoutRow key={s.id} session={s} onClick={viewSessionDetail} />)}
+                </div>
+              )}
+
+              {/* Group: This Week */}
+              {groupedSessions.thisWeek.length > 0 && (
+                <div>
+                  <div className="bg-slate-50/50 px-5 py-2 border-b border-[#E5E7EB] border-t first:border-t-0">
+                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">This Week</p>
+                  </div>
+                  {groupedSessions.thisWeek.map(s => <WorkoutRow key={s.id} session={s} onClick={viewSessionDetail} />)}
+                </div>
+              )}
+
+              {/* Group: Earlier */}
+              {groupedSessions.earlier.length > 0 && (
+                <div>
+                  <div className="bg-slate-50/50 px-5 py-2 border-b border-[#E5E7EB] border-t first:border-t-0">
+                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Earlier</p>
+                  </div>
+                  {groupedSessions.earlier.map(s => <WorkoutRow key={s.id} session={s} onClick={viewSessionDetail} />)}
+                </div>
+              )}
+            </>
           )}
         </div>
+
+        {/* Footer info */}
+        <p className="text-center text-[12px] text-slate-400 mt-8">
+          Showing {filteredAndSortedSessions.length} sessions. Data synced with EvoFit Cloud.
+        </p>
+
       </div>
     </div>
   );
