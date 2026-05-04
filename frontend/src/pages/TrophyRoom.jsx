@@ -94,8 +94,8 @@ export default function TrophyRoom() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-full bg-[#F8FAFC]">
-        <div className="w-10 h-10 border-3 border-slate-200 border-t-[#7C3AED] rounded-full animate-spin" />
+      <div className="flex items-center justify-center h-full bg-evofit-bg-primary">
+        <div className="w-10 h-10 border-3 border-evofit-border border-t-evofit-purple-main rounded-full animate-spin" />
       </div>
     );
   }
@@ -106,45 +106,45 @@ export default function TrophyRoom() {
     <motion.div 
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="flex-1 overflow-y-auto bg-[#F8FAFC] min-h-screen font-inter"
+      className="flex-1 overflow-y-auto bg-evofit-bg-primary min-h-screen font-inter"
     >
       <div className="max-w-6xl mx-auto px-6 py-12">
         
         {/* ── HERO SECTION ────────────────────────────────────────────── */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
           <div className="lg:col-span-2">
-            <div className="flex items-center gap-2 text-[#7C3AED] font-semibold text-sm mb-3">
+            <div className="flex items-center gap-2 text-evofit-purple-main font-semibold text-sm mb-3">
               <Sparkles size={16} />
               <span>Personal Achievements</span>
             </div>
-            <h1 className="text-4xl font-bold text-[#0F172A] mb-3">Trophy Room</h1>
-            <p className="text-[#64748B] text-lg max-w-xl">
+            <h1 className="text-4xl font-bold text-evofit-text-primary mb-3">Trophy Room</h1>
+            <p className="text-evofit-text-muted text-lg max-w-xl">
               You're doing great! Every rep and every drop of sweat is a step closer to your ultimate fitness goals.
             </p>
           </div>
 
-          <div className="bg-white rounded-2xl border border-[#E5E7EB] p-6 shadow-sm flex flex-col justify-between">
+          <div className="bg-evofit-bg-card rounded-2xl border border-evofit-border p-6 shadow-sm flex flex-col justify-between">
             <div className="flex justify-between items-start mb-4">
               <div>
-                <p className="text-xs font-bold text-[#64748B] uppercase tracking-wider mb-1">Current Level</p>
-                <p className="text-3xl font-bold text-[#0F172A]">Level {data.level || 4}</p>
+                <p className="text-xs font-bold text-evofit-text-muted uppercase tracking-wider mb-1">Current Level</p>
+                <p className="text-3xl font-bold text-evofit-text-primary">Level {data.level || 4}</p>
               </div>
-              <div className="w-12 h-12 rounded-xl bg-purple-50 border border-purple-100 flex items-center justify-center text-[#7C3AED]">
+              <div className="w-12 h-12 rounded-xl bg-evofit-purple-main/10 border border-evofit-purple-main/20 flex items-center justify-center text-evofit-purple-main">
                 <TrendingUp size={24} />
               </div>
             </div>
             
             <div>
               <div className="flex justify-between items-end mb-2">
-                <span className="text-sm font-medium text-[#64748B]">{data.xp || 750} / {data.next_level_xp || 1000} XP</span>
-                <span className="text-xs font-bold text-[#7C3AED]">{Math.round(xpProgress)}%</span>
+                <span className="text-sm font-medium text-evofit-text-muted">{data.xp || 750} / {data.next_level_xp || 1000} XP</span>
+                <span className="text-xs font-bold text-evofit-purple-main">{Math.round(xpProgress)}%</span>
               </div>
-              <div className="h-2 bg-[#F1F5F9] rounded-full overflow-hidden">
+              <div className="h-2 bg-evofit-bg-primary rounded-full overflow-hidden border border-evofit-border/30">
                 <motion.div 
                   initial={{ width: 0 }}
                   animate={{ width: `${xpProgress}%` }}
                   transition={{ duration: 1, ease: "easeOut" }}
-                  className="h-full bg-[#7C3AED] rounded-full"
+                  className="h-full bg-evofit-purple-main rounded-full"
                 />
               </div>
             </div>
@@ -153,25 +153,25 @@ export default function TrophyRoom() {
 
         {/* ── STATS ROW ────────────────────────────────────────────────── */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-          <div className="bg-white rounded-2xl border border-[#E5E7EB] p-4 shadow-sm">
-            <p className="text-[10px] font-bold text-[#64748B] uppercase tracking-widest mb-1">Total Badges</p>
-            <p className="text-2xl font-bold text-[#0F172A]">{data.total_badges || 12}</p>
+          <div className="bg-evofit-bg-card rounded-2xl border border-evofit-border p-4 shadow-sm">
+            <p className="text-[10px] font-bold text-evofit-text-muted uppercase tracking-widest mb-1">Total Badges</p>
+            <p className="text-2xl font-bold text-evofit-text-primary">{data.total_badges || 12}</p>
           </div>
-          <div className="bg-white rounded-2xl border border-[#E5E7EB] p-4 shadow-sm">
-            <p className="text-[10px] font-bold text-[#64748B] uppercase tracking-widest mb-1">Unlocked</p>
+          <div className="bg-evofit-bg-card rounded-2xl border border-evofit-border p-4 shadow-sm">
+            <p className="text-[10px] font-bold text-evofit-text-muted uppercase tracking-widest mb-1">Unlocked</p>
             <p className="text-2xl font-bold text-[#22C55E]">{data.achievements.filter(a => !a.is_locked).length}</p>
           </div>
-          <div className="bg-white rounded-2xl border border-[#E5E7EB] p-4 shadow-sm">
-            <p className="text-[10px] font-bold text-[#64748B] uppercase tracking-widest mb-1">Completion</p>
-            <p className="text-2xl font-bold text-[#0F172A]">
+          <div className="bg-evofit-bg-card rounded-2xl border border-evofit-border p-4 shadow-sm">
+            <p className="text-[10px] font-bold text-evofit-text-muted uppercase tracking-widest mb-1">Completion</p>
+            <p className="text-2xl font-bold text-evofit-text-primary">
               {data.achievements.length > 0 
                 ? Math.round((data.achievements.filter(a => !a.is_locked).length / data.achievements.length) * 100) 
                 : 0}%
             </p>
           </div>
-          <div className="bg-white rounded-2xl border border-[#E5E7EB] p-4 shadow-sm">
-            <p className="text-[10px] font-bold text-[#64748B] uppercase tracking-widest mb-1">Global Rank</p>
-            <p className="text-2xl font-bold text-[#7C3AED]">Top 5%</p>
+          <div className="bg-evofit-bg-card rounded-2xl border border-evofit-border p-4 shadow-sm">
+            <p className="text-[10px] font-bold text-evofit-text-muted uppercase tracking-widest mb-1">Global Rank</p>
+            <p className="text-2xl font-bold text-evofit-purple-main">Top 5%</p>
           </div>
         </div>
 
@@ -183,8 +183,8 @@ export default function TrophyRoom() {
               onClick={() => setActiveCategory(cat)}
               className={`px-5 py-2 rounded-full text-sm font-bold transition-all duration-200 whitespace-nowrap border ${
                 activeCategory === cat
-                  ? 'bg-[#7C3AED] text-white border-[#7C3AED] shadow-md shadow-purple-200'
-                  : 'bg-white text-[#64748B] border-[#E5E7EB] hover:border-[#7C3AED]/30 hover:text-[#0F172A]'
+                  ? 'bg-evofit-purple-main text-white border-evofit-purple-main shadow-md shadow-evofit-purple-main/20'
+                  : 'bg-evofit-bg-card text-evofit-text-muted border-evofit-border hover:border-evofit-purple-main/30 hover:text-evofit-text-primary'
               }`}
             >
               {cat}
@@ -203,8 +203,8 @@ export default function TrophyRoom() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 whileHover={{ y: -4 }}
-                className={`bg-white rounded-2xl border border-[#E5E7EB] p-6 shadow-sm transition-all relative overflow-hidden group ${
-                  badge.is_locked ? 'opacity-60 grayscale' : 'hover:border-[#7C3AED]/40'
+                className={`bg-evofit-bg-card rounded-2xl border border-evofit-border p-6 shadow-sm transition-all relative overflow-hidden group ${
+                  badge.is_locked ? 'opacity-60 grayscale' : 'hover:border-evofit-purple-main/40'
                 }`}
               >
                 {!badge.is_locked && (
@@ -218,32 +218,32 @@ export default function TrophyRoom() {
                 <div className="flex gap-5">
                   <div className={`w-16 h-16 rounded-2xl flex items-center justify-center shrink-0 shadow-sm border ${
                     badge.is_locked 
-                    ? 'bg-slate-50 border-slate-100 text-slate-300' 
-                    : 'bg-purple-50 border-purple-100 text-[#7C3AED] group-hover:scale-110 transition-transform duration-300'
+                    ? 'bg-evofit-bg-primary border-evofit-border text-evofit-text-muted/30' 
+                    : 'bg-evofit-purple-main/5 border-evofit-purple-main/10 text-evofit-purple-main group-hover:scale-110 transition-transform duration-300'
                   }`}>
                     {badge.is_locked ? <Lock size={24} /> : (ICON_MAP[badge.icon] || <Award size={24} />)}
                   </div>
                   
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-bold text-[#0F172A] leading-tight">{badge.badge_name}</h3>
+                      <h3 className="font-bold text-evofit-text-primary leading-tight">{badge.badge_name}</h3>
                       {badge.rarity && (
                         <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase font-black tracking-tighter border ${RARITY_CONFIG[badge.rarity].bg} ${RARITY_CONFIG[badge.rarity].text} ${RARITY_CONFIG[badge.rarity].border}`}>
                           {badge.rarity}
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-[#64748B] leading-relaxed mb-3">
+                    <p className="text-xs text-evofit-text-muted leading-relaxed mb-3">
                       {badge.description}
                     </p>
                     
                     <div className="flex items-center gap-2 mt-auto">
                       {badge.is_locked ? (
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                        <span className="text-[10px] font-bold text-evofit-text-muted/40 uppercase tracking-widest flex items-center gap-1">
                           <Lock size={10} /> Locked
                         </span>
                       ) : (
-                        <span className="text-[10px] font-bold text-[#64748B] uppercase tracking-widest flex items-center gap-1">
+                        <span className="text-[10px] font-bold text-evofit-text-muted uppercase tracking-widest flex items-center gap-1">
                           <Clock size={10} /> {new Date(badge.unlocked_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                         </span>
                       )}
@@ -253,7 +253,7 @@ export default function TrophyRoom() {
                 
                 {/* Subtle Hover Glow */}
                 {!badge.is_locked && (
-                  <div className="absolute inset-0 bg-[#7C3AED]/[0.02] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                  <div className="absolute inset-0 bg-evofit-purple-main/[0.02] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                 )}
               </motion.div>
             ))}
@@ -261,22 +261,22 @@ export default function TrophyRoom() {
         </div>
 
         {/* ── UPCOMING MILESTONE ──────────────────────────────────────── */}
-        <div className="bg-white rounded-2xl border border-[#7C3AED]/20 p-8 shadow-sm relative overflow-hidden">
-          <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-[#7C3AED]/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="bg-evofit-bg-card rounded-2xl border border-evofit-purple-main/20 p-8 shadow-sm relative overflow-hidden">
+          <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-evofit-purple-main/5 rounded-full blur-3xl pointer-events-none" />
           
           <div className="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
             <div className="flex items-center gap-6">
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#7C3AED] to-[#8B5CF6] flex items-center justify-center text-white shadow-lg shadow-purple-200">
+              <div className="w-20 h-20 rounded-2xl bg-premium-gradient flex items-center justify-center text-white shadow-lg shadow-evofit-purple-main/20">
                 <Crown size={36} />
               </div>
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <h4 className="text-xl font-bold text-[#0F172A]">Upcoming: Elite Voyager</h4>
-                  <span className="text-[10px] px-2 py-0.5 bg-amber-100 text-amber-700 rounded uppercase font-black tracking-tighter border border-amber-200">
+                  <h4 className="text-xl font-bold text-evofit-text-primary">Upcoming: Elite Voyager</h4>
+                  <span className="text-[10px] px-2 py-0.5 bg-amber-500/10 text-amber-500 rounded uppercase font-black tracking-tighter border border-amber-500/20">
                     Elite
                   </span>
                 </div>
-                <p className="text-[#64748B] text-sm max-w-md">
+                <p className="text-evofit-text-muted text-sm max-w-md">
                   Complete 50 perfect-form sessions to unlock this prestigious badge. You're almost there!
                 </p>
               </div>
@@ -284,18 +284,18 @@ export default function TrophyRoom() {
 
             <div className="w-full md:w-80">
               <div className="flex justify-between items-end mb-2">
-                <span className="text-xs font-bold text-[#64748B] uppercase">42 / 50 Sessions</span>
-                <span className="text-sm font-bold text-[#7C3AED]">84%</span>
+                <span className="text-xs font-bold text-evofit-text-muted uppercase">42 / 50 Sessions</span>
+                <span className="text-sm font-bold text-evofit-purple-main">84%</span>
               </div>
-              <div className="h-3 bg-[#F1F5F9] rounded-full overflow-hidden border border-[#E5E7EB]">
+              <div className="h-3 bg-evofit-bg-primary rounded-full overflow-hidden border border-evofit-border">
                 <motion.div 
                   initial={{ width: 0 }}
                   animate={{ width: '84%' }}
                   transition={{ duration: 1.5, ease: "easeOut", delay: 0.5 }}
-                  className="h-full bg-gradient-to-r from-[#7C3AED] to-[#8B5CF6] rounded-full"
+                  className="h-full bg-premium-gradient rounded-full"
                 />
               </div>
-              <p className="text-[11px] text-[#64748B] mt-2 text-right font-medium">
+              <p className="text-[11px] text-evofit-text-muted mt-2 text-right font-medium">
                 8 sessions remaining
               </p>
             </div>

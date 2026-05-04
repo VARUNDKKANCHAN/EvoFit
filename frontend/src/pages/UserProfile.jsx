@@ -144,10 +144,10 @@ export default function UserProfile() {
 
   if (!user) {
     return (
-      <main className="flex-1 flex flex-col items-center justify-center">
-        <div className="text-[#6B7280] text-center">
+      <main className="flex-1 flex flex-col items-center justify-center bg-evofit-bg-primary">
+        <div className="text-evofit-text-muted text-center">
           <p className="text-4xl mb-4">🔐</p>
-          <p className="text-lg font-semibold text-white">Not logged in</p>
+          <p className="text-lg font-bold text-evofit-text-primary">Not logged in</p>
           <p className="text-sm mt-1">Please log in to view your profile.</p>
         </div>
       </main>
@@ -179,7 +179,7 @@ export default function UserProfile() {
             {/* Avatar */}
             <div className="relative shrink-0">
               <div
-                className="w-24 h-24 md:w-32 md:h-32 rounded-full flex items-center justify-center text-4xl md:text-5xl font-black text-white border-4 border-white shadow-xl"
+                className="w-24 h-24 md:w-32 md:h-32 rounded-full flex items-center justify-center text-4xl md:text-5xl font-black text-white border-4 border-evofit-bg-card shadow-xl"
                 style={{
                   background: `linear-gradient(135deg, #7C3AED, #8B5CF6)`,
                   boxShadow: `0 0 40px ${tier.glow}40`,
@@ -189,7 +189,7 @@ export default function UserProfile() {
               </div>
               {/* Level badge */}
               <div
-                className="absolute -bottom-1 -right-1 text-[11px] font-black px-3 py-1 rounded-full text-white shadow-lg border-2 border-white"
+                className="absolute -bottom-1 -right-1 text-[11px] font-black px-3 py-1 rounded-full text-white shadow-lg border-2 border-evofit-bg-card"
                 style={{ background: `linear-gradient(135deg, #7C3AED, #8B5CF6)` }}
               >
                 LVL {level}
@@ -257,7 +257,7 @@ export default function UserProfile() {
                     id="save-profile-btn"
                     onClick={handleSave}
                     disabled={saving}
-                    className="px-6 py-3 rounded-lg text-sm font-bold text-white transition-all bg-[#10B981] hover:bg-[#059669] disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                    className="px-6 py-3 rounded-lg text-sm font-bold text-white transition-all bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                   >
                     {saving ? 'Saving...' : 'Save Changes'}
                   </button>
@@ -269,10 +269,10 @@ export default function UserProfile() {
 
         {/* ── Stats Row ── */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          <StatCard label="Age" value={user.age} unit="yrs" icon="🎂" color="bg-blue-50" textColor="text-blue-600" />
-          <StatCard label="Weight" value={user.weight_kg} unit="kg" icon="⚖️" color="bg-orange-50" textColor="text-orange-600" />
-          <StatCard label="Height" value={user.height_cm} unit="cm" icon="📏" color="bg-emerald-50" textColor="text-emerald-600" />
-          <StatCard label="BMI" value={bmi} unit="" icon="💪" color="bg-purple-50" textColor="text-purple-600" />
+          <StatCard label="Age" value={user.age} unit="yrs" icon="🎂" color="bg-blue-500/10" textColor="text-blue-500" />
+          <StatCard label="Weight" value={user.weight_kg} unit="kg" icon="⚖️" color="bg-orange-500/10" textColor="text-orange-500" />
+          <StatCard label="Height" value={user.height_cm} unit="cm" icon="📏" color="bg-emerald-500/10" textColor="text-emerald-500" />
+          <StatCard label="BMI" value={bmi} unit="" icon="💪" color="bg-purple-500/10" textColor="text-purple-500" />
         </div>
 
         {/* ── Profile Form / Info ── */}

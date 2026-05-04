@@ -157,8 +157,8 @@ export default function UploadPredict() {
               className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowLevelUp(false)} />
             <motion.div initial={{ scale: 0.85, opacity: 0, y: 40 }} animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.85, opacity: 0 }}
-              className="relative z-10 bg-white rounded-2xl border border-evofit-border p-8 text-center max-w-sm w-full shadow-xl">
-              <div className="w-20 h-20 mx-auto rounded-full bg-amber-50 border-4 border-amber-200 flex items-center justify-center mb-5">
+              className="relative z-10 bg-evofit-bg-card rounded-2xl border border-evofit-border p-8 text-center max-w-sm w-full shadow-xl">
+              <div className="w-20 h-20 mx-auto rounded-full bg-amber-500/10 border-4 border-amber-500/20 flex items-center justify-center mb-5">
                 <Zap size={36} className="text-amber-500" />
               </div>
               <h2 className="text-2xl font-bold text-evofit-text-primary mb-1">Level Up!</h2>
@@ -194,7 +194,7 @@ export default function UploadPredict() {
                         ? { background: '#22C55E14', color: '#22C55E' }
                         : isActive
                           ? { background: '#7C3AED14', color: '#7C3AED' }
-                          : { background: '#F1F5F9', color: '#94A3B8' }}>
+                          : { background: 'var(--bg-primary)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
                       {isDone ? <CheckCheck size={18} /> : s.icon}
                     </div>
                     <div className="min-w-0">
@@ -227,7 +227,7 @@ export default function UploadPredict() {
             /* ── Empty state ── */
             <div
               className={`border-2 border-dashed rounded-xl py-14 px-6 transition-all duration-200 cursor-pointer select-none
-                ${dragOver ? 'border-evofit-purple-main bg-[#7C3AED08] scale-[1.01]' : 'border-evofit-border hover:border-evofit-purple-main/50 hover:bg-[#7C3AED04]'}`}
+                ${dragOver ? 'border-evofit-purple-main bg-evofit-purple-main/10 scale-[1.01]' : 'border-evofit-border hover:border-evofit-purple-main/50 hover:bg-evofit-purple-main/5'}`}
               onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
               onDragLeave={() => setDragOver(false)}
               onDrop={onDrop}
@@ -281,9 +281,9 @@ export default function UploadPredict() {
 
                 {/* Success banner */}
                 {uploaded && !loading && (
-                  <div className="flex items-center gap-2.5 px-4 py-3 rounded-xl mb-5" style={{ background: '#22C55E0D', border: '1px solid #22C55E33' }}>
+                  <div className="flex items-center gap-2.5 px-4 py-3 rounded-xl mb-5" style={{ background: 'rgba(34, 197, 94, 0.08)', border: '1px solid rgba(34, 197, 94, 0.2)' }}>
                     <CheckCircle2 size={16} style={{ color: '#22C55E' }} />
-                    <p className="text-sm font-semibold m-0" style={{ color: '#16A34A' }}>File uploaded successfully — ready to analyse</p>
+                    <p className="text-sm font-semibold m-0 text-[#22C55E]">File uploaded successfully — ready to analyse</p>
                   </div>
                 )}
 
@@ -313,7 +313,7 @@ export default function UploadPredict() {
         <AnimatePresence>
           {error && (
             <motion.div key="error" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-              className="flex items-start gap-3 px-5 py-4 rounded-xl border" style={{ background: '#EF44440D', borderColor: '#EF444433' }}>
+              className="flex items-start gap-3 px-5 py-4 rounded-xl border" style={{ background: 'rgba(239, 68, 68, 0.08)', borderColor: 'rgba(239, 68, 68, 0.2)' }}>
               <AlertCircle size={17} style={{ color: '#EF4444' }} className="shrink-0 mt-0.5" />
               <p className="text-sm font-medium m-0" style={{ color: '#EF4444' }}>{error}</p>
             </motion.div>

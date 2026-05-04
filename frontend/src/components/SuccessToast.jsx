@@ -10,7 +10,7 @@ import React from 'react';
  */
 const SuccessToast = ({ title, subtitle, closeToast }) => {
   return (
-    <div className="flex items-center gap-4 bg-white p-4 rounded-[12px] border border-[#E5E7EB] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.1)] min-w-[320px] pointer-events-auto group animate-toast-slide-in">
+    <div className="flex items-center gap-4 bg-evofit-bg-card p-4 rounded-[12px] border border-evofit-border shadow-evofit-premium-card min-w-[320px] pointer-events-auto group animate-toast-slide-in">
       {/* Success Icon: Green circle with white checkmark */}
       <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#22C55E] flex items-center justify-center shadow-sm">
         <svg 
@@ -32,11 +32,11 @@ const SuccessToast = ({ title, subtitle, closeToast }) => {
 
       {/* Message Text */}
       <div className="flex-1 min-w-0">
-        <h3 className="text-[14px] font-medium text-[#0F172A] m-0 leading-tight">
+        <h3 className="text-[14px] font-bold text-evofit-text-primary m-0 leading-tight">
           {title}
         </h3>
         {subtitle && (
-          <p className="text-[12px] text-[#64748B] m-0 mt-1 leading-normal font-normal">
+          <p className="text-[12px] text-evofit-text-muted m-0 mt-1 leading-normal font-normal">
             {subtitle}
           </p>
         )}
@@ -45,7 +45,7 @@ const SuccessToast = ({ title, subtitle, closeToast }) => {
       {/* Minimal Close Button */}
       <button 
         onClick={closeToast}
-        className="p-1.5 rounded-lg hover:bg-[#F1F5F9] transition-all duration-200 opacity-60 hover:opacity-100 flex items-center justify-center"
+        className="p-1.5 rounded-lg hover:bg-evofit-bg-primary transition-all duration-200 opacity-60 hover:opacity-100 flex items-center justify-center text-evofit-text-muted"
         aria-label="Close notification"
       >
         <svg 
@@ -53,7 +53,7 @@ const SuccessToast = ({ title, subtitle, closeToast }) => {
           height="14" 
           viewBox="0 0 24 24" 
           fill="none" 
-          stroke="#64748B" 
+          stroke="currentColor" 
           strokeWidth="2.5" 
           strokeLinecap="round" 
           strokeLinejoin="round"

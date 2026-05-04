@@ -136,7 +136,7 @@ function PageHeader({ title, onMenuClick }) {
           onMouseLeave={() => setBellHover(false)}
         >
           <svg width="20" height="20" fill="none" viewBox="0 0 24 24"
-            stroke={bellHover ? '#7C3AED' : '#64748B'} strokeWidth="2"
+            stroke={bellHover ? 'var(--purple-main)' : 'var(--text-muted)'} strokeWidth="2"
             className="transition-colors duration-200">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
             <path d="M13.73 21a2 2 0 0 1-3.46 0" />
@@ -163,7 +163,7 @@ function PageHeader({ title, onMenuClick }) {
                 {user ? `Lv.${level} · ${xp.toLocaleString()} XP` : 'Standard User'}
               </p>
             </div>
-            <div className={`w-8 h-8 rounded-full bg-gradient-to-br from-[#7C3AED] to-[#8B5CF6] flex items-center justify-center text-[12px] font-black text-white border border-white/20 shadow-sm transition-all duration-200 ${dropdownOpen ? 'ring-2 ring-[#7C3AED]/30' : ''}`}>
+            <div className={`w-8 h-8 rounded-full bg-gradient-to-br from-evofit-purple-main to-evofit-purple-dark flex items-center justify-center text-[12px] font-black text-white border border-white/20 shadow-sm transition-all duration-200 ${dropdownOpen ? 'ring-2 ring-evofit-purple-main/30' : ''}`}>
               {initials}
             </div>
           </button>
@@ -180,13 +180,13 @@ function PageHeader({ title, onMenuClick }) {
                 width: '288px',
                 zIndex: 999999,
                 animationDuration: '0.15s',
-                boxShadow: '0 20px 60px rgba(0,0,0,0.45)',
+                boxShadow: 'var(--card-shadow)',
               }}
             >
               {/* User info header */}
               <div className="p-4 border-b border-evofit-border bg-gradient-to-br from-evofit-purple-main/10 to-transparent">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#6D28D9] to-[#A78BFA] flex items-center justify-center text-lg font-black text-white shrink-0">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-evofit-purple-main to-evofit-purple-dark flex items-center justify-center text-lg font-black text-white shrink-0">
                     {initials}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -198,7 +198,7 @@ function PageHeader({ title, onMenuClick }) {
                       <span className="text-[10px] font-bold text-evofit-purple-light">Lv.{level}</span>
                       <div className="flex-1 h-1 rounded-full bg-evofit-border overflow-hidden">
                         <div
-                          className="h-full rounded-full bg-gradient-to-r from-[#6D28D9] to-[#A78BFA]"
+                          className="h-full rounded-full bg-gradient-to-r from-evofit-purple-main to-evofit-purple-dark"
                           style={{ width: `${xpPct}%` }}
                         />
                       </div>
@@ -263,7 +263,7 @@ function PageHeader({ title, onMenuClick }) {
                   className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-[13px] font-medium text-[#F87171] hover:bg-red-500/10 transition-all duration-150 group"
                 >
                   <span className="w-7 h-7 rounded-lg bg-red-500/10 flex items-center justify-center">
-                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="#F87171" strokeWidth="2.5">
+                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                       <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
                       <polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
                     </svg>
@@ -353,7 +353,6 @@ function AppShell() {
       case '/chatbot': return 'EvoFit AI Assistant';
       case '/leaderboard': return 'Global Leaderboard';
       case '/profile': return 'My Profile';
-      case '/chatbot': return 'EvoFit AI Assistant';
       default: 
         if (path.startsWith('/target-analysis/')) return 'Performance Deep Dive';
         return 'EvoFit Dashboard';
@@ -425,7 +424,7 @@ export default function App() {
         pauseOnFocusLoss
         draggable
         pauseOnHover
-        theme="light"
+        theme="dark"
       />
     </Router>
   );
