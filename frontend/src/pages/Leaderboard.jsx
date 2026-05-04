@@ -20,23 +20,30 @@ export default function Leaderboard() {
   const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [fetchingMore, setFetchingMore] = useState(false);
   const [timeFilter, setTimeFilter] = useState('All-time');
+  const [limit, setLimit] = useState(50);
+
+  const fetchLeaderboard = async (filter, currentLimit) => {
+    try {
+      if (currentLimit > 50) setFetchingMore(true);
+      else setLoading(true);
+
+      const res = await api.get(`/users/leaderboard?timeframe=${filter}&limit=${currentLimit}`);
+      setData(res.data);
+    } catch (err) {
+      console.error("Failed to fetch leaderboard", err);
+    } finally {
+      setLoading(false);
+      setFetchingMore(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchLeaderboard = async () => {
-      try {
-        const res = await api.get('/users/leaderboard');
-        setData(res.data);
-      } catch (err) {
-        console.error("Failed to fetch leaderboard", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchLeaderboard();
-  }, []);
+    fetchLeaderboard(timeFilter, limit);
+  }, [timeFilter, limit]);
 
-  if (loading) {
+  if (loading && !data) {
     return (
       <div className="flex items-center justify-center h-full bg-[#F8FAFC] min-h-screen">
         <motion.div 
@@ -84,7 +91,7 @@ export default function Leaderboard() {
             <div className="flex items-center gap-6 w-full md:w-auto">
               <div className="flex flex-col items-center justify-center px-6 border-r border-[#E5E7EB]">
                 <span className="text-xs font-semibold text-[#64748B] uppercase tracking-wider mb-1">Your Rank</span>
-                <span className="text-4xl font-bold text-[#7C3AED]">#{data?.current_user_rank}</span>
+                <span className="text-4xl font-bold text-[#7C3AED]">#{data?.current_user_rank > 0 ? data.current_user_rank : '—'}</span>
               </div>
               
               <div className="flex items-center gap-4 flex-1">
@@ -95,7 +102,7 @@ export default function Leaderboard() {
                   <div className="flex items-center gap-2">
                     <h2 className="text-lg font-bold text-[#0F172A]">{user?.username}</h2>
                     <span className="bg-[#22C55E]/10 text-[#22C55E] text-[10px] font-bold px-2 py-0.5 rounded-full border border-[#22C55E]/20">
-                      Top 29% globally
+                      Top {101 - (data?.percentile || 0)}% globally
                     </span>
                   </div>
                   <div className="mt-2 flex items-center gap-3">
@@ -138,7 +145,10 @@ export default function Leaderboard() {
                   transition={{ delay: idx * 0.1 }}
                   className={`relative flex flex-col items-center ${isFirst ? 'order-1 md:order-2 z-10' : idx === 0 ? 'order-2 md:order-1' : 'order-3'}`}
                 >
-                  <div className={`w-full bg-white border border-[#E5E7EB] rounded-2xl p-8 shadow-sm flex flex-col items-center transition-all hover:border-[#7C3AED]/30 ${isFirst ? 'py-10 border-b-4 border-b-[#7C3AED]' : ''}`}>
+                  <div 
+                    onClick={() => navigate(`/analytics`)} // Navigate to public profile/analytics
+                    className={`w-full bg-white border border-[#E5E7EB] rounded-2xl p-8 shadow-sm flex flex-col items-center transition-all hover:border-[#7C3AED]/30 cursor-pointer ${isFirst ? 'py-10 border-b-4 border-b-[#7C3AED]' : ''}`}
+                  >
                     {isFirst && (
                       <div className="absolute -top-6">
                         <Crown size={32} className="text-[#F59E0B] drop-shadow-sm" />
@@ -183,7 +193,10 @@ export default function Leaderboard() {
               {['Daily', 'Weekly', 'All-time'].map((filter) => (
                 <button
                   key={filter}
-                  onClick={() => setTimeFilter(filter)}
+                  onClick={() => {
+                    setTimeFilter(filter);
+                    setLimit(50); // Reset limit when filter changes
+                  }}
                   className={`px-4 py-1.5 rounded-md text-xs font-bold transition-all ${
                     timeFilter === filter 
                     ? 'bg-white text-[#7C3AED] shadow-sm' 
@@ -217,6 +230,7 @@ export default function Leaderboard() {
                   return (
                     <motion.tr 
                       key={u.id}
+                      onClick={() => navigate(`/analytics`)}
                       className={`group transition-all hover:bg-[#F8FAFC] cursor-pointer ${isMe ? 'bg-[#7C3AED]/5' : ''}`}
                     >
                       <td className="px-6 py-4">
@@ -260,11 +274,17 @@ export default function Leaderboard() {
             </table>
           </div>
           
-          <div className="px-6 py-4 bg-[#F8FAFC] border-t border-[#E5E7EB] text-center">
-            <button className="text-[11px] font-bold text-[#64748B] hover:text-[#7C3AED] transition-colors uppercase tracking-widest">
-              View All Rankings
-            </button>
-          </div>
+          {data.total_count > limit && (
+            <div className="px-6 py-4 bg-[#F8FAFC] border-t border-[#E5E7EB] text-center">
+              <button 
+                onClick={() => setLimit(prev => prev + 50)}
+                disabled={fetchingMore}
+                className="text-[11px] font-bold text-[#64748B] hover:text-[#7C3AED] transition-colors uppercase tracking-widest disabled:opacity-50"
+              >
+                {fetchingMore ? 'Loading...' : 'View More Rankings'}
+              </button>
+            </div>
+          )}
         </div>
 
       </div>

@@ -299,3 +299,5 @@ class LeaderboardResponse(BaseModel):
     leaderboard: List[LeaderboardUser]
     current_user_rank: int
     current_user_xp: int
+    percentile: Optional[int] = 100
+    total_count: Optional[int] = 0
