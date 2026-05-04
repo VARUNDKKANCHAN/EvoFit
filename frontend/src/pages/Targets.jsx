@@ -61,8 +61,7 @@ export default function Targets() {
   }, []);
 
   const handleViewAnalysis = (exercise) => {
-    sessionStorage.setItem('analyticsExerciseFilter', exercise);
-    navigate('/analytics');
+    navigate(`/target-analysis/${exercise}`);
   };
 
   const handleSaveTarget = async () => {
@@ -92,14 +91,6 @@ export default function Targets() {
     </div>
   );
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: { 
-      opacity: 1,
-      transition: { staggerChildren: 0.1 }
-    }
-  };
-
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } }
@@ -107,14 +98,9 @@ export default function Targets() {
 
   return (
     <div className="min-h-screen bg-evofit-bg-primary pb-20 font-inter text-evofit-text-primary">
-      <motion.div 
-        className="max-w-7xl mx-auto px-6 pt-12"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-      >
+      <div className="max-w-7xl mx-auto px-6 pt-12">
         {/* ── HEADER SECTION ─────────────────────────────────────────────────── */}
-        <motion.div variants={itemVariants} className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10">
+        <motion.div initial="hidden" animate="visible" variants={itemVariants} className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10">
           <div>
             <h1 className="text-3xl font-bold text-evofit-text-primary tracking-tight">Targets & Progress</h1>
             <p className="text-evofit-text-muted mt-1">Set your weekly benchmarks and visualize your performance trends.</p>
@@ -131,7 +117,7 @@ export default function Targets() {
         </motion.div>
 
         {/* ── TARGET SETUP + PROGRESS (COMBINED) ─────────────────────────── */}
-        <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <motion.div initial="hidden" animate="visible" variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           <div className="lg:col-span-2 bg-evofit-bg-card border border-evofit-border rounded-2xl p-6 shadow-sm flex flex-col justify-center">
             <h3 className="text-sm font-semibold text-evofit-text-muted uppercase tracking-wider mb-6">Quick Target Setup</h3>
             <div className="flex flex-col sm:flex-row gap-3">
@@ -187,7 +173,7 @@ export default function Targets() {
         </motion.div>
 
         {/* ── PRIORITY EXERCISES ─────────────────────────────────────── */}
-        <motion.div variants={itemVariants} className="mb-10">
+        <motion.div initial="hidden" animate="visible" variants={itemVariants} className="mb-10">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-bold text-evofit-text-primary">Priority Exercises</h3>
             <span className="text-xs font-bold text-evofit-text-muted uppercase tracking-widest">Main Benchmarks</span>
@@ -237,7 +223,7 @@ export default function Targets() {
         </motion.div>
 
         {/* ── SECONDARY EXERCISES GRID ─────────────────────────────────── */}
-        <motion.div variants={itemVariants} className="mb-12">
+        <motion.div initial="hidden" animate="visible" variants={itemVariants} className="mb-12">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-bold text-evofit-text-primary">Secondary Exercises</h3>
             <div className="h-[1px] flex-1 bg-evofit-border mx-6"></div>
@@ -281,7 +267,7 @@ export default function Targets() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* ── WEEKLY TREND GRAPH ─────────────────────────────────── */}
-          <motion.div variants={itemVariants} className="lg:col-span-2 bg-evofit-bg-card border border-evofit-border rounded-2xl p-8 shadow-sm">
+          <motion.div initial="hidden" animate="visible" variants={itemVariants} className="lg:col-span-2 bg-evofit-bg-card border border-evofit-border rounded-2xl p-8 shadow-sm">
             <div className="flex justify-between items-start mb-8">
               <div>
                 <h3 className="text-xl font-bold text-evofit-text-primary">Weekly Trend</h3>
@@ -340,7 +326,7 @@ export default function Targets() {
           </motion.div>
 
           {/* ── MILESTONES / ACHIEVEMENTS ───────────────────────────────── */}
-          <motion.div variants={itemVariants} className="bg-evofit-bg-card border border-evofit-border rounded-2xl p-8 shadow-sm">
+          <motion.div initial="hidden" animate="visible" variants={itemVariants} className="bg-evofit-bg-card border border-evofit-border rounded-2xl p-8 shadow-sm">
             <div className="flex items-center gap-3 mb-8">
               <div className="w-10 h-10 rounded-xl bg-evofit-purple-main/10 flex items-center justify-center text-evofit-purple-main">
                 <Award size={20} />
@@ -379,7 +365,7 @@ export default function Targets() {
             </div>
           </motion.div>
         </div>
-      </motion.div>
+      </div>
 
       {/* Badges Modal */}
       <AnimatePresence>

@@ -12,6 +12,7 @@ import SessionHistory from './pages/SessionHistory';
 import UserProfile from './pages/UserProfile';
 import Chatbot from './pages/Chatbot';
 import Leaderboard from './pages/Leaderboard';
+import TargetAnalysis from './pages/TargetAnalysis';
 import ThemeToggle from './components/ThemeToggle';
 import FloatingChatbot from './components/FloatingChatbot';
 import { useAuth } from './context/AuthContext';
@@ -33,7 +34,7 @@ function AnimatedPage({ children }) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -15 }}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
-      className="contents"
+      className="flex-1 flex flex-col min-h-0"
     >
       {children}
     </motion.div>
@@ -352,7 +353,10 @@ function AppShell() {
       case '/chatbot': return 'EvoFit AI Assistant';
       case '/leaderboard': return 'Global Leaderboard';
       case '/profile': return 'My Profile';
-      default: return 'EvoFit Dashboard';
+      case '/chatbot': return 'EvoFit AI Assistant';
+      default: 
+        if (path.startsWith('/target-analysis/')) return 'Performance Deep Dive';
+        return 'EvoFit Dashboard';
     }
   };
 
@@ -396,6 +400,7 @@ function AppShell() {
                 <Route path="/leaderboard" element={<Leaderboard />} />
                 <Route path="/profile"   element={<UserProfile />} />
                 <Route path="/chatbot"   element={<Chatbot />} />
+                <Route path="/target-analysis/:exercise" element={<TargetAnalysis />} />
               </Routes>
             </AnimatedPage>
           </AnimatePresence>

@@ -181,6 +181,27 @@ class OverallProgressResponse(BaseModel):
     exercise_progress: List[WeeklyExerciseProgress]
     recent_achievements: List[AchievementResponse]
     weekly_trend: List[Dict[str, Any]] # e.g. [{"week": "Week 1", "completion": 75.0}]
+
+class TargetAnalysisPoint(BaseModel):
+    date: str
+    reps: int
+    quality: float
+
+class PersonalBests(BaseModel):
+    max_reps: int
+    best_form: float
+    total_volume: int
+    session_count: int
+
+class TargetAnalysisResponse(BaseModel):
+    exercise: str
+    has_data: bool
+    current_target: int
+    personal_bests: Optional[PersonalBests] = None
+    progression: Optional[List[TargetAnalysisPoint]] = []
+    avg_recent_form: Optional[float] = 0.0
+    insights: Optional[List[str]] = []
+    message: Optional[str] = None
 # --- DASHBOARD SCHEMAS ---
 
 class SessionItem(BaseModel):
