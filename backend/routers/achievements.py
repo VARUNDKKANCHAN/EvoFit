@@ -20,6 +20,7 @@ def get_achievements(current_user: models.User = Depends(auth_service.get_curren
     return {
         "level": user.level if user else 1,
         "xp": user.xp if user else 0,
+        "next_level_xp": (user.level if user else 1) * 1000,
         "total_badges": len(badges),
         "achievements": badges
     }

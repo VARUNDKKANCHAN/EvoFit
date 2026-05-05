@@ -156,7 +156,7 @@ export default function UserProfile() {
   const tier = getLevelTier(user.level ?? 1);
   const xp = user.xp ?? 0;
   const level = user.level ?? 1;
-  const xpToNext = level * 1000;
+  const xpToNext = Math.max(1, level) * 1000;
   const xpProgress = Math.min(100, Math.round((xp / xpToNext) * 100));
   const initials = (user.fullName || user.username || '?').slice(0, 2).toUpperCase();
   const memberSince = user.created_at

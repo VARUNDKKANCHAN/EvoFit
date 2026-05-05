@@ -161,6 +161,7 @@ class AchievementResponse(BaseModel):
 class TrophyRoomResponse(BaseModel):
     level: int
     xp: int
+    next_level_xp: int
     total_badges: int
     achievements: List[AchievementResponse]
 

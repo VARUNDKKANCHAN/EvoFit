@@ -100,7 +100,7 @@ export default function TrophyRoom() {
     );
   }
 
-  const xpProgress = (data.xp / data.next_level_xp) * 100;
+  const xpProgress = ((data.xp || 0) / (data.next_level_xp || 1000)) * 100;
 
   return (
     <motion.div 

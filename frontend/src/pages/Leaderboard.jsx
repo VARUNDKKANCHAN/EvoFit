@@ -72,7 +72,7 @@ export default function Leaderboard() {
 
   const currentUserXP = data?.current_user_xp || 0;
   const currentLevel = user?.level || 1;
-  const xpForNextLevel = currentLevel * 1000;
+  const xpForNextLevel = Math.max(1, currentLevel) * 1000;
   const progressPct = Math.min(100, Math.max(0, (currentUserXP / xpForNextLevel) * 100));
 
   return (
@@ -225,7 +225,7 @@ export default function Leaderboard() {
                 {rest.map((u) => {
                   const isMe = u.is_current_user;
                   const rankInfo = getRankInfo(u.level);
-                  const rowProgressPct = Math.min(100, (u.xp / (u.level * 1000)) * 100);
+                  const rowProgressPct = Math.min(100, (u.xp / (Math.max(1, u.level) * 1000)) * 100);
 
                   return (
                     <motion.tr 
