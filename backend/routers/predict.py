@@ -65,7 +65,14 @@ async def predict_exercise(file: UploadFile = File(...), current_user: models.Us
             }
             
             try:
-                prompt = f"User finished {label} exercise. Reps: {reps}. Form: {avg_conf * 100}%. Best set: {result.get('best_set_summary')}. Consistency: {result.get('overall_consistency')}. Give a SINGLE short, punchy sentence of game-style motivation and observation (e.g. 'Stellar {label} run! Set 2 was an absolute powerhouse of precision.'). Keep it under 15 words. No quotes, no intro."
+                # Optimized prompt to be data-driven and avoid hallucinations like "100 reps"
+                prompt = (
+                    f"User finished {label} exercise. Reps: {reps}. Form: {avg_conf * 100:.1f}%. "
+                    f"Best set summary: {result.get('best_set_summary')}. Consistency: {result.get('overall_consistency')}. "
+                    "Provide a short, motivating RPG-style announcer observation. "
+                    "Focus on form and effort. DO NOT mention specific numbers unless they are provided in the data above. "
+                    "Keep it under 15 words. No quotes."
+                )
                 msg = [SystemMessage(content="You are a fitness RPG game announcer."), HumanMessage(content=prompt)]
                 ai_text = f"AI Analysis: {chat_service.llm.invoke(msg).content.strip().replace('\"', '')}"
                 report_data["summary"]["ai_insight"] = ai_text

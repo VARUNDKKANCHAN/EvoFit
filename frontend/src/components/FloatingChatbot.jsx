@@ -81,7 +81,7 @@ export default function FloatingChatbot() {
   return (
     <>
       <motion.button
-        className="fixed bottom-6 right-6 w-12 h-12 rounded-full bg-gradient-to-r from-evofit-purple-light to-evofit-purple-main flex items-center justify-center text-white shadow-lg shadow-evofit-purple-main/20 z-50 transition-all opacity-80 hover:opacity-100 hover:scale-110"
+        className="fixed bottom-8 right-8 w-14 h-14 rounded-full bg-gradient-to-r from-evofit-purple-light to-evofit-purple-main flex items-center justify-center text-white shadow-2xl shadow-evofit-purple-main/40 z-50 transition-all opacity-40 hover:opacity-100 hover:scale-110 active:scale-95"
         onClick={() => setIsOpen(true)}
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 0.8 }}

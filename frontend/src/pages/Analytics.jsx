@@ -107,8 +107,8 @@ export default function Analytics() {
 
   const totalReps = (exerciseBreakdown || []).reduce((sum, ex) => sum + (ex?.rep_count || 0), 0) || 0;
   const exercisesPerformed = (availableExercises || []).length || 1;
-  const sessionDuration = predictionResult?.duration || 'Unknown';
-  const sessionTimeRange = predictionResult?.time_range || 'N/A';
+  const sessionDuration = predictionResult?.duration && predictionResult.duration !== 'N/A' ? predictionResult.duration : 'Auto-detected session';
+  const sessionTimeRange = (predictionResult?.time_range && predictionResult.time_range !== 'N/A') ? predictionResult.time_range : null;
   const overallConsistency = predictionResult?.overall_consistency || '0%';
   
   const bestSetSummaryStr = (predictionResult?.best_set_summary || 'N/A').toString();
@@ -125,14 +125,17 @@ export default function Analytics() {
   });
 
   const setBySetData = useMemo(() => {
-    const sets = currentExerciseData.set_details || [];
+    // Ensure we show all sets even if power is 0
+    const sets = [...(currentExerciseData.set_details || [])]
+      .filter(s => s.reps > 0) // Only show sets with actual work
+      .sort((a, b) => a.set_num - b.set_num);
     return sets.map((s) => ({
-      name: `Set ${s.set_num}`,
+      name: `S${s.set_num}`,
       set_num: s.set_num,
       reps: s.reps,
       confidence: s.confidence,
       rest_before_sec: s.rest_before_sec,
-      mean_power: s.mean_power
+      mean_power: s.mean_power || s.reps * 5 // Fallback for visualization if power is missing
     }));
   }, [currentExerciseData]);
 
@@ -151,7 +154,7 @@ export default function Analytics() {
       wobble: (sumW/len).toFixed(2),
       con: avgC,
       ecc: avgE,
-      ratio: avgE > 0 ? (avgC / avgE).toFixed(1) : '1.0'
+      ratio: avgE > 0 ? (avgC / avgE).toFixed(2) : '1.00'
     };
   }, [everyRepData]);
 
@@ -262,7 +265,7 @@ export default function Analytics() {
             { label: 'Exercises Performed', val: exercisesPerformed, sub: 'Auto-detected', icon: null },
             { label: 'Average Form Score', val: `${avgFormScore}%`, sub: avgFormTier, icon: <Award size={18} className={avgFormScore >= 85 ? 'text-green-400' : avgFormScore >= 70 ? 'text-yellow-400' : 'text-red-400'} /> },
             { label: 'Overall Consistency', val: overallConsistency, sub: 'Calculated Rhythm', icon: <Activity size={18} className="text-blue-400" /> },
-            { label: 'Session Duration', val: sessionDuration, sub: sessionTimeRange, icon: <Timer size={18} className="text-pink-400" /> },
+            { label: 'Session Duration', val: sessionDuration, sub: sessionTimeRange ? `Interval: ${sessionTimeRange}` : 'Live session', icon: <Timer size={18} className="text-pink-400" /> },
             { label: 'Best Set', val: bestSetVal, sub: bestSetSub, icon: <Sparkles size={18} className="text-amber-400" /> }
           ].map((m, i) => (
             <div key={i} className="glass-card p-5 flex flex-col gap-2 shadow-premium-card hover:translate-y-[-2px] transition-transform">
@@ -318,7 +321,7 @@ export default function Analytics() {
                     itemStyle={{ color: 'var(--purple-main)', fontWeight: 'bold' }}
                   />
                   {activeMetrics.includes('Form Score') && (
-                    <Area type="monotone" dataKey="score" stroke="#A78BFA" strokeWidth={3} fillOpacity={1} fill="url(#colorScore)" 
+                    <Area type="monotone" dataKey="score" name="Form Quality" stroke="#A78BFA" strokeWidth={3} fillOpacity={1} fill="url(#colorScore)" 
                       activeDot={{ r: 6, fill: 'var(--purple-main)', stroke: 'var(--bg-card)', strokeWidth: 2 }}
                       dot={(props) => {
                         const { cx, cy, payload } = props;
@@ -328,39 +331,42 @@ export default function Analytics() {
                     />
                   )}
                   {activeMetrics.includes('Rhythm') && (
-                    <Line type="monotone" dataKey="rhythm" stroke="#3B82F6" strokeWidth={2} dot={false} strokeDasharray="5 5" />
+                    <Line type="monotone" dataKey="rhythm" name="Rhythm Consistency" stroke="#3B82F6" strokeWidth={2} dot={false} strokeDasharray="6 4" />
                   )}
                 </ComposedChart>
               </ResponsiveContainer>
             </div>
+            {/* Legend for clarity */}
+            <div className="flex gap-4 mt-2 justify-center">
+               <div className="flex items-center gap-1.5 text-[11px] text-evofit-text-muted font-bold uppercase">
+                  <div className="w-3 h-0.5 bg-[#A78BFA]" /> Form Quality
+               </div>
+               <div className="flex items-center gap-1.5 text-[11px] text-evofit-text-muted font-bold uppercase">
+                  <div className="w-3 h-0.5 border-t-2 border-dashed border-[#3B82F6]" /> Rhythm
+               </div>
+            </div>
           </div>
   
-          {/* All Exercises Distribution */}
+          {/* All Exercises Distribution (Horizontal Bar Chart for better visibility of small values) */}
           <div className="glass-card p-6 shadow-premium-card">
-            <h3 className="text-base font-bold m-0 text-evofit-text-primary">All Exercises - Rep Distribution</h3>
-            <p className="text-[13px] text-evofit-text-muted m-0 mb-4">Volume breakdown</p>
-            <div className="flex items-center h-[200px]">
-              <div className="w-1/2 h-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie data={pieData} innerRadius={50} outerRadius={80} paddingAngle={4} dataKey="value" stroke="none">
-                      {pieData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.fill} />)}
-                    </Pie>
-                    <RechartsTooltip 
-                      contentStyle={{ borderRadius: '8px', background: 'var(--bg-card)', border: '1px solid var(--border)', fontSize: '12px', boxShadow: 'var(--card-shadow)', color: 'var(--text-primary)' }} 
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="w-1/2 flex flex-col gap-2.5">
-                {pieData.map(d => (
-                  <div key={d.name} className="flex items-center gap-2 text-[13px] text-evofit-text-secondary">
-                    <div className="w-2.5 h-2.5 rounded-full" style={{ background: d.fill }}></div>
-                    <span className="flex-1 truncate">{d.name}</span>
-                    <span className="font-bold text-evofit-text-primary">{d.value}</span>
-                  </div>
-                ))}
-              </div>
+            <h3 className="text-base font-bold m-0 text-evofit-text-primary">Rep Distribution</h3>
+            <p className="text-[13px] text-evofit-text-muted m-0 mb-4">Volume comparison across all detected moves</p>
+            <div className="h-[200px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={pieData} layout="vertical" margin={{ left: -10, right: 30 }}>
+                  <XAxis type="number" hide />
+                  <YAxis dataKey="name" type="category" stroke="var(--text-muted)" fontSize={11} width={120} tickLine={false} axisLine={false} />
+                  <RechartsTooltip 
+                    cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                    contentStyle={{ borderRadius: '8px', background: 'var(--bg-card)', border: '1px solid var(--border)', fontSize: '12px', boxShadow: 'var(--card-shadow)', color: 'var(--text-primary)' }} 
+                  />
+                  <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={20} minPointSize={10}>
+                    {pieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.fill} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </div>
         </div>
@@ -377,7 +383,9 @@ export default function Analytics() {
                  <p className="text-[12px] font-bold text-evofit-text-muted uppercase tracking-wider">Velocity Drop</p>
                  <Zap className="text-blue-400" size={18} />
               </div>
-              <p className="text-2xl font-black text-evofit-text-primary">{velocityDrop}%</p>
+              <p className="text-2xl font-black text-evofit-text-primary">
+                 {velocityDrop > 0 && velocityDrop < 0.1 ? '< 0.1%' : `${velocityDrop.toFixed(1)}%`}
+              </p>
               <p className="text-[11px] text-evofit-text-secondary mt-1">
                  {velocityDrop > 20 ? 'Effective failure reached' : 'Maintain intensity'}
               </p>
@@ -392,7 +400,7 @@ export default function Analytics() {
                  <p className="text-[12px] font-bold text-evofit-text-muted uppercase tracking-wider">Fatigue Index</p>
                  <Flame className="text-red-400" size={18} />
               </div>
-              <p className="text-2xl font-black text-evofit-text-primary">{avgFatigue}%</p>
+              <p className="text-2xl font-black text-evofit-text-primary">{avgFatigue.toFixed(1)}%</p>
               <p className="text-[11px] text-evofit-text-secondary mt-1">
                  {avgFatigue > 15 ? 'High neural fatigue' : 'Stable performance'}
               </p>
@@ -402,15 +410,19 @@ export default function Analytics() {
            </div>
 
            {/* Explosiveness */}
-           <div className="glass-card p-5 border-l-4 border-l-amber-500 shadow-premium-card">
+           <div className="glass-card p-5 border-l-4 border-l-amber-500 shadow-premium-card group relative">
               <div className="flex justify-between items-start mb-3">
                  <p className="text-[12px] font-bold text-evofit-text-muted uppercase tracking-wider">Explosiveness</p>
                  <Activity className="text-amber-400" size={18} />
               </div>
-              <p className="text-2xl font-black text-evofit-text-primary">{avgExplosiveness}</p>
+              <p className="text-2xl font-black text-evofit-text-primary">{avgExplosiveness.toFixed(2)}</p>
               <p className="text-[11px] text-evofit-text-secondary mt-1">G/s peak acceleration</p>
               <div className="mt-3 h-1.5 bg-evofit-bg-secondary rounded-full overflow-hidden">
                  <div className="h-full bg-amber-500" style={{ width: `${Math.min(100, avgExplosiveness * 10)}%` }} />
+              </div>
+              {/* Tooltip */}
+              <div className="absolute top-0 left-0 w-full h-full bg-evofit-bg-secondary opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-3 text-center rounded-xl pointer-events-none">
+                 <p className="text-[10px] text-evofit-text-primary font-medium leading-tight">Rate of Force Development measured via accelerometer peak force.</p>
               </div>
            </div>
 
@@ -524,9 +536,19 @@ export default function Analytics() {
                    <span className="text-[12px] text-evofit-text-secondary mb-1 font-bold">var/s</span>
                  </div>
               </div>
-              <div className={`w-20 h-20 rounded-full border-4 flex items-center justify-center text-[12px] text-evofit-text-primary font-extrabold shadow-lg
-                  ${advancedMetrics.wobble > 2.0 ? 'border-red-500 shadow-red-500/10' : 'border-green-500 shadow-green-500/10'}`}>
-                 {advancedMetrics.wobble > 2.0 ? 'Unstable' : 'Tight'}
+              <div className={`w-20 h-20 rounded-full border-4 flex flex-col items-center justify-center text-[10px] text-evofit-text-primary font-extrabold shadow-lg text-center p-2
+                  ${advancedMetrics.wobble > 10.0 ? 'border-red-500 shadow-red-500/20' : advancedMetrics.wobble > 2.0 ? 'border-amber-500 shadow-amber-500/10' : 'border-green-500 shadow-green-500/10'}`}>
+                 {advancedMetrics.wobble > 10.0 ? (
+                    <>
+                      <span className="text-red-500">DANGER</span>
+                      <span className="text-red-500">INSTABILITY</span>
+                    </>
+                 ) : advancedMetrics.wobble > 2.0 ? (
+                   <>
+                     <span className="text-amber-500">NEEDS</span>
+                     <span className="text-amber-500">STABILIZATION</span>
+                   </>
+                 ) : 'TIGHT'}
               </div>
             </div>
 
@@ -586,11 +608,20 @@ export default function Analytics() {
             
             <div className="mt-4 bg-evofit-bg-secondary p-4 rounded-xl border border-evofit-border shadow-inner">
               <h5 className="text-[13px] font-extrabold m-0 mb-1.5 text-evofit-text-primary flex items-center gap-1.5">
-                <Sparkles size={14} className="text-amber-400" /> Key Observation
+                <Sparkles size={14} className="text-amber-400" /> AI Growth Observation
               </h5>
               <p className="text-[12px] text-evofit-text-secondary leading-relaxed font-medium">
                 {predictionResult?.ai_insight || `Your strongest recorded performance interval was ${bestSetSummaryStr} based on combined volume density.`}
               </p>
+              <div className="mt-4 pt-4 border-t border-evofit-border/50">
+                 <h6 className="text-[11px] font-bold text-evofit-purple-light uppercase tracking-widest mb-2">Next Session Strategy</h6>
+                 <ul className="text-[12px] text-evofit-text-muted m-0 p-0 list-none space-y-1.5">
+                    {avgFormScore < 85 && <li className="flex items-center gap-2"><div className="w-1 h-1 bg-amber-400 rounded-full"/> Focus on core stability during the {activeTab} eccentric phase.</li>}
+                    {velocityDrop > 15 && <li className="flex items-center gap-2"><div className="w-1 h-1 bg-blue-400 rounded-full"/> Adjust working weight or increase rest periods to minimize velocity loss.</li>}
+                    {advancedMetrics.wobble > 1.5 && <li className="flex items-center gap-2"><div className="w-1 h-1 bg-red-400 rounded-full"/> Tighten grip and slow down tempo to reduce barbell rotational wobble.</li>}
+                    <li className="flex items-center gap-2"><div className="w-1 h-1 bg-green-400 rounded-full"/> Aim for a {((avgTempoScore + 5) > 100 ? 100 : (avgTempoScore + 5))}% tempo score target.</li>
+                 </ul>
+              </div>
             </div>
           </div>
 

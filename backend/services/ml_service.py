@@ -36,18 +36,24 @@ def _parse_csv(raw: bytes) -> pd.DataFrame:
         raise ValueError(f"Could not parse CSV file: {e}")
 
     # Handle timestamp index
-    if "epoch (ms)" in df.columns:
-        try:
-            df.index = pd.to_datetime(df["epoch (ms)"], unit="ms")
-        except Exception:
-            df.index = pd.to_datetime(df["epoch (ms)"])
-        df = df.drop(columns=["epoch (ms)", "time (01:00)", "elapsed (s)"], errors="ignore")
-    elif "Unnamed: 0" in df.columns:
-        try:
-            df.index = pd.to_datetime(df["Unnamed: 0"])
-        except Exception:
-            pass
-        df = df.drop(columns=["Unnamed: 0"], errors="ignore")
+    time_cols = ["epoch (ms)", "Timestamp", "timestamp", "time", "date", "Unnamed: 0"]
+    for col in time_cols:
+        if col in df.columns:
+            try:
+                # Try parsing with unit='ms' first if column name suggests it
+                unit = "ms" if "ms" in col.lower() or "epoch" in col.lower() else None
+                df.index = pd.to_datetime(df[col], unit=unit)
+                # Drop common redundant time columns
+                df = df.drop(columns=[col, "time (01:00)", "elapsed (s)"], errors="ignore")
+                break
+            except Exception:
+                try:
+                    # Fallback to general parsing
+                    df.index = pd.to_datetime(df[col])
+                    df = df.drop(columns=[col, "time (01:00)", "elapsed (s)"], errors="ignore")
+                    break
+                except Exception:
+                    continue
 
     return df
 
