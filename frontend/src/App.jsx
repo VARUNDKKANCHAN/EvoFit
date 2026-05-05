@@ -16,6 +16,7 @@ import TargetAnalysis from './pages/TargetAnalysis';
 import ThemeToggle from './components/ThemeToggle';
 import FloatingChatbot from './components/FloatingChatbot';
 import { useAuth } from './context/AuthContext';
+import { useNotifications } from './context/NotificationContext';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -42,6 +43,280 @@ function AnimatedPage({ children }) {
 }
 
 /* ══════════════════════════════════════════════════
+   Relative timestamp helper
+   ══════════════════════════════════════════════════ */
+function timeAgo(iso) {
+  const diff = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${Math.floor(hrs / 24)}d ago`;
+}
+
+/* ══════════════════════════════════════════════════
+   Notification type config
+   ══════════════════════════════════════════════════ */
+const NOTIF_CONFIG = {
+  success: { color: '#22C55E', bg: 'rgba(34,197,94,0.12)' },
+  error:   { color: '#EF4444', bg: 'rgba(239,68,68,0.12)'  },
+  warning: { color: '#F59E0B', bg: 'rgba(245,158,11,0.12)' },
+  info:    { color: '#7C3AED', bg: 'rgba(124,58,237,0.12)' },
+};
+
+function NotifTypeIcon({ type }) {
+  const cfg = NOTIF_CONFIG[type] ?? NOTIF_CONFIG.info;
+  const icons = {
+    success: <path d="M1.5 5L5.5 9L12.5 1.5" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />,
+    error:   <><line x1="15" y1="5" x2="5" y2="15" stroke="white" strokeWidth="2.2" strokeLinecap="round"/><line x1="5" y1="5" x2="15" y2="15" stroke="white" strokeWidth="2.2" strokeLinecap="round"/></>,
+    warning: <><path d="M10 3.5 L2 16 h16 Z" stroke="white" strokeWidth="2" fill="none" strokeLinejoin="round"/><line x1="10" y1="10" x2="10" y2="13" stroke="white" strokeWidth="2" strokeLinecap="round"/></>,
+    info:    <><circle cx="10" cy="10" r="8" stroke="white" strokeWidth="2"/><line x1="10" y1="8" x2="10" y2="8" stroke="white" strokeWidth="2.5" strokeLinecap="round"/><line x1="10" y1="11" x2="10" y2="14" stroke="white" strokeWidth="2" strokeLinecap="round"/></>,
+  };
+  return (
+    <div style={{
+      width: 26, height: 26, borderRadius: '50%',
+      background: cfg.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+      boxShadow: `0 0 8px ${cfg.color}50`,
+    }}>
+      <svg width="16" height="16" viewBox="0 0 20 20" fill="none">{icons[type] ?? icons.info}</svg>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════
+   Notification Bell with dropdown panel
+   ══════════════════════════════════════════════════ */
+function NotificationBell() {
+  const { notifications, unreadCount, markAllRead, markRead, clearAll } = useNotifications();
+  const [open, setOpen] = useState(false);
+  const btnRef  = useRef(null);
+  const panelRef = useRef(null);
+
+  // Close on outside click
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e) => {
+      if (
+        panelRef.current && !panelRef.current.contains(e.target) &&
+        btnRef.current   && !btnRef.current.contains(e.target)
+      ) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
+
+  // Close on scroll / resize
+  useEffect(() => {
+    if (!open) return;
+    const close = () => setOpen(false);
+    window.addEventListener('scroll', close, true);
+    window.addEventListener('resize', close);
+    return () => { window.removeEventListener('scroll', close, true); window.removeEventListener('resize', close); };
+  }, [open]);
+
+  const handleOpen = () => {
+    setOpen(prev => !prev);
+    if (!open && unreadCount > 0) markAllRead();
+  };
+
+  return (
+    <div className="relative" style={{ display: 'flex' }}>
+      {/* Bell trigger */}
+      <button
+        id="notification-bell-btn"
+        ref={btnRef}
+        onClick={handleOpen}
+        className="relative p-2 rounded-lg hover:bg-evofit-purple-main/10 transition-all duration-200"
+        aria-label="Toggle notifications"
+        aria-haspopup="true"
+        aria-expanded={open}
+      >
+        <svg width="20" height="20" fill="none" viewBox="0 0 24 24"
+          stroke={open ? 'var(--purple-main)' : 'var(--text-muted)'}
+          strokeWidth="2" className="transition-colors duration-200"
+        >
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+          <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+        </svg>
+        {/* Unread badge */}
+        {unreadCount > 0 && (
+          <span
+            className="absolute top-1.5 right-1.5 min-w-[16px] h-4 px-1 flex items-center justify-center
+                       text-[9px] font-black text-white rounded-full animate-pulse-glow"
+            style={{ background: '#EF4444', lineHeight: 1, border: '1.5px solid var(--bg-secondary)' }}
+          >
+            {unreadCount > 9 ? '9+' : unreadCount}
+          </span>
+        )}
+      </button>
+
+      {/* Dropdown panel — portal to avoid header clip */}
+      {open && createPortal(
+        <div
+          ref={panelRef}
+          className="animate-fade-in-up"
+          style={{
+            position: 'fixed',
+            top: 68,
+            right: 64,
+            width: 360,
+            maxHeight: 520,
+            zIndex: 999999,
+            display: 'flex',
+            flexDirection: 'column',
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border)',
+            borderRadius: 18,
+            boxShadow: 'var(--card-shadow), 0 24px 48px rgba(0,0,0,0.18)',
+            overflow: 'hidden',
+            animationDuration: '0.18s',
+          }}
+        >
+          {/* Panel header */}
+          <div style={{
+            padding: '14px 18px 12px',
+            borderBottom: '1px solid var(--border)',
+            display: 'flex', alignItems: 'center', gap: 10,
+            background: 'linear-gradient(135deg, rgba(124,58,237,0.06) 0%, transparent 100%)',
+          }}>
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24"
+              stroke="var(--purple-main)" strokeWidth="2">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+            </svg>
+            <span style={{ flex: 1, fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>
+              Notifications
+            </span>
+            {notifications.length > 0 && (
+              <>
+                <button
+                  onClick={markAllRead}
+                  style={{
+                    fontSize: 11, fontWeight: 600, color: 'var(--purple-light)',
+                    background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px',
+                    borderRadius: 6, transition: 'background 0.15s',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(124,58,237,0.1)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                >
+                  Mark all read
+                </button>
+                <button
+                  onClick={clearAll}
+                  style={{
+                    fontSize: 11, fontWeight: 600, color: 'var(--text-muted)',
+                    background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px',
+                    borderRadius: 6, transition: 'background 0.15s',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.08)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                >
+                  Clear all
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* Notification list */}
+          <div style={{ flex: 1, overflowY: 'auto', padding: '6px 8px' }}>
+            {notifications.length === 0 ? (
+              <div style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center',
+                justifyContent: 'center', padding: '40px 20px', gap: 12,
+              }}>
+                <div style={{
+                  width: 48, height: 48, borderRadius: 14,
+                  background: 'rgba(124,58,237,0.08)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <svg width="22" height="22" fill="none" viewBox="0 0 24 24"
+                    stroke="var(--purple-light)" strokeWidth="1.8">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                  </svg>
+                </div>
+                <p style={{ margin: 0, fontSize: 13, color: 'var(--text-muted)', textAlign: 'center' }}>
+                  No notifications yet
+                </p>
+                <p style={{ margin: 0, fontSize: 11, color: 'var(--text-muted)', textAlign: 'center', lineHeight: 1.5 }}>
+                  Achievements, alerts and updates will appear here
+                </p>
+              </div>
+            ) : (
+              notifications.map(n => {
+                const cfg = NOTIF_CONFIG[n.type] ?? NOTIF_CONFIG.info;
+                return (
+                  <div
+                    key={n.id}
+                    onClick={() => markRead(n.id)}
+                    style={{
+                      display: 'flex', alignItems: 'flex-start', gap: 12,
+                      padding: '10px 10px',
+                      borderRadius: 12,
+                      cursor: 'default',
+                      position: 'relative',
+                      background: n.read ? 'transparent' : `${cfg.bg}`,
+                      borderLeft: n.read ? '2px solid transparent' : `2px solid ${cfg.color}`,
+                      marginBottom: 2,
+                      transition: 'background 0.15s',
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-primary)'}
+                    onMouseLeave={e => e.currentTarget.style.background = n.read ? 'transparent' : cfg.bg}
+                  >
+                    <NotifTypeIcon type={n.type} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{
+                        margin: 0, fontSize: 13, fontWeight: n.read ? 500 : 700,
+                        color: 'var(--text-primary)', lineHeight: 1.25,
+                      }}>
+                        {n.title}
+                      </p>
+                      {n.subtitle && (
+                        <p style={{
+                          margin: '2px 0 0', fontSize: 11.5,
+                          color: 'var(--text-muted)', lineHeight: 1.4,
+                        }}>
+                          {n.subtitle}
+                        </p>
+                      )}
+                      <p style={{ margin: '4px 0 0', fontSize: 10.5, color: 'var(--text-muted)' }}>
+                        {timeAgo(n.timestamp)}
+                      </p>
+                    </div>
+                    {!n.read && (
+                      <span style={{
+                        width: 7, height: 7, borderRadius: '50%',
+                        background: cfg.color, flexShrink: 0, marginTop: 4,
+                        boxShadow: `0 0 6px ${cfg.color}80`,
+                      }} />
+                    )}
+                  </div>
+                );
+              })
+            )}
+          </div>
+
+          {/* Footer */}
+          {notifications.length > 0 && (
+            <div style={{
+              padding: '10px 18px',
+              borderTop: '1px solid var(--border)',
+              display: 'flex', justifyContent: 'center',
+            }}>
+              <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                {notifications.length} notification{notifications.length !== 1 ? 's' : ''} total
+              </span>
+            </div>
+          )}
+        </div>,
+        document.body
+      )}
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════
    Shared top header
    ══════════════════════════════════════════════════ */
 function PageHeader({ title, onMenuClick }) {
@@ -50,7 +325,6 @@ function PageHeader({ title, onMenuClick }) {
   const today = new Date().toLocaleDateString('en-US', {
     weekday: 'short', month: 'short', day: 'numeric',
   });
-  const [bellHover, setBellHover] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
   const btnRef = useRef(null);
@@ -126,23 +400,9 @@ function PageHeader({ title, onMenuClick }) {
       </div>
 
       {/* Right side */}
-      <div className="flex items-center gap-4 ml-4">
+      <div className="flex items-center gap-3 ml-4">
         <ThemeToggle />
-        
-        {/* Bell */}
-        <div
-          className="relative p-2 rounded-lg hover:bg-evofit-purple-main/10 cursor-pointer transition-all duration-200"
-          onMouseEnter={() => setBellHover(true)}
-          onMouseLeave={() => setBellHover(false)}
-        >
-          <svg width="20" height="20" fill="none" viewBox="0 0 24 24"
-            stroke={bellHover ? 'var(--purple-main)' : 'var(--text-muted)'} strokeWidth="2"
-            className="transition-colors duration-200">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-          </svg>
-          <span className="absolute top-2 right-2 w-2 h-2 bg-[#EF4444] rounded-full border-2 border-white" />
-        </div>
+        <NotificationBell />
 
         {/* User chip + dropdown */}
         <div className="relative" ref={dropdownRef}>

@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { authApi } from '../api/auth';
-import { toast } from 'react-toastify';
-import SuccessToast from '../components/SuccessToast';
+import { useNotifications } from './NotificationContext';
 
 const AuthContext = createContext();
 
@@ -41,6 +40,8 @@ export function AuthProvider({ children }) {
   // Loading is false by default since we restore from cache instantly
   const [loading, setLoading] = useState(false);
 
+  const { notify } = useNotifications();
+
   const saveUser = useCallback((userObj) => {
     setUser(userObj);
     localStorage.setItem('evofit_user', JSON.stringify(userObj));
@@ -50,8 +51,8 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('evofit_token');
     localStorage.removeItem('evofit_user');
     setUser(null);
-    toast.info('Logged out from EvoFit.');
-  }, []);
+    notify('info', 'Signed out', 'You have been logged out of EvoFit.');
+  }, [notify]);
 
   // Background sync on mount: silently refresh user data from backend
   useEffect(() => {
@@ -91,12 +92,15 @@ export function AuthProvider({ children }) {
       const userObj = normalizeUser(meData);
       saveUser(userObj);
 
-
-      toast.success(<SuccessToast title="Welcome back!" subtitle={`${userObj.fullName || userObj.username}, your session is ready.`} />, { icon: false });
+      notify(
+        'success',
+        'Welcome back!',
+        `${userObj.fullName || userObj.username}, your session is ready.`,
+      );
       return true;
     } catch (error) {
       const msg = error.response?.data?.detail || 'Login failed. Please check your credentials.';
-      toast.error(msg);
+      notify('error', 'Login failed', msg);
       return false;
     } finally {
       setLoading(false);
@@ -107,11 +111,11 @@ export function AuthProvider({ children }) {
     try {
       setLoading(true);
       await authApi.register(userData);
-      toast.success(<SuccessToast title="Account created!" subtitle="You can now log in to your dashboard." />, { icon: false });
+      notify('success', 'Account created!', 'You can now log in to your dashboard.');
       return true;
     } catch (error) {
       const msg = error.response?.data?.detail || 'Registration failed. Please try again.';
-      toast.error(msg);
+      notify('error', 'Registration failed', msg);
       return false;
     } finally {
       setLoading(false);
@@ -123,10 +127,10 @@ export function AuthProvider({ children }) {
       const updated = await authApi.updateProfile(profileData);
       const userObj = normalizeUser(updated);
       saveUser(userObj);
-      toast.success(<SuccessToast title="Profile updated successfully" subtitle="Changes saved instantly" />, { icon: false });
+      notify('success', 'Profile updated', 'Your changes have been saved.');
       return true;
     } catch (error) {
-      toast.error('Failed to update profile.');
+      notify('error', 'Update failed', 'Could not save profile changes. Please try again.');
       return false;
     }
   };

@@ -1,7 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import SuccessToast from '../components/SuccessToast';
+import { useNotifications } from '../context/NotificationContext';
 import api from '../api/auth';
 import Confetti from 'react-confetti';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -46,6 +45,7 @@ const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
 export default function UploadPredict() {
   const navigate = useNavigate();
   const inputRef = useRef();
+  const { notify } = useNotifications();
 
   const [file, setFile] = useState(null);
   const [dragOver, setDragOver] = useState(false);
@@ -55,6 +55,8 @@ export default function UploadPredict() {
   const [error, setError] = useState('');
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [levelUpData, setLevelUpData] = useState(null);
+  // Badges queued while the level-up modal is open — fired on dismiss
+  const [pendingBadges, setPendingBadges] = useState([]);
   const [recentSessions, setRecentSessions] = useState([]);
   const [recentLoading, setRecentLoading] = useState(true);
 
@@ -116,18 +118,20 @@ export default function UploadPredict() {
 
       sessionStorage.setItem('lastPrediction', JSON.stringify({ result: data, filename: file.name }));
 
-      if (data.new_achievements?.length > 0) {
-        data.new_achievements.forEach(badge =>
-          toast.success(<SuccessToast title="🏆 Achievement Unlocked!" subtitle={badge} />, { icon: false })
-        );
-      }
+      const badges = data.new_achievements ?? [];
 
       if (data.leveled_up) {
+        // Queue badges to show AFTER the level-up modal is dismissed (avoids z-index race)
         setLoading(false);
+        setPendingBadges(badges);
         setLevelUpData({ xp: data.new_xp_total, filename: file.name, result: data });
         setShowLevelUp(true);
-        fetchRecent(); // refresh list after new upload
+        fetchRecent();
       } else {
+        // Fire badge toasts immediately — no modal conflict
+        badges.forEach(badge =>
+          notify('success', '🏆 Achievement Unlocked!', badge)
+        );
         fetchRecent();
         setTimeout(() => navigate('/analytics', { state: { result: data, filename: file.name } }), 400);
       }
@@ -163,7 +167,15 @@ export default function UploadPredict() {
               </div>
               <h2 className="text-2xl font-bold text-evofit-text-primary mb-1">Level Up!</h2>
               <p className="text-sm text-evofit-text-muted mb-6">You've reached a new rank. Your power grows!</p>
-              <button onClick={() => { setShowLevelUp(false); navigate('/analytics', { state: { result: levelUpData.result, filename: levelUpData.filename } }); }}
+              <button onClick={() => {
+                setShowLevelUp(false);
+                // Fire any queued achievement toasts now that modal is gone
+                pendingBadges.forEach(badge =>
+                  notify('success', '🏆 Achievement Unlocked!', badge)
+                );
+                setPendingBadges([]);
+                navigate('/analytics', { state: { result: levelUpData.result, filename: levelUpData.filename } });
+              }}
                 className="w-full premium-gradient text-white py-3 rounded-xl font-semibold text-sm shadow-sm hover:shadow-md transition-shadow">
                 Continue to Analytics
               </button>
