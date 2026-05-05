@@ -249,6 +249,20 @@ def predict_from_dataframe(df_raw: pd.DataFrame) -> dict:
         # Calculate per-exercise average confidence across sets
         sets = v.get("set_details", [])
         v["avg_confidence"] = sum(s.get("confidence", 0) for s in sets) / len(sets) if sets else 0.0
+        
+        # Calculate Velocity Drop, Avg Fatigue, and Avg Explosiveness
+        reps = v.get("rep_details", [])
+        if len(reps) >= 2:
+            first_vel = reps[0].get("velocity", 0.0)
+            last_vel = reps[-1].get("velocity", 0.0)
+            if first_vel > 0:
+                drop = ((first_vel - last_vel) / first_vel) * 100
+                v["velocity_drop"] = round(max(0.0, float(drop)), 1)
+        
+        if reps:
+            v["avg_fatigue"] = round(sum(r.get("fatigue_index", 0) for r in reps) / len(reps), 1)
+            v["avg_explosiveness"] = round(sum(r.get("explosiveness", 0) for r in reps) / len(reps), 2)
+
         breakdown_list.append(v)
         
     global_results["exercise_breakdown"] = breakdown_list

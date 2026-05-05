@@ -4,7 +4,7 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   PieChart, Pie, Cell, BarChart, Bar, ComposedChart, Line
 } from 'recharts';
-import { Activity, Dumbbell, Award, Timer, ChevronLeft, Share2, Sparkles, Flame, TrendingUp, Check } from 'lucide-react';
+import { Activity, Dumbbell, Award, Timer, ChevronLeft, Share2, Sparkles, Flame, TrendingUp, Check, Zap } from 'lucide-react';
 
 const COLORS = {
   bench: '#7C3AED',
@@ -184,6 +184,16 @@ export default function Analytics() {
     return Math.round(sum / everyRepData.length);
   }, [everyRepData, realConfidence]);
 
+  const avgTempoScore = useMemo(() => {
+    if (!everyRepData || everyRepData.length === 0) return 0;
+    const sum = everyRepData.reduce((acc, r) => acc + (r.tempo_score || 0), 0);
+    return Math.round(sum / everyRepData.length);
+  }, [everyRepData]);
+
+  const velocityDrop = currentExerciseData.velocity_drop || 0;
+  const avgFatigue = currentExerciseData.avg_fatigue || 0;
+  const avgExplosiveness = currentExerciseData.avg_explosiveness || 0;
+
   // Tier label consistent with pbBins thresholds
   const avgFormTier = avgFormScore >= 85 ? 'Excellent' : avgFormScore >= 70 ? 'Good Form' : 'Needs Improvement';
 
@@ -353,6 +363,71 @@ export default function Analytics() {
               </div>
             </div>
           </div>
+        </div>
+
+
+        {/* ── PRO PERFORMANCE METRICS ────────────────────────────────────── */}
+        <h3 className="text-lg font-extrabold mb-4 mt-8 text-evofit-text-primary flex items-center gap-2">
+           <Sparkles className="text-evofit-purple-light" size={20} /> Pro Performance Analysis
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+           {/* Velocity Drop */}
+           <div className="glass-card p-5 border-l-4 border-l-blue-500 shadow-premium-card">
+              <div className="flex justify-between items-start mb-3">
+                 <p className="text-[12px] font-bold text-evofit-text-muted uppercase tracking-wider">Velocity Drop</p>
+                 <Zap className="text-blue-400" size={18} />
+              </div>
+              <p className="text-2xl font-black text-evofit-text-primary">{velocityDrop}%</p>
+              <p className="text-[11px] text-evofit-text-secondary mt-1">
+                 {velocityDrop > 20 ? 'Effective failure reached' : 'Maintain intensity'}
+              </p>
+              <div className="mt-3 h-1.5 bg-evofit-bg-secondary rounded-full overflow-hidden">
+                 <div className="h-full bg-blue-500" style={{ width: `${Math.min(100, velocityDrop * 2)}%` }} />
+              </div>
+           </div>
+
+           {/* Fatigue Index */}
+           <div className="glass-card p-5 border-l-4 border-l-red-500 shadow-premium-card">
+              <div className="flex justify-between items-start mb-3">
+                 <p className="text-[12px] font-bold text-evofit-text-muted uppercase tracking-wider">Fatigue Index</p>
+                 <Flame className="text-red-400" size={18} />
+              </div>
+              <p className="text-2xl font-black text-evofit-text-primary">{avgFatigue}%</p>
+              <p className="text-[11px] text-evofit-text-secondary mt-1">
+                 {avgFatigue > 15 ? 'High neural fatigue' : 'Stable performance'}
+              </p>
+              <div className="mt-3 h-1.5 bg-evofit-bg-secondary rounded-full overflow-hidden">
+                 <div className="h-full bg-red-500" style={{ width: `${Math.min(100, avgFatigue * 3)}%` }} />
+              </div>
+           </div>
+
+           {/* Explosiveness */}
+           <div className="glass-card p-5 border-l-4 border-l-amber-500 shadow-premium-card">
+              <div className="flex justify-between items-start mb-3">
+                 <p className="text-[12px] font-bold text-evofit-text-muted uppercase tracking-wider">Explosiveness</p>
+                 <Activity className="text-amber-400" size={18} />
+              </div>
+              <p className="text-2xl font-black text-evofit-text-primary">{avgExplosiveness}</p>
+              <p className="text-[11px] text-evofit-text-secondary mt-1">G/s peak acceleration</p>
+              <div className="mt-3 h-1.5 bg-evofit-bg-secondary rounded-full overflow-hidden">
+                 <div className="h-full bg-amber-500" style={{ width: `${Math.min(100, avgExplosiveness * 10)}%` }} />
+              </div>
+           </div>
+
+           {/* Tempo Score */}
+           <div className="glass-card p-5 border-l-4 border-l-green-500 shadow-premium-card">
+              <div className="flex justify-between items-start mb-3">
+                 <p className="text-[12px] font-bold text-evofit-text-muted uppercase tracking-wider">Tempo Score</p>
+                 <Timer className="text-green-400" size={18} />
+              </div>
+              <p className="text-2xl font-black text-evofit-text-primary">{avgTempoScore}%</p>
+              <p className="text-[11px] text-evofit-text-secondary mt-1">
+                 {avgTempoScore > 80 ? 'Perfect eccentric control' : 'Control the negative'}
+              </p>
+              <div className="mt-3 h-1.5 bg-evofit-bg-secondary rounded-full overflow-hidden">
+                 <div className="h-full bg-green-500" style={{ width: `${avgTempoScore}%` }} />
+              </div>
+           </div>
         </div>
 
         {/* ── DEEP ANALYSIS ROW ───────────────────────────────────────────── */}
