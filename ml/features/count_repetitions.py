@@ -176,6 +176,39 @@ def evaluate_reps(
         
         concentric_sec = round(concentric_samples / FS, 2)
         eccentric_sec = round(eccentric_samples / FS, 2)
+
+        # --- 1. Velocity (Proxy: Mean Acceleration during concentric phase) ---
+        concentric_data = dataset.iloc[int(v_before):int(peak_idx)]
+        velocity_proxy = concentric_data["acc_r"].mean() if not concentric_data.empty else 0.0
+
+        # --- 2. Fatigue Index (FFT-based: High-freq noise ratio) ---
+        # High noise relative to the main signal indicates fatigue/shaking
+        rep_data = dataset.iloc[int(start_idx):int(v_after if v_after < len(dataset) else len(dataset)-1)]
+        if len(rep_data) > 4:
+            # We use the FFT of the raw acc_r signal
+            fft_vals = np.abs(np.fft.rfft(rep_data["acc_r"].values))
+            # Ratio of high-frequency power (last 50% of spectrum) to total power
+            half = len(fft_vals) // 2
+            fatigue_idx = (np.sum(fft_vals[half:]) / np.sum(fft_vals)) * 100 if np.sum(fft_vals) > 0 else 0.0
+        else:
+            fatigue_idx = 0.0
+
+        # --- 3. Explosiveness (Peak Accel / Time to Peak) ---
+        peak_accel = concentric_data["acc_r"].max() if not concentric_data.empty else 0.0
+        explosiveness = (peak_accel / concentric_sec) if concentric_sec > 0 else 0.0
+
+        # --- 4. Tempo Score (Eccentric control) ---
+        # Ideal: Eccentric (down) is slower than concentric (up)
+        # Ratio of 1.5 - 2.5 is usually considered "controlled"
+        ratio = eccentric_sec / concentric_sec if concentric_sec > 0 else 1.0
+        if eccentric_sec < 0.6: # Dangerously fast drop
+            tempo_score = 40.0
+        elif ratio < 1.0: # Faster down than up
+            tempo_score = 65.0
+        elif ratio > 1.2 and ratio < 3.0: # Good control
+            tempo_score = 95.0
+        else: # Acceptable
+            tempo_score = 80.0
         
         rep_details.append({
             "rep": i + 1,
@@ -184,7 +217,11 @@ def evaluate_reps(
             "peak_index": int(peak_idx),
             "wobble": round(float(wobble), 3),
             "concentric_sec": concentric_sec,
-            "eccentric_sec": eccentric_sec
+            "eccentric_sec": eccentric_sec,
+            "velocity": round(float(velocity_proxy), 2),
+            "fatigue_index": round(float(fatigue_idx), 1),
+            "explosiveness": round(float(explosiveness), 2),
+            "tempo_score": round(float(tempo_score), 1)
         })
 
     # Downsample signal to exactly ~60 points for waveform charting

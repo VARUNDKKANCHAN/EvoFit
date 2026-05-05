@@ -18,6 +18,10 @@ class RepDetail(BaseModel):
     wobble: Optional[float] = 0.0
     concentric_sec: Optional[float] = 0.0
     eccentric_sec: Optional[float] = 0.0
+    velocity: Optional[float] = 0.0
+    fatigue_index: Optional[float] = 0.0
+    explosiveness: Optional[float] = 0.0
+    tempo_score: Optional[float] = 0.0
 
 class RhythmWaveform(BaseModel):
     time: int
@@ -37,6 +41,9 @@ class ExerciseBreakdown(BaseModel):
     set_details: List[SetDetail]
     rep_details: List[RepDetail]
     rhythm_waveform: List[RhythmWaveform]
+    velocity_drop: Optional[float] = 0.0
+    avg_fatigue: Optional[float] = 0.0
+    avg_explosiveness: Optional[float] = 0.0
 
 class PredictionResponse(BaseModel):
     """Returned by POST /predict/"""
