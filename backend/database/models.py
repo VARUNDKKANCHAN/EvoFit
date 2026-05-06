@@ -85,3 +85,18 @@ class BodyMetric(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     user = relationship("User", back_populates="metrics")
+
+class SystemToken(Base):
+    """API Tokens for system-level integrations and external access"""
+    __tablename__ = "system_tokens"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False) # e.g., "Mobile App", "Admin CLI"
+    token = Column(String, unique=True, index=True, nullable=False)
+    created_by = Column(Integer, ForeignKey("users.id"))
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    expires_at = Column(DateTime(timezone=True), nullable=True)
+    last_used_at = Column(DateTime(timezone=True), nullable=True)
+    is_active = Column(Boolean, default=True)
+    use_count = Column(Integer, default=0)
+
+    creator = relationship("User")

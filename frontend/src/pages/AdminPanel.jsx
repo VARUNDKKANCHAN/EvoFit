@@ -12,13 +12,72 @@ const AdminPanel = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [activeTab, setActiveTab] = useState('overview'); // 'overview', 'users'
+  const [activeTab, setActiveTab] = useState('overview'); // 'overview', 'users', 'system', 'tokens'
+  const [systemStatus, setSystemStatus] = useState(null);
+  const [statusLoading, setStatusLoading] = useState(false);
+  const [tokens, setTokens] = useState([]);
+  const [tokenLoading, setTokenLoading] = useState(false);
+  const [newTokenName, setNewTokenName] = useState('');
 
   useEffect(() => {
     if (user?.isAdmin) {
       fetchData();
+      fetchSystemStatus();
     }
   }, [user]);
+
+  const fetchSystemStatus = async () => {
+    try {
+      setStatusLoading(true);
+      const data = await adminApi.getSystemStatus();
+      setSystemStatus(data);
+    } catch (error) {
+      console.error('System Status Error:', error);
+      notify('warning', 'Diagnostic Warning', 'Some system health metrics could not be retrieved.');
+    } finally {
+      setStatusLoading(false);
+    }
+  };
+
+  const fetchTokens = async () => {
+    try {
+      setTokenLoading(true);
+      const data = await adminApi.getTokens();
+      setTokens(data);
+    } catch (error) {
+      notify('error', 'Token Error', 'Could not load API tokens.');
+    } finally {
+      setTokenLoading(false);
+    }
+  };
+
+  const handleCreateToken = async () => {
+    if (!newTokenName) return;
+    try {
+      const token = await adminApi.createToken(newTokenName, 30);
+      setTokens([...tokens, token]);
+      setNewTokenName('');
+      notify('success', 'Token Created', 'New API token has been generated.');
+    } catch (error) {
+      notify('error', 'Action Failed', 'Could not create token.');
+    }
+  };
+
+  const handleRevokeToken = async (id) => {
+    try {
+      await adminApi.revokeToken(id);
+      setTokens(tokens.map(t => t.id === id ? { ...t, is_active: false } : t));
+      notify('success', 'Token Revoked', 'API token is no longer active.');
+    } catch (error) {
+      notify('error', 'Action Failed', 'Could not revoke token.');
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'tokens') {
+      fetchTokens();
+    }
+  }, [activeTab]);
 
   const fetchData = async () => {
     try {
@@ -81,6 +140,18 @@ const AdminPanel = () => {
           >
             User Management
           </button>
+          <button 
+            onClick={() => setActiveTab('system')}
+            className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${activeTab === 'system' ? 'bg-evofit-purple-main text-white shadow-lg' : 'text-evofit-text-muted hover:text-evofit-text-primary'}`}
+          >
+            System Status
+          </button>
+          <button 
+            onClick={() => setActiveTab('tokens')}
+            className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${activeTab === 'tokens' ? 'bg-evofit-purple-main text-white shadow-lg' : 'text-evofit-text-muted hover:text-evofit-text-primary'}`}
+          >
+            API Tokens
+          </button>
         </div>
       </div>
 
@@ -142,7 +213,7 @@ const AdminPanel = () => {
               </div>
             </div>
           </motion.div>
-        ) : (
+        ) : activeTab === 'users' ? (
           <motion.div 
             key="users"
             initial={{ opacity: 0, y: 10 }}
@@ -239,6 +310,228 @@ const AdminPanel = () => {
                                 )}
                               </svg>
                             </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </motion.div>
+        ) : activeTab === 'system' ? (
+          <motion.div 
+            key="system"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="space-y-6"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Database Health */}
+              <div className="bg-evofit-bg-card border border-evofit-border rounded-2xl p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-sm font-black text-evofit-text-primary uppercase tracking-widest m-0">Database</h4>
+                  <div className={`w-3 h-3 rounded-full ${systemStatus?.database === 'operational' ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 'bg-red-500 animate-pulse'}`} />
+                </div>
+                <div className="space-y-3">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-evofit-text-muted">Status</span>
+                    <span className={`font-bold ${systemStatus?.database === 'operational' ? 'text-green-500' : 'text-red-500'}`}>
+                      {systemStatus?.database?.toUpperCase() || 'FETCHING...'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-evofit-text-muted">Type</span>
+                    <span className="text-evofit-text-primary font-bold">PostgreSQL / SQLite</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* ML Engine Health */}
+              <div className="bg-evofit-bg-card border border-evofit-border rounded-2xl p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-sm font-black text-evofit-text-primary uppercase tracking-widest m-0">ML Engine</h4>
+                  <div className={`w-3 h-3 rounded-full ${systemStatus?.ml_engine === 'operational' ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 'bg-red-500 animate-pulse'}`} />
+                </div>
+                <div className="space-y-3">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-evofit-text-muted">Status</span>
+                    <span className={`font-bold ${systemStatus?.ml_engine === 'operational' ? 'text-green-500' : 'text-red-500'}`}>
+                      {systemStatus?.ml_engine?.toUpperCase() || 'FETCHING...'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-evofit-text-muted">Model</span>
+                    <span className="text-evofit-text-primary font-bold">Random Forest v1.0</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* API Server Health */}
+              <div className="bg-evofit-bg-card border border-evofit-border rounded-2xl p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-sm font-black text-evofit-text-primary uppercase tracking-widest m-0">API Server</h4>
+                  <div className={`w-3 h-3 rounded-full ${systemStatus?.api_server === 'operational' ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 'bg-red-500 animate-pulse'}`} />
+                </div>
+                <div className="space-y-3">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-evofit-text-muted">Latency</span>
+                    <span className="text-evofit-text-primary font-bold">{systemStatus?.latency_ms || '0'} ms</span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-evofit-text-muted">Status</span>
+                    <span className="text-green-500 font-bold">ONLINE</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Resource Monitoring */}
+            <div className="bg-evofit-bg-card border border-evofit-border rounded-2xl p-6">
+              <div className="flex items-center gap-2 mb-6">
+                <div className="p-2 rounded-lg bg-evofit-purple-main/10 text-evofit-purple-light">
+                  <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                  </svg>
+                </div>
+                <h4 className="text-sm font-black text-evofit-text-primary uppercase tracking-widest m-0">Resource Monitoring</h4>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-2">
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="text-evofit-text-muted font-bold uppercase tracking-wider">CPU Usage</span>
+                    <span className="text-evofit-text-primary font-black">{systemStatus?.cpu_usage_percent || 0}%</span>
+                  </div>
+                  <div className="h-2 bg-evofit-bg-secondary rounded-full overflow-hidden">
+                    <motion.div 
+                      className="h-full bg-evofit-purple-main"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${systemStatus?.cpu_usage_percent || 0}%` }}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="text-evofit-text-muted font-bold uppercase tracking-wider">Memory Usage</span>
+                    <span className="text-evofit-text-primary font-black">{systemStatus?.memory_usage_mb || 0} MB</span>
+                  </div>
+                  <div className="h-2 bg-evofit-bg-secondary rounded-full overflow-hidden">
+                    <motion.div 
+                      className="h-full bg-blue-500"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${Math.min((systemStatus?.memory_usage_mb || 0) / 10.24, 100)}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-8 pt-6 border-t border-evofit-border flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-evofit-purple-main animate-pulse" />
+                  <span className="text-[10px] font-black text-evofit-text-muted uppercase tracking-widest">Live Monitoring Active</span>
+                </div>
+                <button 
+                  onClick={fetchSystemStatus}
+                  className="px-4 py-2 rounded-xl bg-evofit-bg-secondary border border-evofit-border text-[10px] font-black text-evofit-text-primary hover:bg-evofit-border transition-all uppercase tracking-widest"
+                >
+                  Refresh Diagnostics
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        ) : (
+          <motion.div 
+            key="tokens"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="space-y-6"
+          >
+            {/* Token Generator */}
+            <div className="bg-evofit-bg-card border border-evofit-border rounded-2xl p-6">
+              <h4 className="text-sm font-black text-evofit-text-primary uppercase tracking-widest m-0 mb-4">Generate API Token</h4>
+              <div className="flex flex-col md:flex-row gap-4">
+                <input 
+                  type="text" 
+                  placeholder="Token Name (e.g. Mobile Integration)"
+                  value={newTokenName}
+                  onChange={(e) => setNewTokenName(e.target.value)}
+                  className="flex-1 bg-evofit-bg-secondary border border-evofit-border rounded-xl px-4 py-2.5 text-sm text-evofit-text-primary focus:outline-none focus:ring-2 focus:ring-evofit-purple-main/20 focus:border-evofit-purple-main/40 transition-all"
+                />
+                <button 
+                  onClick={handleCreateToken}
+                  disabled={!newTokenName}
+                  className="px-6 py-2.5 rounded-xl bg-evofit-purple-main text-white text-xs font-black uppercase tracking-widest hover:bg-evofit-purple-dark disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg"
+                >
+                  Create Token
+                </button>
+              </div>
+            </div>
+
+            {/* Tokens Table */}
+            <div className="bg-evofit-bg-card border border-evofit-border rounded-2xl overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-evofit-bg-secondary/50 border-b border-evofit-border">
+                      <th className="px-6 py-4 text-[11px] font-black text-evofit-text-muted uppercase tracking-widest">Name / ID</th>
+                      <th className="px-6 py-4 text-[11px] font-black text-evofit-text-muted uppercase tracking-widest">Token Key</th>
+                      <th className="px-6 py-4 text-[11px] font-black text-evofit-text-muted uppercase tracking-widest">Usage</th>
+                      <th className="px-6 py-4 text-[11px] font-black text-evofit-text-muted uppercase tracking-widest">Status</th>
+                      <th className="px-6 py-4 text-[11px] font-black text-evofit-text-muted uppercase tracking-widest text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-evofit-border">
+                    {tokenLoading ? (
+                      [...Array(3)].map((_, i) => (
+                        <tr key={i} className="animate-pulse">
+                          <td colSpan="5" className="px-6 py-8"><div className="h-4 bg-evofit-border rounded w-full opacity-50" /></td>
+                        </tr>
+                      ))
+                    ) : tokens.length === 0 ? (
+                      <tr>
+                        <td colSpan="5" className="px-6 py-12 text-center text-evofit-text-muted text-sm">No API tokens generated yet.</td>
+                      </tr>
+                    ) : (
+                      tokens.map(t => (
+                        <tr key={t.id} className={`hover:bg-evofit-purple-main/[0.02] transition-colors ${!t.is_active ? 'opacity-60' : ''}`}>
+                          <td className="px-6 py-4">
+                            <div className="flex flex-col gap-0.5">
+                              <span className="text-sm font-bold text-evofit-text-primary">{t.name}</span>
+                              <span className="text-[10px] text-evofit-text-muted">ID: {t.id} • Created {new Date(t.created_at).toLocaleDateString()}</span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <code className="bg-evofit-bg-secondary px-2 py-1 rounded text-[11px] text-evofit-purple-light font-mono select-all">
+                              {t.is_active ? t.token : '••••••••••••••••'}
+                            </code>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex flex-col gap-0.5">
+                              <span className="text-xs font-bold text-evofit-text-primary">{t.use_count} uses</span>
+                              <span className="text-[10px] text-evofit-text-muted">Last: {t.last_used_at ? new Date(t.last_used_at).toLocaleDateString() : 'Never'}</span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className={`px-2 py-0.5 rounded-full text-[9px] font-black tracking-widest border ${t.is_active ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'}`}>
+                              {t.is_active ? 'ACTIVE' : 'REVOKED'}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            {t.is_active && (
+                              <button 
+                                onClick={() => handleRevokeToken(t.id)}
+                                className="p-2 rounded-lg hover:bg-red-500/10 text-evofit-text-muted hover:text-red-500 transition-all"
+                                title="Revoke Token"
+                              >
+                                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                  <path d="M18.36 6.64a9 9 0 1 1-12.73 0M12 2v10" />
+                                </svg>
+                              </button>
+                            )}
                           </td>
                         </tr>
                       ))

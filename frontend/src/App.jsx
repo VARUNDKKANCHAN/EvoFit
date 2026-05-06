@@ -430,14 +430,14 @@ function PageHeader({ title, onMenuClick }) {
           >
             <div className="text-right hidden sm:block">
               <p className="m-0 text-[13px] font-bold text-evofit-text-primary leading-tight">
-                {user?.fullName || user?.username || 'Guest'}
+                {user?.isAdmin ? 'System Administrator' : (user?.fullName || user?.username || 'Guest')}
               </p>
               <p className="m-0 text-[11px] font-medium text-evofit-text-muted leading-tight mt-0.5">
-                {user ? `${tierName} · ${xp.toLocaleString()} XP` : 'Standard User'}
+                {user?.isAdmin ? 'Root Access' : (user ? `${tierName} · ${xp.toLocaleString()} XP` : 'Standard User')}
               </p>
             </div>
             <div className={`w-8 h-8 rounded-full bg-gradient-to-br from-evofit-purple-main to-evofit-purple-dark flex items-center justify-center text-[12px] font-black text-white border border-white/20 shadow-sm transition-all duration-200 ${dropdownOpen ? 'ring-2 ring-evofit-purple-main/30' : ''}`}>
-              {initials}
+              {user?.isAdmin ? 'A' : initials}
             </div>
           </button>
 
@@ -460,73 +460,86 @@ function PageHeader({ title, onMenuClick }) {
               <div className="p-4 border-b border-evofit-border bg-gradient-to-br from-evofit-purple-main/10 to-transparent">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-evofit-purple-main to-evofit-purple-dark flex items-center justify-center text-lg font-black text-white shrink-0">
-                    {initials}
+                    {user?.isAdmin ? 'A' : initials}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-[14px] font-bold text-evofit-text-primary m-0 truncate">
-                      {user?.fullName || user?.username}
+                      {user?.isAdmin ? 'Administrator' : (user?.fullName || user?.username)}
                     </p>
                     <p className="text-[11px] text-evofit-text-muted m-0 truncate">{user?.email}</p>
-                    <div className="flex items-center gap-1.5 mt-1">
-                      <span className="text-[10px] font-bold text-evofit-purple-light">Lv.{level}</span>
-                      <div className="flex-1 h-1 rounded-full bg-evofit-border overflow-hidden">
-                        <div
-                          className="h-full rounded-full bg-gradient-to-r from-evofit-purple-main to-evofit-purple-dark"
-                          style={{ width: `${xpPct}%` }}
-                        />
+                    {!user?.isAdmin && (
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <span className="text-[10px] font-bold text-evofit-purple-light">Lv.{level}</span>
+                        <div className="flex-1 h-1 rounded-full bg-evofit-border overflow-hidden">
+                          <div
+                            className="h-full rounded-full bg-gradient-to-r from-evofit-purple-main to-evofit-purple-dark"
+                            style={{ width: `${xpPct}%` }}
+                          />
+                        </div>
+                        <span className="text-[10px] text-evofit-text-muted">{xp}/{xpToNext}xp</span>
                       </div>
-                      <span className="text-[10px] text-evofit-text-muted">{xp}/{xpToNext}xp</span>
-                    </div>
+                    )}
                   </div>
                 </div>
               </div>
 
-              {/* Menu items */}
-              <div className="p-2">
-                <button
-                  id="dropdown-profile-btn"
-                  onClick={() => handleNav('/profile')}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-[13px] font-medium text-evofit-text-secondary hover:bg-evofit-purple-main/10 hover:text-evofit-purple-light transition-all duration-150 group"
-                >
-                  <span className="w-7 h-7 rounded-lg bg-evofit-bg-secondary border border-evofit-border flex items-center justify-center group-hover:border-evofit-purple-main/40 transition-colors">
-                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-                    </svg>
-                  </span>
-                  My Profile
-                </button>
+               {/* Menu items */}
+               <div className="p-2">
+                 {user?.isAdmin ? (
+                    <button
+                      onClick={() => handleNav('/admin')}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-[13px] font-medium text-evofit-text-secondary hover:bg-evofit-purple-main/10 hover:text-evofit-purple-light transition-all duration-150 group"
+                    >
+                      <span className="w-7 h-7 rounded-lg bg-evofit-bg-secondary border border-evofit-border flex items-center justify-center group-hover:border-evofit-purple-main/40 transition-colors">
+                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                        </svg>
+                      </span>
+                      Admin Dashboard
+                    </button>
+                 ) : (
+                   <>
+                    <button
+                      id="dropdown-profile-btn"
+                      onClick={() => handleNav('/profile')}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-[13px] font-medium text-evofit-text-secondary hover:bg-evofit-purple-main/10 hover:text-evofit-purple-light transition-all duration-150 group"
+                    >
+                      <span className="w-7 h-7 rounded-lg bg-evofit-bg-secondary border border-evofit-border flex items-center justify-center group-hover:border-evofit-purple-main/40 transition-colors">
+                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                        </svg>
+                      </span>
+                      My Profile
+                    </button>
 
-                <button
-                  id="dropdown-trophy-btn"
-                  onClick={() => handleNav('/trophy')}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-[13px] font-medium text-evofit-text-secondary hover:bg-evofit-purple-main/10 hover:text-evofit-purple-light transition-all duration-150 group"
-                >
-                  <span className="w-7 h-7 rounded-lg bg-evofit-bg-secondary border border-evofit-border flex items-center justify-center group-hover:border-evofit-purple-main/40 transition-colors">
-                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                      <path d="M8 21h8m-4-4v4M7 4h10M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                    </svg>
-                  </span>
-                  Trophy Room
-                  {user && (
-                    <span className="ml-auto text-[10px] font-bold bg-evofit-purple-main/20 text-evofit-purple-light px-2 py-0.5 rounded-full">
-                      Lv.{level}
-                    </span>
-                  )}
-                </button>
+                    <button
+                      id="dropdown-trophy-btn"
+                      onClick={() => handleNav('/trophy')}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-[13px] font-medium text-evofit-text-secondary hover:bg-evofit-purple-main/10 hover:text-evofit-purple-light transition-all duration-150 group"
+                    >
+                      <span className="w-7 h-7 rounded-lg bg-evofit-bg-secondary border border-evofit-border flex items-center justify-center group-hover:border-evofit-purple-main/40 transition-colors">
+                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                          <path d="M8 21h8m-4-4v4M7 4h10M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                      </span>
+                      Trophy Room
+                    </button>
 
-                <button
-                  id="dropdown-settings-btn"
-                  onClick={() => handleNav('/profile')}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-[13px] font-medium text-evofit-text-secondary hover:bg-evofit-purple-main/10 hover:text-evofit-purple-light transition-all duration-150 group"
-                >
-                  <span className="w-7 h-7 rounded-lg bg-evofit-bg-secondary border border-evofit-border flex items-center justify-center group-hover:border-evofit-purple-main/40 transition-colors">
-                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                      <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-                    </svg>
-                  </span>
-                  Edit Profile & Settings
-                </button>
-              </div>
+                    <button
+                      id="dropdown-settings-btn"
+                      onClick={() => handleNav('/profile')}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-[13px] font-medium text-evofit-text-secondary hover:bg-evofit-purple-main/10 hover:text-evofit-purple-light transition-all duration-150 group"
+                    >
+                      <span className="w-7 h-7 rounded-lg bg-evofit-bg-secondary border border-evofit-border flex items-center justify-center group-hover:border-evofit-purple-main/40 transition-colors">
+                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                          <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                        </svg>
+                      </span>
+                      Settings
+                    </button>
+                   </>
+                 )}
+               </div>
 
               {/* Divider + Logout */}
               <div className="px-2 pb-2 border-t border-evofit-border mt-1 pt-2">
@@ -627,7 +640,11 @@ function AppShell() {
     if (!loading && !user && !isAuthPage) {
       navigate('/login');
     }
-  }, [user, loading, isAuthPage, navigate]);
+    // Redirect admin to admin panel if they land on user pages
+    if (!loading && user?.isAdmin && !isAuthPage && location.pathname !== '/admin') {
+      navigate('/admin');
+    }
+  }, [user, loading, isAuthPage, navigate, location.pathname]);
 
   const getPageTitle = (path) => {
     switch (path) {

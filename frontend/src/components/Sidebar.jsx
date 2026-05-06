@@ -79,6 +79,18 @@ const NAV = [
   },
 ];
 
+const ADMIN_NAV = [
+  {
+    to: '/admin',
+    label: 'Platform Control',
+    icon: (
+      <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+      </svg>
+    ),
+  },
+];
+
 export default function Sidebar({ mobileOpen }) {
   const navigate    = useNavigate();
   const location    = useLocation();
@@ -134,11 +146,11 @@ export default function Sidebar({ mobileOpen }) {
       <nav className="flex-1 py-3 overflow-y-auto overflow-x-hidden">
         {!collapsed && (
           <p className="text-[10px] font-bold tracking-[0.1em] text-evofit-text-muted px-5 pt-2 pb-1 uppercase whitespace-nowrap animate-fade-in duration-300">
-            Main Menu
+            {user?.isAdmin ? 'Administration' : 'Main Menu'}
           </p>
         )}
 
-        {NAV.map(({ to, label, icon }, idx) => (
+        {(user?.isAdmin ? ADMIN_NAV : NAV).map(({ to, label, icon }, idx) => (
           <NavLink
             key={to}
             to={to}
@@ -165,44 +177,13 @@ export default function Sidebar({ mobileOpen }) {
             )}
           </NavLink>
         ))}
-
-        {user?.isAdmin && (
-          <>
-            {!collapsed && (
-              <p className="text-[10px] font-bold tracking-[0.1em] text-evofit-text-muted px-5 pt-4 pb-1 uppercase whitespace-nowrap animate-fade-in duration-300">
-                System
-              </p>
-            )}
-            <NavLink
-              to="/admin"
-              title={collapsed ? 'Admin Panel' : undefined}
-              className={({ isActive }) => `
-                group relative flex items-center gap-3 transition-all duration-200 no-underline text-sm font-medium
-                ${collapsed ? 'justify-center py-2.5 px-0 mx-1.5' : 'justify-start py-2.5 px-4 mx-3'}
-                ${isActive 
-                  ? 'bg-evofit-purple-main/5 text-evofit-purple-main' 
-                  : 'text-evofit-text-secondary hover:bg-evofit-purple-main/5 hover:text-evofit-purple-main'}
-                rounded-lg
-              `}
-            >
-              <div className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-evofit-purple-main rounded-r-full transition-all duration-200 ${location.pathname === '/admin' ? 'opacity-100' : 'opacity-0'}`} />
-              
-              <span className={`shrink-0 transition-all duration-200 ${location.pathname === '/admin' ? 'text-evofit-purple-main' : 'text-evofit-text-muted group-hover:text-evofit-text-primary'}`}>
-                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                </svg>
-              </span>
-              {!collapsed && <span className="whitespace-nowrap">Admin Panel</span>}
-            </NavLink>
-          </>
-        )}
       </nav>
 
       {/* ── User Profile & Bottom controls ───────────────────── */}
       <div className={`border-t border-evofit-border animate-fade-in-up duration-500 delay-300 ${collapsed ? 'p-3 pb-5' : 'p-[10px] pb-5'}`}>
         
-        {/* User Stats Card (Only if not collapsed) */}
-        {!collapsed && user && (
+        {/* User Stats Card (Only if not collapsed AND NOT admin) */}
+        {!collapsed && user && !user.isAdmin && (
           <div
             className="mx-2 mb-4 p-3 rounded-xl bg-evofit-bg-secondary border border-evofit-border flex items-center gap-3 cursor-pointer hover:border-evofit-border-hover hover:bg-evofit-purple-main/5 transition-all duration-200 group"
             onClick={() => navigate('/profile')}
@@ -227,12 +208,27 @@ export default function Sidebar({ mobileOpen }) {
           </div>
         )}
 
-        {/* User Mini Icon (If collapsed) */}
-        {collapsed && user && (
+        {/* User Mini Icon (If collapsed AND NOT admin) */}
+        {collapsed && user && !user.isAdmin && (
           <div className="flex justify-center mb-4">
              <div className="w-8 h-8 rounded-full bg-evofit-purple-main/20 flex items-center justify-center text-evofit-purple-light text-xs font-bold border border-evofit-purple-main/30" title={`${user.fullName} (Lvl ${user.level})`}>
               {user.fullName?.charAt(0) || user.username?.charAt(0) || '?'}
             </div>
+          </div>
+        )}
+
+        {/* Admin Minimal Avatar (If admin) */}
+        {user?.isAdmin && (
+          <div className={`mx-2 mb-4 p-3 flex items-center gap-3 ${collapsed ? 'justify-center' : ''}`}>
+             <div className="w-10 h-10 rounded-2xl bg-evofit-purple-main/10 flex items-center justify-center text-evofit-purple-light font-black border border-evofit-purple-main/20 shadow-sm">
+              A
+            </div>
+            {!collapsed && (
+              <div>
+                <p className="text-[13px] font-bold text-evofit-text-primary m-0">System Admin</p>
+                <p className="text-[10px] text-evofit-text-muted m-0">Root Privileges</p>
+              </div>
+            )}
           </div>
         )}
 

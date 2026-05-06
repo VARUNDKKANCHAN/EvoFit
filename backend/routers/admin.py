@@ -3,6 +3,14 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 from typing import List, Optional
 from datetime import datetime, date, timedelta
+import secrets
+import time
+import os
+try:
+    import psutil
+except ImportError:
+    psutil = None
+from sqlalchemy import text
 
 from ..database.database import get_db
 from ..database import models
@@ -125,3 +133,92 @@ def delete_session(
     db.delete(db_session)
     db.commit()
     return {"message": "Session deleted successfully"}
+
+@router.get("/system-status")
+def get_system_status(db: Session = Depends(get_db), _ = Depends(admin_required)):
+    """Check health of various system components."""
+    start_time = time.time()
+    
+    # 1. DB Health
+    db_status = "operational"
+    try:
+        db.execute(text("SELECT 1"))
+    except Exception as e:
+        db_status = f"error: {str(e)}"
+        
+    # 2. ML Health
+    ml_status = "operational"
+    try:
+        from ..services.ml_service import get_metrics
+        get_metrics()
+    except Exception as e:
+        ml_status = f"error: {str(e)}"
+
+    latency = (time.time() - start_time) * 1000 # ms
+    
+    # 3. System Metrics (Safe fallback if psutil is missing)
+    memory_usage = 0
+    cpu_usage = 0
+    
+    if psutil:
+        try:
+            process = psutil.Process(os.getpid())
+            memory_usage = process.memory_info().rss / (1024 * 1024) # MB
+            cpu_usage = process.cpu_percent(interval=0.1)
+        except Exception:
+            pass
+    
+    return {
+        "database": db_status,
+        "ml_engine": ml_status,
+        "api_server": "operational",
+        "memory_usage_mb": round(memory_usage, 2),
+        "cpu_usage_percent": cpu_usage,
+        "latency_ms": round(latency, 2),
+        "server_time": datetime.now().isoformat()
+    }
+
+@router.get("/tokens", response_model=List[schemas.SystemTokenResponse])
+def list_system_tokens(db: Session = Depends(get_db), _ = Depends(admin_required)):
+    """List all system API tokens."""
+    return db.query(models.SystemToken).all()
+
+@router.post("/tokens", response_model=schemas.SystemTokenResponse)
+def create_system_token(
+    payload: schemas.SystemTokenCreate, 
+    db: Session = Depends(get_db), 
+    admin: models.User = Depends(admin_required)
+):
+    """Generate a new secure API token for system access."""
+    # Generate a secure random token
+    raw_token = f"ef_{secrets.token_urlsafe(32)}"
+    
+    expires_at = None
+    if payload.expires_in_days:
+        expires_at = datetime.now() + timedelta(days=payload.expires_in_days)
+        
+    db_token = models.SystemToken(
+        name=payload.name,
+        token=raw_token,
+        created_by=admin.id,
+        expires_at=expires_at
+    )
+    db.add(db_token)
+    db.commit()
+    db.refresh(db_token)
+    return db_token
+
+@router.delete("/tokens/{token_id}")
+def revoke_system_token(
+    token_id: int, 
+    db: Session = Depends(get_db), 
+    _ = Depends(admin_required)
+):
+    """Revoke (deactivate) an API token."""
+    db_token = db.query(models.SystemToken).filter(models.SystemToken.id == token_id).first()
+    if not db_token:
+        raise HTTPException(status_code=404, detail="Token not found")
+    
+    db_token.is_active = False
+    db.commit()
+    return {"message": "Token revoked successfully"}

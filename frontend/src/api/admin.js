@@ -31,5 +31,21 @@ export const adminApi = {
       headers: getAuthHeader()
     });
     return response.data;
+  },
+  getSystemStatus: async () => {
+    const response = await axios.get(`${API_URL}/system-status`, { headers: getAuthHeader() });
+    return response.data;
+  },
+  getTokens: async () => {
+    const response = await axios.get(`${API_URL}/tokens`, { headers: getAuthHeader() });
+    return response.data;
+  },
+  createToken: async (name, expiresInDays) => {
+    const response = await axios.post(`${API_URL}/tokens`, { name, expires_in_days: expiresInDays }, { headers: getAuthHeader() });
+    return response.data;
+  },
+  revokeToken: async (tokenId) => {
+    const response = await axios.delete(`${API_URL}/tokens/${tokenId}`, { headers: getAuthHeader() });
+    return response.data;
   }
 };
