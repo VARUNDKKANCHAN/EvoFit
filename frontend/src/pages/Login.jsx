@@ -396,7 +396,7 @@ export default function Login() {
           padding: 13px 14px 13px 42px;
           font-family: 'Inter',sans-serif;
           font-size: 14px;
-          color: #F0F0F5;
+          color: #F0F0F5 !important;
           outline: none;
           transition: all 0.25s ease;
           box-sizing: border-box;

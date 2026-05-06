@@ -24,6 +24,7 @@ function normalizeUser(data) {
     fitness_goal: data.fitness_goal || null,
     created_at: data.created_at || null,
     is_active: data.is_active ?? true,
+    isAdmin: data.is_admin ?? false,
   };
 }
 

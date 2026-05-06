@@ -13,6 +13,7 @@ import UserProfile from './pages/UserProfile';
 import Chatbot from './pages/Chatbot';
 import Leaderboard from './pages/Leaderboard';
 import TargetAnalysis from './pages/TargetAnalysis';
+import AdminPanel from './pages/AdminPanel';
 import ThemeToggle from './components/ThemeToggle';
 import FloatingChatbot from './components/FloatingChatbot';
 import CelebrationModal from './components/CelebrationModal';
@@ -641,6 +642,7 @@ function AppShell() {
       case '/chatbot': return 'EvoFit AI Assistant';
       case '/leaderboard': return 'Global Leaderboard';
       case '/profile': return 'My Profile';
+      case '/admin': return 'Platform Administration';
       default: 
         if (path.startsWith('/target-analysis/')) return 'Performance Deep Dive';
         return 'EvoFit Dashboard';
@@ -687,6 +689,7 @@ function AppShell() {
                 <Route path="/leaderboard" element={<Leaderboard />} />
                 <Route path="/profile"   element={<UserProfile />} />
                 <Route path="/chatbot"   element={<Chatbot />} />
+                <Route path="/admin"     element={<AdminPanel />} />
                 <Route path="/target-analysis/:exercise" element={<TargetAnalysis />} />
               </Routes>
             </AnimatedPage>

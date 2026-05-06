@@ -96,6 +96,7 @@ class UserResponse(UserBase):
     id: int
     created_at: datetime
     is_active: bool
+    is_admin: bool
     xp: int
     level: int
 
@@ -291,6 +292,7 @@ class MeResponse(BaseModel):
     level: int
     created_at: datetime
     is_active: bool
+    is_admin: bool
     # Profile fields
     full_name: Optional[str] = None
     age: Optional[int] = None

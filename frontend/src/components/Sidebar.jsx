@@ -165,6 +165,37 @@ export default function Sidebar({ mobileOpen }) {
             )}
           </NavLink>
         ))}
+
+        {user?.isAdmin && (
+          <>
+            {!collapsed && (
+              <p className="text-[10px] font-bold tracking-[0.1em] text-evofit-text-muted px-5 pt-4 pb-1 uppercase whitespace-nowrap animate-fade-in duration-300">
+                System
+              </p>
+            )}
+            <NavLink
+              to="/admin"
+              title={collapsed ? 'Admin Panel' : undefined}
+              className={({ isActive }) => `
+                group relative flex items-center gap-3 transition-all duration-200 no-underline text-sm font-medium
+                ${collapsed ? 'justify-center py-2.5 px-0 mx-1.5' : 'justify-start py-2.5 px-4 mx-3'}
+                ${isActive 
+                  ? 'bg-evofit-purple-main/5 text-evofit-purple-main' 
+                  : 'text-evofit-text-secondary hover:bg-evofit-purple-main/5 hover:text-evofit-purple-main'}
+                rounded-lg
+              `}
+            >
+              <div className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-evofit-purple-main rounded-r-full transition-all duration-200 ${location.pathname === '/admin' ? 'opacity-100' : 'opacity-0'}`} />
+              
+              <span className={`shrink-0 transition-all duration-200 ${location.pathname === '/admin' ? 'text-evofit-purple-main' : 'text-evofit-text-muted group-hover:text-evofit-text-primary'}`}>
+                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                </svg>
+              </span>
+              {!collapsed && <span className="whitespace-nowrap">Admin Panel</span>}
+            </NavLink>
+          </>
+        )}
       </nav>
 
       {/* ── User Profile & Bottom controls ───────────────────── */}

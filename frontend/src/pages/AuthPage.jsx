@@ -327,15 +327,16 @@ export default function AuthPage() {
         .auth-input {
           width: 100%; background: rgba(255,255,255,0.04);
           border: 1px solid rgba(255,255,255,0.08); border-radius: 14px;
-          padding: 13px 16px 13px 44px; color: #fff; font-size: 15px; outline: none; transition: all 0.25s;
+          padding: 13px 16px 13px 44px; color: #fff !important; font-size: 15px; outline: none; transition: all 0.25s;
           box-sizing: border-box;
         }
+        .auth-input::placeholder { color: rgba(255, 255, 255, 0.35); }
         .auth-input:focus { border-color: #818cf8; background: rgba(129,140,248,0.06); box-shadow: 0 0 0 4px rgba(129,140,248,0.1); }
 
         /* FIX: Select Dropdown Contrast */
         .auth-select {
           width: 100%; background: #16161E; border: 1px solid rgba(255,255,255,0.08);
-          border-radius: 14px; padding: 13px 16px 13px 44px; color: #fff; font-size: 15px; outline: none;
+          border-radius: 14px; padding: 13px 16px 13px 44px; color: #fff !important; font-size: 15px; outline: none;
           cursor: pointer; appearance: none;
           background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23818cf8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
           background-repeat: no-repeat; background-position: right 16px center; background-size: 18px;
