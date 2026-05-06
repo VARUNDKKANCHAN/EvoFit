@@ -8,7 +8,7 @@ from typing import List
 from backend.database.database import get_db
 from backend.services import auth_service
 from backend.database import models
-from backend.schemas.schemas import DashboardSummaryResponse, KPIStats, TrendPoint, SessionItem, DistributionItem, DashboardTargetItem, UserProgression
+from backend.schemas.schemas import DashboardSummaryResponse, KPIStats, TrendPoint, SessionItem, DistributionItem, DashboardTargetItem, UserProgression, PersonalBestItem
 from backend.services.chat_service import chat_service
 from langchain_core.messages import SystemMessage, HumanMessage
 
@@ -280,6 +280,27 @@ def get_dashboard_summary(
     else:
         recovery_estimate = "All muscle groups are fully recovered. You are ready to crush any workout!"
         
+    # 8. Personal Bests (All time)
+    pb_query = db.query(
+        models.WorkoutSession.exercise,
+        func.max(models.WorkoutSession.reps_actual).label("max_reps"),
+        func.max(models.WorkoutSession.form_score).label("best_form"),
+        func.max(models.WorkoutSession.date).label("date")
+    ).filter(
+        models.WorkoutSession.user_id == user_id
+    ).group_by(models.WorkoutSession.exercise).all()
+
+    personal_bests = [
+        PersonalBestItem(
+            exercise=row.exercise,
+            max_reps=row.max_reps,
+            best_form=round(row.best_form, 1),
+            date=row.date
+        ) for row in pb_query
+    ]
+    # Sort by reps or exercise name
+    personal_bests.sort(key=lambda x: x.max_reps, reverse=True)
+
     return DashboardSummaryResponse(
         kpis=KPIStats(
             total_reps_lifted=reps_week,
@@ -298,5 +319,6 @@ def get_dashboard_summary(
         distribution=distribution,
         targets=targets,
         insights=insights,
+        personal_bests=personal_bests,
         recovery_estimate=recovery_estimate
     )

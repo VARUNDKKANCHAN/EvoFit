@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import api from '../api/auth';
 
 /* ── Level tier colors ── */
 const getLevelTier = (level) => {
@@ -168,6 +169,43 @@ export default function UserProfile() {
     ? (user.weight_kg / ((user.height_cm / 100) ** 2)).toFixed(1)
     : null;
 
+  /* ── Activity Heatmap Logic ── */
+  const [activity, setActivity] = useState({});
+  const [activityLoading, setActivityLoading] = useState(true);
+
+  useEffect(() => {
+    api.get('/activity/heatmap')
+      .then(res => setActivity(res.data.activity))
+      .catch(err => console.error("Failed to fetch heatmap", err))
+      .finally(() => setActivityLoading(false));
+  }, []);
+
+  const generateHeatmapDays = () => {
+    const days = [];
+    const today = new Date();
+    // Go back 52 weeks to align with a grid
+    for (let i = 364; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toISOString().split('T')[0];
+      days.push({
+        date: dateStr,
+        count: activity[dateStr] || 0,
+        dayOfWeek: d.getDay()
+      });
+    }
+    return days;
+  };
+
+  const heatmapDays = generateHeatmapDays();
+  const getColor = (count) => {
+    if (count === 0) return 'bg-evofit-bg-secondary border-evofit-border/30';
+    if (count < 50) return 'bg-evofit-purple-main/25 border-evofit-purple-main/10';
+    if (count < 100) return 'bg-evofit-purple-main/50 border-evofit-purple-main/20';
+    if (count < 200) return 'bg-evofit-purple-main/75 border-evofit-purple-main/30';
+    return 'bg-evofit-purple-main border-evofit-purple-main/40';
+  };
+
   return (
     <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 bg-evofit-bg-primary">
       <div className="max-w-5xl mx-auto space-y-6 animate-fade-in-up">
@@ -264,6 +302,52 @@ export default function UserProfile() {
               )}
             </div>
           </div>
+        </div>
+
+        {/* ── Activity Heatmap Card ── */}
+        <div className="bg-evofit-bg-card border border-evofit-border rounded-2xl p-6 overflow-hidden">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-[13px] font-bold text-evofit-text-muted uppercase tracking-[0.1em] flex items-center gap-2">
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path d="M12 2v20m0-20l-4 4m4-4l4 4"/></svg>
+              Activity Consistency
+            </h2>
+            <div className="flex items-center gap-2 text-[10px] text-evofit-text-muted font-bold uppercase tracking-widest">
+              <span>Less</span>
+              <div className="flex gap-1">
+                <div className="w-3 h-3 rounded-[3px] bg-evofit-bg-secondary border border-evofit-border/30" />
+                <div className="w-3 h-3 rounded-[3px] bg-evofit-purple-main/25" />
+                <div className="w-3 h-3 rounded-[3px] bg-evofit-purple-main/50" />
+                <div className="w-3 h-3 rounded-[3px] bg-evofit-purple-main/75" />
+                <div className="w-3 h-3 rounded-[3px] bg-evofit-purple-main" />
+              </div>
+              <span>More</span>
+            </div>
+          </div>
+
+          {activityLoading ? (
+             <div className="h-32 flex items-center justify-center">
+               <div className="w-6 h-6 border-2 border-evofit-border border-t-evofit-purple-main rounded-full animate-spin" />
+             </div>
+          ) : (
+            <div className="overflow-x-auto pb-2 no-scrollbar">
+              <div className="flex flex-col gap-1 min-w-[700px]">
+                <div className="grid grid-flow-col grid-rows-7 gap-1">
+                  {heatmapDays.map((day, idx) => (
+                    <div 
+                      key={day.date}
+                      title={`${day.date}: ${day.count} reps`}
+                      className={`w-[13px] h-[13px] rounded-[3px] border transition-all duration-300 ${getColor(day.count)} hover:scale-125 hover:z-10 hover:shadow-lg hover:border-evofit-purple-main cursor-pointer`}
+                    />
+                  ))}
+                </div>
+                <div className="flex justify-between mt-2 text-[10px] font-bold text-evofit-text-muted px-1 uppercase tracking-tighter">
+                  <span>{new Date(heatmapDays[0].date).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}</span>
+                  <span>{new Date(heatmapDays[Math.floor(heatmapDays.length/2)].date).toLocaleDateString(undefined, { month: 'short' })}</span>
+                  <span>Today</span>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* ── Stats Row ── */}

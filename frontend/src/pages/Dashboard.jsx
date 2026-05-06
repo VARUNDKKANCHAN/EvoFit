@@ -8,7 +8,7 @@ import {
 } from 'recharts';
 import {
   Dumbbell, Flame, Activity, ShieldCheck, Plus, Sparkles,
-  ChevronRight, Trophy, Clock, Target, ArrowUpRight, Zap
+  ChevronRight, Trophy, Clock, Target, ArrowUpRight, Zap, Medal, Crown
 } from 'lucide-react';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
@@ -95,7 +95,7 @@ export default function Dashboard() {
     );
   }
 
-  const { kpis, trend_data, recent_sessions, targets, insights } = data || {};
+  const { kpis, trend_data, recent_sessions, targets, insights, personal_bests } = data || {};
   const prog = data?.user_progression || {};
   const xpPct = Math.min(100, Math.round(((prog.xp || 0) / (prog.xp_to_next_level || 1000)) * 100));
 
@@ -185,6 +185,40 @@ export default function Dashboard() {
           <KpiCard icon={<Activity size={18} />} label="Consistency" value={kpis?.consistency_score > 0 ? `${kpis.consistency_score}%` : '0%'} accent="#7C3AED" tooltip={TOOLTIP_CONTENT.consistency} />
           <KpiCard icon={<Flame size={18} />} label="Active Streak" value={`${kpis?.active_streak || 0} days`} badge="🔥 On Fire" accent="#F59E0B" tooltip={TOOLTIP_CONTENT.activeStreak} />
         </motion.div>
+
+        {/* ── PERSONAL BESTS ─────────────────────────────────── */}
+        {personal_bests && personal_bests.length > 0 && (
+          <motion.div variants={fade}>
+            <SectionHeader title="Personal Records" subtitle="Your all-time best performances" icon={<Trophy size={18} />} />
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+              {personal_bests.slice(0, 4).map((pb, i) => (
+                <div key={i} className="saas-card p-5 group relative overflow-hidden">
+                   <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
+                     <Medal size={40} className="text-evofit-purple-main" />
+                   </div>
+                   <div className="flex items-center gap-3 mb-4">
+                     <div className="w-10 h-10 rounded-xl bg-evofit-purple-main/10 flex items-center justify-center text-evofit-purple-main">
+                        <Zap size={18} />
+                     </div>
+                     <div>
+                        <p className="text-[11px] font-bold text-evofit-text-muted uppercase tracking-widest m-0">{EXERCISE_LABELS[pb.exercise] || pb.exercise}</p>
+                        <p className="text-[10px] text-evofit-text-muted m-0">{new Date(pb.date).toLocaleDateString()}</p>
+                     </div>
+                   </div>
+                   <div className="flex items-end justify-between">
+                     <div>
+                        <p className="text-2xl font-black text-evofit-text-primary m-0">{pb.max_reps} <span className="text-xs font-medium text-evofit-text-muted">reps</span></p>
+                        <p className="text-[11px] font-semibold text-[#22C55E] m-0">{pb.best_form}% Form Score</p>
+                     </div>
+                     <div className="p-1.5 rounded-lg bg-amber-500/10 text-amber-500">
+                        <Crown size={14} />
+                     </div>
+                   </div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
 
         {/* ── CHART + ACTION PANEL ───────────────────────────── */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4">

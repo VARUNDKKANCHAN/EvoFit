@@ -15,6 +15,7 @@ import Leaderboard from './pages/Leaderboard';
 import TargetAnalysis from './pages/TargetAnalysis';
 import ThemeToggle from './components/ThemeToggle';
 import FloatingChatbot from './components/FloatingChatbot';
+import CelebrationModal from './components/CelebrationModal';
 import { useAuth } from './context/AuthContext';
 import { useNotifications } from './context/NotificationContext';
 import { ToastContainer } from 'react-toastify';
@@ -585,6 +586,22 @@ function AppShell() {
   const navigate = useNavigate();
   const { user, loading, isAuthenticated } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [prevLevel, setPrevLevel] = useState(null);
+  const [celebration, setCelebration] = useState({ isOpen: false, type: 'level_up', data: null });
+
+  // Level-up detection
+  useEffect(() => {
+    if (user && prevLevel !== null && user.level > prevLevel) {
+      setCelebration({
+        isOpen: true,
+        type: 'level_up',
+        data: { level: user.level }
+      });
+    }
+    if (user) {
+      setPrevLevel(user.level);
+    }
+  }, [user, prevLevel]);
 
   const isAuthPage = location.pathname === '/login' || location.pathname === '/signup';
 
@@ -666,6 +683,12 @@ function AppShell() {
         </div>
       </div>
       {!isAuthPage && <FloatingChatbot />}
+      <CelebrationModal 
+        isOpen={celebration.isOpen}
+        onClose={() => setCelebration(prev => ({ ...prev, isOpen: false }))}
+        type={celebration.type}
+        data={celebration.data}
+      />
     </div>
   );
 }

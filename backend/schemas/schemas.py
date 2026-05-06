@@ -210,6 +210,12 @@ class TargetAnalysisResponse(BaseModel):
     avg_recent_form: Optional[float] = 0.0
     insights: Optional[List[str]] = []
     message: Optional[str] = None
+
+class PersonalBestItem(BaseModel):
+    exercise: str
+    max_reps: int
+    best_form: float
+    date: date
 # --- DASHBOARD SCHEMAS ---
 
 class SessionItem(BaseModel):
@@ -260,6 +266,7 @@ class DashboardSummaryResponse(BaseModel):
     distribution: List[DistributionItem]
     targets: List[DashboardTargetItem]
     insights: List[str]
+    personal_bests: List[PersonalBestItem] = []
     recovery_estimate: Optional[str] = None
 
 # --- AUTH SCHEMAS ---
@@ -309,3 +316,6 @@ class LeaderboardResponse(BaseModel):
     current_user_xp: int
     percentile: Optional[int] = 100
     total_count: Optional[int] = 0
+
+class ActivityHeatmapResponse(BaseModel):
+    activity: Dict[str, int] # Date string -> Intensity (e.g. rep count)
