@@ -50,7 +50,11 @@ def get_active_streak(db: Session, user_id: int) -> int:
     return streak
 
 @router.get("/summary", response_model=DashboardSummaryResponse)
-def get_dashboard_summary(current_user: models.User = Depends(auth_service.get_current_user), db: Session = Depends(get_db)):
+def get_dashboard_summary(
+    range_type: str = "7D",
+    current_user: models.User = Depends(auth_service.get_current_user), 
+    db: Session = Depends(get_db)
+):
     user_id = current_user.id
     today = date.today()
     last_week = today - timedelta(days=7)
@@ -86,23 +90,50 @@ def get_dashboard_summary(current_user: models.User = Depends(auth_service.get_c
 
     avg_consistency = (total_rhythm / rhythm_count) if rhythm_count > 0 else 0.0
 
-    # 2. Trend Data (Last 7 Days)
+    # 2. Trend Data (Optimized Query)
+    days_back = 7
+    if range_type == "30D":
+        days_back = 30
+    elif range_type == "ALL":
+        # Find earliest session date
+        earliest = db.query(func.min(models.WorkoutSession.date)).filter(
+            models.WorkoutSession.user_id == user_id
+        ).scalar()
+        if earliest:
+            days_back = max(7, (today - earliest).days + 1)
+        else:
+            days_back = 7
+
+    start_date = today - timedelta(days=days_back-1)
+    
+    trend_raw = db.query(
+        models.WorkoutSession.date,
+        func.sum(models.WorkoutSession.reps_actual).label("reps"),
+        func.avg(models.WorkoutSession.form_score).label("quality")
+    ).filter(
+        models.WorkoutSession.user_id == user_id,
+        models.WorkoutSession.date >= start_date
+    ).group_by(models.WorkoutSession.date).all()
+    
+    trend_map = {t.date: t for t in trend_raw}
     trend_data = []
-    for i in range(6, -1, -1):
-        d = today - timedelta(days=i)
-        day_reps = db.query(func.sum(models.WorkoutSession.reps_actual)).filter(
-            models.WorkoutSession.user_id == user_id,
-            models.WorkoutSession.date == d
-        ).scalar() or 0
-        day_quality = db.query(func.avg(models.WorkoutSession.form_score)).filter(
-            models.WorkoutSession.user_id == user_id,
-            models.WorkoutSession.date == d
-        ).scalar() or 0.0
+    
+    for i in range(days_back):
+        d = start_date + timedelta(days=i)
+        point = trend_map.get(d)
         
+        # Formatting dates for labels
+        if range_type == "7D":
+            date_label = d.strftime("%a")
+        elif range_type == "30D":
+            date_label = d.strftime("%d %b")
+        else:
+            date_label = d.strftime("%m/%d")
+
         trend_data.append(TrendPoint(
-            date=d.strftime("%a"),
-            reps=day_reps,
-            quality=round(float(day_quality), 1)
+            date=date_label,
+            reps=int(point.reps) if point and point.reps else 0,
+            quality=round(float(point.quality), 1) if point and point.quality else 0.0
         ))
 
     # 3. Recent Sessions Table

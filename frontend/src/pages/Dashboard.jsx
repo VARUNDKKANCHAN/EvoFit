@@ -13,6 +13,14 @@ import {
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 import { motion } from 'framer-motion';
+import MetricTooltip from '../components/MetricTooltip';
+
+const TOOLTIP_CONTENT = {
+  weeklyReps: "Total number of repetitions completed across all exercises this week.",
+  avgFormScore: "Your average movement quality score calculated from all sessions this week.",
+  consistency: "A score representing how strictly you follow your training schedule and maintain form.",
+  activeStreak: "The number of consecutive days you have logged at least one training session."
+};
 
 const EXERCISE_LABELS = {
   bench: 'Bench Press', dead: 'Deadlift', squat: 'Back Squat',
@@ -22,7 +30,7 @@ const EXERCISE_LABELS = {
 const fade = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 280, damping: 24 } } };
 const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
 
-function KpiCard({ icon, label, value, accent = '#7C3AED', badge, children }) {
+function KpiCard({ icon, label, value, accent = '#7C3AED', badge, children, tooltip }) {
   return (
     <motion.div variants={fade} className="saas-card p-5 group cursor-default">
       <div className="flex justify-between items-start mb-4">
@@ -32,7 +40,9 @@ function KpiCard({ icon, label, value, accent = '#7C3AED', badge, children }) {
         {badge && <span className="status-pill" style={{ background: `${accent}14`, color: accent }}>{badge}</span>}
         {children}
       </div>
-      <p className="text-[11px] font-bold text-evofit-text-muted uppercase tracking-widest m-0 mb-1">{label}</p>
+      <MetricTooltip content={tooltip}>
+        <p className="text-[11px] font-bold text-evofit-text-muted uppercase tracking-widest m-0 mb-1">{label}</p>
+      </MetricTooltip>
       <p className="text-3xl font-black text-evofit-text-primary m-0 tracking-tight">{value}</p>
     </motion.div>
   );
@@ -62,13 +72,20 @@ export default function Dashboard() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('7D');
+  const [chartLoading, setChartLoading] = useState(false);
 
   useEffect(() => {
-    api.get('/dashboard/summary')
+    // Only show global loading on first mount, then use chartLoading for range switches
+    if (!loading) setChartLoading(true);
+    
+    api.get(`/dashboard/summary?range_type=${activeTab}`)
       .then(r => setData(r.data))
       .catch(e => console.error(e))
-      .finally(() => setLoading(false));
-  }, []);
+      .finally(() => {
+        setLoading(false);
+        setChartLoading(false);
+      });
+  }, [activeTab]);
 
   if (loading) {
     return (
@@ -158,15 +175,15 @@ export default function Dashboard() {
 
         {/* ── KPI GRID ───────────────────────────────────────── */}
         <motion.div variants={stagger} className="grid grid-cols-2 xl:grid-cols-4 gap-4">
-          <KpiCard icon={<Dumbbell size={18} />} label="Weekly Reps" value={(kpis?.total_reps_lifted || 0).toLocaleString()} badge="+14%" accent="#7C3AED" />
-          <KpiCard icon={<ShieldCheck size={18} />} label="Avg Form Score" value={kpis?.avg_form_score > 0 ? `${kpis.avg_form_score}%` : '0%'} accent="#06B6D4">
+          <KpiCard icon={<Dumbbell size={18} />} label="Weekly Reps" value={(kpis?.total_reps_lifted || 0).toLocaleString()} badge="+14%" accent="#7C3AED" tooltip={TOOLTIP_CONTENT.weeklyReps} />
+          <KpiCard icon={<ShieldCheck size={18} />} label="Avg Form Score" value={kpis?.avg_form_score > 0 ? `${kpis.avg_form_score}%` : '0%'} accent="#06B6D4" tooltip={TOOLTIP_CONTENT.avgFormScore}>
             <div className="w-9 h-9">
               <CircularProgressbar value={kpis?.avg_form_score || 0} strokeWidth={13}
                 styles={buildStyles({ pathColor: '#06B6D4', trailColor: '#E5E7EB', strokeLinecap: 'round' })} />
             </div>
           </KpiCard>
-          <KpiCard icon={<Activity size={18} />} label="Consistency" value={kpis?.consistency_score > 0 ? `${kpis.consistency_score}%` : '0%'} accent="#7C3AED" />
-          <KpiCard icon={<Flame size={18} />} label="Active Streak" value={`${kpis?.active_streak || 0} days`} badge="🔥 On Fire" accent="#F59E0B" />
+          <KpiCard icon={<Activity size={18} />} label="Consistency" value={kpis?.consistency_score > 0 ? `${kpis.consistency_score}%` : '0%'} accent="#7C3AED" tooltip={TOOLTIP_CONTENT.consistency} />
+          <KpiCard icon={<Flame size={18} />} label="Active Streak" value={`${kpis?.active_streak || 0} days`} badge="🔥 On Fire" accent="#F59E0B" tooltip={TOOLTIP_CONTENT.activeStreak} />
         </motion.div>
 
         {/* ── CHART + ACTION PANEL ───────────────────────────── */}
@@ -187,7 +204,12 @@ export default function Dashboard() {
                 ))}
               </div>
             </div>
-            <div className="h-[280px]">
+            <div className="h-[280px] relative">
+              {chartLoading && (
+                <div className="absolute inset-0 z-20 flex items-center justify-center bg-evofit-bg-card/40 backdrop-blur-[1px] rounded-xl animate-fade-in">
+                  <div className="w-8 h-8 rounded-full border-2 border-evofit-border border-t-evofit-purple-main animate-spin" />
+                </div>
+              )}
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart data={trend_data || []} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
                   <defs>
@@ -200,7 +222,7 @@ export default function Dashboard() {
                   <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 11, fontWeight: 600 }} dy={8} />
                   <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 11, fontWeight: 600 }} />
                   <Tooltip
-                    contentStyle={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 12, fontSize: 12, fontWeight: 600, boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}
+                    contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 12, fontSize: 12, fontWeight: 600, boxShadow: 'var(--card-shadow)' }}
                     cursor={{ stroke: '#7C3AED', strokeWidth: 1, strokeDasharray: '4 4' }}
                   />
                   <Area type="monotone" dataKey="reps" fill="url(#repsFill)" stroke="#7C3AED" strokeWidth={2.5} name="Total Reps" dot={false} activeDot={{ r: 5, fill: '#7C3AED', stroke: '#fff', strokeWidth: 2 }} />
@@ -227,7 +249,7 @@ export default function Dashboard() {
               </div>
               <p className="text-sm font-bold text-evofit-text-primary m-0 mb-1">Quick Upload</p>
               <p className="text-xs text-evofit-text-muted m-0 mb-4">Drop training footage to analyze form instantly</p>
-              <button className="premium-gradient text-white px-6 py-2 rounded-lg text-xs font-bold tracking-wide shadow-sm hover:shadow-md transition-shadow">
+              <button className="premium-gradient text-white px-6 py-2 rounded-lg text-xs font-bold tracking-wide shadow-sm hover:shadow-md transition-shadow active:scale-95">
                 Select Video
               </button>
             </motion.div>

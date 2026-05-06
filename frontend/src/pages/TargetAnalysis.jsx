@@ -11,6 +11,23 @@ import {
   Timer, Info, ChevronRight
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import MetricTooltip from '../components/MetricTooltip';
+
+const TOOLTIP_CONTENT = {
+  allTimePB: "Your highest ever repetition count in a single session for this exercise.",
+  bestForm: "The highest form quality score you have ever achieved for this exercise.",
+  totalVolume: "The cumulative number of repetitions you have performed across all recorded sessions.",
+  sessions: "The total number of unique training sessions completed for this exercise.",
+  peakForm: "Highest recorded movement quality score based on AI alignment analysis.",
+  recentConsistency: "How stable your form has been over the last 5 sessions.",
+  stability: "Measurement of balance and control during the exercise movement.",
+  weeklyProgress: "Your progress towards your monthly volume goal based on current reps.",
+  targetAdherence: "Your current repetition goal set for this exercise per week.",
+  sessionFrequency: "How often you train this specific exercise.",
+  totalRepsDone: "Total lifetime repetitions specifically for this move.",
+  milestone: "Your progress towards the 1,000 rep mastery milestone.",
+  peakOutput: "Maximum volume output achieved in your best ever set."
+};
 
 const EXERCISE_LABELS = {
   bench:   'Bench Press',
@@ -33,11 +50,13 @@ const fade = {
 
 // ─── Sub-components ─────────────────────────────────────────────────────────
 
-function KpiCard({ label, value, sub, icon, accent = '#7C3AED', badge }) {
+function KpiCard({ label, value, sub, icon, accent = '#7C3AED', badge, tooltip }) {
   return (
     <motion.div variants={fade} className="saas-card p-5 flex flex-col gap-3 group cursor-default">
       <div className="flex items-center justify-between">
-        <span className="text-[11px] font-bold text-evofit-text-muted uppercase tracking-widest">{label}</span>
+        <MetricTooltip content={tooltip}>
+          <span className="text-[11px] font-bold text-evofit-text-muted uppercase tracking-widest">{label}</span>
+        </MetricTooltip>
         <div className="icon-circle" style={{ background: `${accent}14` }}>
           <span style={{ color: accent }}>{icon}</span>
         </div>
@@ -53,11 +72,13 @@ function KpiCard({ label, value, sub, icon, accent = '#7C3AED', badge }) {
   );
 }
 
-function ProgressRow({ label, value, pct, color = '#7C3AED' }) {
+function ProgressRow({ label, value, pct, color = '#7C3AED', tooltip }) {
   return (
     <div>
       <div className="flex justify-between text-sm mb-2">
-        <span className="text-evofit-text-muted font-medium">{label}</span>
+        <MetricTooltip content={tooltip}>
+          <span className="text-evofit-text-muted font-medium">{label}</span>
+        </MetricTooltip>
         <span className="font-bold text-evofit-text-primary">{value}</span>
       </div>
       <div className="progress-bar">
@@ -212,6 +233,7 @@ export default function TargetAnalysis() {
             icon={<TrendingUp size={18} />}
             accent="#7C3AED"
             badge="+PR"
+            tooltip={TOOLTIP_CONTENT.allTimePB}
           />
           <KpiCard
             label="Best Form"
@@ -219,6 +241,7 @@ export default function TargetAnalysis() {
             sub="Peak quality"
             icon={<ShieldCheck size={18} />}
             accent="#22C55E"
+            tooltip={TOOLTIP_CONTENT.bestForm}
           />
           <KpiCard
             label="Total Volume"
@@ -226,6 +249,7 @@ export default function TargetAnalysis() {
             sub="Lifetime reps"
             icon={<Dumbbell size={18} />}
             accent="#3B82F6"
+            tooltip={TOOLTIP_CONTENT.totalVolume}
           />
           <KpiCard
             label="Sessions"
@@ -233,6 +257,7 @@ export default function TargetAnalysis() {
             sub="Completed"
             icon={<Calendar size={18} />}
             accent="#F59E0B"
+            tooltip={TOOLTIP_CONTENT.sessions}
           />
         </motion.div>
 
@@ -358,18 +383,21 @@ export default function TargetAnalysis() {
                 value={`${pb.best_form}%`}
                 pct={pb.best_form}
                 color="#22C55E"
+                tooltip={TOOLTIP_CONTENT.peakForm}
               />
               <ProgressRow
                 label="Recent Consistency"
                 value={`${data.avg_recent_form}%`}
                 pct={data.avg_recent_form}
                 color="#7C3AED"
+                tooltip={TOOLTIP_CONTENT.recentConsistency}
               />
               <ProgressRow
                 label="Stability Metric"
                 value="High"
                 pct={Math.min(100, data.avg_recent_form + 5)}
                 color="#3B82F6"
+                tooltip={TOOLTIP_CONTENT.stability}
               />
             </div>
           </motion.div>
@@ -388,18 +416,21 @@ export default function TargetAnalysis() {
                 value={`${Math.round((data.personal_bests.total_volume / (data.current_target * 4)) * 100)}%`}
                 pct={Math.min(100, Math.round((data.personal_bests.total_volume / (data.current_target * 4)) * 100))}
                 color="#3B82F6"
+                tooltip={TOOLTIP_CONTENT.weeklyProgress}
               />
               <ProgressRow
                 label="Target Adherence"
                 value={`${data.current_target} reps/wk`}
                 pct={Math.min(100, pb.session_count * 10)}
                 color="#7C3AED"
+                tooltip={TOOLTIP_CONTENT.targetAdherence}
               />
               <ProgressRow
                 label="Session Frequency"
                 value={`${pb.session_count} sessions`}
                 pct={Math.min(100, pb.session_count * 5)}
                 color="#F59E0B"
+                tooltip={TOOLTIP_CONTENT.sessionFrequency}
               />
             </div>
           </motion.div>
@@ -418,18 +449,21 @@ export default function TargetAnalysis() {
                 value={`${pb.total_volume.toLocaleString()} reps`}
                 pct={Math.min(100, milestonePercent)}
                 color="#F59E0B"
+                tooltip={TOOLTIP_CONTENT.totalRepsDone}
               />
               <ProgressRow
                 label="1K Rep Master"
                 value={`${milestonePercent}%`}
                 pct={milestonePercent}
                 color="#EF4444"
+                tooltip={TOOLTIP_CONTENT.milestone}
               />
               <ProgressRow
                 label="Peak Output"
                 value={`${pb.max_reps} reps`}
                 pct={Math.min(100, (pb.max_reps / 50) * 100)}
                 color="#22C55E"
+                tooltip={TOOLTIP_CONTENT.peakOutput}
               />
             </div>
           </motion.div>

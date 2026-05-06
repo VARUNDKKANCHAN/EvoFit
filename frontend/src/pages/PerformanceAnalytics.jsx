@@ -17,7 +17,22 @@ import {
   Lightbulb,
   Info
 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import MetricTooltip from '../components/MetricTooltip';
+
+const TOOLTIP_CONTENT = {
+  formScore: "Overall quality of your movement based on joint alignment and range of motion.",
+  totalReps: "Total number of completed repetitions during this session.",
+  consistency: "How well you maintained your form throughout the entire set.",
+  duration: "The total time elapsed from your first rep to your last.",
+  bestSet: "Your highest performance set based on weight, reps, and form quality.",
+  formQuality: "A deep dive into your movement precision and range of motion.",
+  stability: "Measurement of how much your body wobbled or deviated from the ideal path.",
+  rhythm: "The consistency of your repetition tempo (concentric and eccentric phases).",
+  tut: "Total time your muscles were under load during the movement.",
+  fatigue: "Visualization of how your performance declined as the session progressed.",
+  recovery: "How quickly your performance returns to baseline after a set."
+};
 
 const MOCK_DATA = {
   formScore: 94,
@@ -165,7 +180,9 @@ export default function PerformanceAnalytics() {
             </div>
             <div>
               <div className="flex items-center justify-between mb-6">
-                <span className="text-[#64748B] text-sm font-medium uppercase tracking-wider">Average Form Score</span>
+                <MetricTooltip content={TOOLTIP_CONTENT.formScore}>
+                  <span className="text-[#64748B] text-sm font-medium uppercase tracking-wider">Average Form Score</span>
+                </MetricTooltip>
                 <div className="p-2 bg-purple-50 rounded-lg">
                   <ShieldCheck size={20} className="text-[#7C3AED]" />
                 </div>
@@ -199,7 +216,14 @@ export default function PerformanceAnalytics() {
             ].map((kpi, i) => (
               <motion.div key={i} variants={itemVars} className="bg-white border border-[#E5E7EB] rounded-2xl p-6 shadow-sm hover:border-[#7C3AED]/30 transition-colors group">
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-[#64748B] text-sm font-medium">{kpi.label}</span>
+                  <MetricTooltip content={
+                    kpi.label === 'Total Reps' ? TOOLTIP_CONTENT.totalReps :
+                    kpi.label === 'Consistency' ? TOOLTIP_CONTENT.consistency :
+                    kpi.label === 'Session Duration' ? TOOLTIP_CONTENT.duration :
+                    TOOLTIP_CONTENT.bestSet
+                  }>
+                    <span className="text-[#64748B] text-sm font-medium">{kpi.label}</span>
+                  </MetricTooltip>
                   <div className={`p-2 rounded-xl bg-slate-50 text-[#64748B] group-hover:text-[#7C3AED] transition-colors`}>
                     {kpi.icon}
                   </div>
@@ -288,7 +312,9 @@ export default function PerformanceAnalytics() {
               <div className="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center text-[#22C55E]">
                 <ShieldCheck size={18} />
               </div>
-              <h3 className="font-bold text-[#0F172A]">Form Quality</h3>
+              <MetricTooltip content={TOOLTIP_CONTENT.formQuality}>
+                <h3 className="font-bold text-[#0F172A]">Form Quality</h3>
+              </MetricTooltip>
             </div>
             <div className="space-y-6">
               <div>
@@ -302,7 +328,9 @@ export default function PerformanceAnalytics() {
               </div>
               <div>
                 <div className="flex justify-between text-sm mb-2">
-                  <span className="text-[#64748B]">Stability Metric</span>
+                  <MetricTooltip content={TOOLTIP_CONTENT.stability}>
+                    <span className="text-[#64748B]">Stability Metric</span>
+                  </MetricTooltip>
                   <span className="font-bold text-[#0F172A]">94/100</span>
                 </div>
                 <div className="h-2 bg-[#F1F5F9] rounded-full overflow-hidden">
@@ -318,7 +346,9 @@ export default function PerformanceAnalytics() {
               <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-500">
                 <Timer size={18} />
               </div>
-              <h3 className="font-bold text-[#0F172A]">Performance Timing</h3>
+              <MetricTooltip content={TOOLTIP_CONTENT.rhythm}>
+                <h3 className="font-bold text-[#0F172A]">Performance Timing</h3>
+              </MetricTooltip>
             </div>
             <div className="space-y-6">
               <div>
@@ -336,7 +366,9 @@ export default function PerformanceAnalytics() {
               </div>
               <div>
                 <div className="flex justify-between text-sm mb-2">
-                  <span className="text-[#64748B]">Time Under Tension</span>
+                  <MetricTooltip content={TOOLTIP_CONTENT.tut}>
+                    <span className="text-[#64748B]">Time Under Tension</span>
+                  </MetricTooltip>
                   <span className="font-bold text-[#0F172A]">2.4s avg</span>
                 </div>
                 <div className="h-2 bg-[#F1F5F9] rounded-full overflow-hidden">
@@ -352,7 +384,9 @@ export default function PerformanceAnalytics() {
               <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center text-orange-500">
                 <TrendingUp size={18} />
               </div>
-              <h3 className="font-bold text-[#0F172A]">Endurance</h3>
+              <MetricTooltip content={TOOLTIP_CONTENT.fatigue}>
+                <h3 className="font-bold text-[#0F172A]">Endurance</h3>
+              </MetricTooltip>
             </div>
             <div className="space-y-6">
               <div>
@@ -368,7 +402,9 @@ export default function PerformanceAnalytics() {
               </div>
               <div>
                 <div className="flex justify-between text-sm mb-2">
-                  <span className="text-[#64748B]">Recovery Rate</span>
+                  <MetricTooltip content={TOOLTIP_CONTENT.recovery}>
+                    <span className="text-[#64748B]">Recovery Rate</span>
+                  </MetricTooltip>
                   <span className="font-bold text-[#0F172A]">Optimal</span>
                 </div>
                 <div className="h-2 bg-[#F1F5F9] rounded-full overflow-hidden">

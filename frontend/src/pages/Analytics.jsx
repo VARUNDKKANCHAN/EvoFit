@@ -4,7 +4,23 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   PieChart, Pie, Cell, BarChart, Bar, ComposedChart, Line
 } from 'recharts';
-import { Activity, Dumbbell, Award, Timer, ChevronLeft, Share2, Sparkles, Flame, TrendingUp, Check, Zap } from 'lucide-react';
+import { Activity, Dumbbell, Award, Timer, ChevronLeft, Share2, Sparkles, Flame, TrendingUp, Check, Zap, Info } from 'lucide-react';
+import MetricTooltip from '../components/MetricTooltip';
+
+const TOOLTIP_CONTENT = {
+  totalReps: "Total number of completed repetitions across all exercises in this session.",
+  exercisesPerformed: "Number of unique exercise types detected by our AI.",
+  formScore: "Overall quality of your movement based on joint alignment and range of motion.",
+  consistency: "How well you maintained your form and rhythm throughout the entire set.",
+  duration: "The total time elapsed from your first rep to your last.",
+  bestSet: "Your highest performance set based on weight, reps, and form quality.",
+  velocityDrop: "Percentage decrease in movement speed, often used to measure fatigue.",
+  fatigueIndex: "Mathematical derivation of neural and muscular fatigue based on performance decline.",
+  explosiveness: "Rate of force development measured via peak acceleration (G/s).",
+  tempoScore: "Consistency and control of your eccentric (negative) phase.",
+  stability: "Measurement of barbell rotational wobble and path deviation.",
+  tut: "Total time your muscles were under load during the movement."
+};
 
 const COLORS = {
   bench: '#7C3AED',
@@ -261,16 +277,18 @@ export default function Analytics() {
         {/* ── KEY METRICS ROW ───────────────────────────────────────────── */}
         <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
           {[
-            { label: 'Total Reps Context', val: totalReps, sub: 'Entire Session', icon: <Dumbbell size={18} className="text-evofit-purple-light" /> },
-            { label: 'Exercises Performed', val: exercisesPerformed, sub: 'Auto-detected', icon: null },
-            { label: 'Average Form Score', val: `${avgFormScore}%`, sub: avgFormTier, icon: <Award size={18} className={avgFormScore >= 85 ? 'text-green-400' : avgFormScore >= 70 ? 'text-yellow-400' : 'text-red-400'} /> },
-            { label: 'Overall Consistency', val: overallConsistency, sub: 'Calculated Rhythm', icon: <Activity size={18} className="text-blue-400" /> },
-            { label: 'Session Duration', val: sessionDuration, sub: sessionTimeRange ? `Interval: ${sessionTimeRange}` : 'Live session', icon: <Timer size={18} className="text-pink-400" /> },
-            { label: 'Best Set', val: bestSetVal, sub: bestSetSub, icon: <Sparkles size={18} className="text-amber-400" /> }
+            { label: 'Total Reps Context', val: totalReps, sub: 'Entire Session', icon: <Dumbbell size={18} className="text-evofit-purple-light" />, tooltip: TOOLTIP_CONTENT.totalReps },
+            { label: 'Exercises Performed', val: exercisesPerformed, sub: 'Auto-detected', icon: null, tooltip: TOOLTIP_CONTENT.exercisesPerformed },
+            { label: 'Average Form Score', val: `${avgFormScore}%`, sub: avgFormTier, icon: <Award size={18} className={avgFormScore >= 85 ? 'text-green-400' : avgFormScore >= 70 ? 'text-yellow-400' : 'text-red-400'} />, tooltip: TOOLTIP_CONTENT.formScore },
+            { label: 'Overall Consistency', val: overallConsistency, sub: 'Calculated Rhythm', icon: <Activity size={18} className="text-blue-400" />, tooltip: TOOLTIP_CONTENT.consistency },
+            { label: 'Session Duration', val: sessionDuration, sub: sessionTimeRange ? `Interval: ${sessionTimeRange}` : 'Live session', icon: <Timer size={18} className="text-pink-400" />, tooltip: TOOLTIP_CONTENT.duration },
+            { label: 'Best Set', val: bestSetVal, sub: bestSetSub, icon: <Sparkles size={18} className="text-amber-400" />, tooltip: TOOLTIP_CONTENT.bestSet }
           ].map((m, i) => (
             <div key={i} className="glass-card p-5 flex flex-col gap-2 shadow-premium-card hover:translate-y-[-2px] transition-transform">
               <div className="flex justify-between items-start">
-                <p className="text-[13px] text-evofit-text-secondary m-0 font-medium">{m.label}</p>
+                <MetricTooltip content={m.tooltip}>
+                  <p className="text-[13px] text-evofit-text-secondary m-0 font-medium">{m.label}</p>
+                </MetricTooltip>
                 {m.icon && m.icon}
               </div>
               <div>
@@ -380,7 +398,9 @@ export default function Analytics() {
            {/* Velocity Drop */}
            <div className="glass-card p-5 border-l-4 border-l-blue-500 shadow-premium-card">
               <div className="flex justify-between items-start mb-3">
-                 <p className="text-[12px] font-bold text-evofit-text-muted uppercase tracking-wider">Velocity Drop</p>
+                 <MetricTooltip content={TOOLTIP_CONTENT.velocityDrop}>
+                    <p className="text-[12px] font-bold text-evofit-text-muted uppercase tracking-wider">Velocity Drop</p>
+                 </MetricTooltip>
                  <Zap className="text-blue-400" size={18} />
               </div>
               <p className="text-2xl font-black text-evofit-text-primary">
@@ -397,7 +417,9 @@ export default function Analytics() {
            {/* Fatigue Index */}
            <div className="glass-card p-5 border-l-4 border-l-red-500 shadow-premium-card">
               <div className="flex justify-between items-start mb-3">
-                 <p className="text-[12px] font-bold text-evofit-text-muted uppercase tracking-wider">Fatigue Index</p>
+                 <MetricTooltip content={TOOLTIP_CONTENT.fatigueIndex}>
+                    <p className="text-[12px] font-bold text-evofit-text-muted uppercase tracking-wider">Fatigue Index</p>
+                 </MetricTooltip>
                  <Flame className="text-red-400" size={18} />
               </div>
               <p className="text-2xl font-black text-evofit-text-primary">{avgFatigue.toFixed(1)}%</p>
@@ -412,7 +434,9 @@ export default function Analytics() {
            {/* Explosiveness */}
            <div className="glass-card p-5 border-l-4 border-l-amber-500 shadow-premium-card group relative">
               <div className="flex justify-between items-start mb-3">
-                 <p className="text-[12px] font-bold text-evofit-text-muted uppercase tracking-wider">Explosiveness</p>
+                 <MetricTooltip content={TOOLTIP_CONTENT.explosiveness}>
+                    <p className="text-[12px] font-bold text-evofit-text-muted uppercase tracking-wider">Explosiveness</p>
+                 </MetricTooltip>
                  <Activity className="text-amber-400" size={18} />
               </div>
               <p className="text-2xl font-black text-evofit-text-primary">{avgExplosiveness.toFixed(2)}</p>
@@ -420,16 +444,14 @@ export default function Analytics() {
               <div className="mt-3 h-1.5 bg-evofit-bg-secondary rounded-full overflow-hidden">
                  <div className="h-full bg-amber-500" style={{ width: `${Math.min(100, avgExplosiveness * 10)}%` }} />
               </div>
-              {/* Tooltip */}
-              <div className="absolute top-0 left-0 w-full h-full bg-evofit-bg-secondary opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-3 text-center rounded-xl pointer-events-none">
-                 <p className="text-[10px] text-evofit-text-primary font-medium leading-tight">Rate of Force Development measured via accelerometer peak force.</p>
-              </div>
            </div>
 
            {/* Tempo Score */}
            <div className="glass-card p-5 border-l-4 border-l-green-500 shadow-premium-card">
               <div className="flex justify-between items-start mb-3">
-                 <p className="text-[12px] font-bold text-evofit-text-muted uppercase tracking-wider">Tempo Score</p>
+                 <MetricTooltip content={TOOLTIP_CONTENT.tempoScore}>
+                    <p className="text-[12px] font-bold text-evofit-text-muted uppercase tracking-wider">Tempo Score</p>
+                 </MetricTooltip>
                  <Timer className="text-green-400" size={18} />
               </div>
               <p className="text-2xl font-black text-evofit-text-primary">{avgTempoScore}%</p>
@@ -529,7 +551,10 @@ export default function Analytics() {
             {/* Wobble / Stability Card */}
             <div className="glass-card p-6 flex flex-1 items-center shadow-premium-card">
               <div className="flex-1">
-                 <h4 className="text-[15px] font-bold m-0 mb-1 text-evofit-text-primary">Form Stability (Gyro)</h4>
+                  <MetricTooltip content={TOOLTIP_CONTENT.stability}>
+                    <h4 className="text-[15px] font-bold m-0 mb-1 text-evofit-text-primary">Form Stability (Gyro)</h4>
+                  </MetricTooltip>
+
                  <p className="text-[12px] text-evofit-text-muted m-0 mb-4">Barbell rotational wobble</p>
                  <div className="flex items-end gap-2">
                    <span className="text-[32px] font-extrabold text-evofit-purple-light leading-none tracking-tight">{advancedMetrics.wobble}</span>
@@ -554,7 +579,10 @@ export default function Analytics() {
 
             {/* Time Under Tension Card */}
             <div className="glass-card p-6 flex-1 shadow-premium-card">
-              <h4 className="text-[15px] font-bold m-0 mb-1 text-evofit-text-primary">Time Under Tension</h4>
+               <MetricTooltip content={TOOLTIP_CONTENT.tut}>
+                 <h4 className="text-[15px] font-bold m-0 mb-1 text-evofit-text-primary">Time Under Tension</h4>
+               </MetricTooltip>
+
               <p className="text-[12px] text-evofit-text-muted m-0 mb-4">Concentric vs Eccentric phases</p>
               
               <div className="flex justify-between text-[13px] mb-2 font-bold uppercase tracking-wide">
@@ -578,32 +606,34 @@ export default function Analytics() {
                <h4 className="text-[15px] font-bold m-0 text-evofit-text-primary">Endurance & Recovery</h4>
                <span className="text-[11px] text-evofit-text-muted font-bold uppercase tracking-wider">Power Fatigue Map</span>
             </div>
-            <div className="flex gap-3 h-40 items-flex-end justify-between flex-1 pb-6 pt-4 px-2 overflow-x-auto no-scrollbar">
-               {setBySetData.map((set, i) => {
-                 const maxHeight = Math.max(...setBySetData.map(s => s.reps)) || 15;
-                 const hPct = `${(set.reps/maxHeight)*100}%`;
-                 return (
-                   <React.Fragment key={set.name}>
-                     {i > 0 && (
-                       <div className="self-center z-10 -mx-2 bg-evofit-bg-secondary border border-evofit-border px-1.5 py-0.5 rounded text-[9px] text-evofit-text-muted font-bold">
-                         {set.rest_before_sec}s
-                       </div>
-                     )}
-                     <div className="flex flex-col items-center gap-2 flex-1 relative h-full justify-end">
-                       <div className="absolute -top-6 text-[10px] text-amber-500 whitespace-nowrap flex flex-col items-center font-bold">
-                          <span>{set.mean_power}G</span>
-                       </div>
-                       <span className="text-[14px] font-extrabold text-evofit-text-primary">{set.reps}</span>
-                       <div 
-                        className={`w-full max-w-[30px] rounded-t-lg transition-all duration-1000 ease-out
-                          ${i===0 ? 'bg-gradient-to-t from-evofit-bg-secondary to-evofit-purple-main' : 'bg-gradient-to-t from-evofit-bg-secondary to-blue-500'}`}
-                        style={{ height: hPct }}
-                       ></div>
-                       <span className="text-[11px] text-evofit-text-muted font-bold uppercase">S{set.set_num}</span>
-                     </div>
-                   </React.Fragment>
-                 );
-               })}
+            <div className="flex-1 overflow-x-auto no-scrollbar">
+               <div className="flex gap-6 h-44 items-end justify-center min-w-full pb-6 pt-10 px-8">
+                  {setBySetData.map((set, i) => {
+                    const maxHeight = Math.max(...setBySetData.map(s => s.reps)) || 15;
+                    const hPct = `${(set.reps/maxHeight)*100}%`;
+                    return (
+                      <React.Fragment key={set.name}>
+                        {i > 0 && (
+                          <div className="self-center z-10 -mx-4 bg-evofit-bg-secondary border border-evofit-border px-2 py-1 rounded-lg text-[10px] text-evofit-text-muted font-bold shadow-sm whitespace-nowrap">
+                            {set.rest_before_sec}s
+                          </div>
+                        )}
+                        <div className="flex flex-col items-center gap-2 min-w-[60px] relative h-full justify-end">
+                          <div className="absolute -top-8 text-[10px] text-amber-500 whitespace-nowrap flex flex-col items-center font-bold">
+                             <span>{set.mean_power}G</span>
+                          </div>
+                          <span className="text-[14px] font-extrabold text-evofit-text-primary">{set.reps}</span>
+                          <div 
+                           className={`w-full max-w-[32px] rounded-t-md transition-all duration-1000 ease-out
+                             ${i===0 ? 'bg-gradient-to-t from-evofit-bg-secondary to-evofit-purple-main' : 'bg-gradient-to-t from-evofit-bg-secondary to-blue-500'}`}
+                           style={{ height: hPct }}
+                          ></div>
+                          <span className="text-[11px] text-evofit-text-muted font-bold uppercase">S{set.set_num}</span>
+                        </div>
+                      </React.Fragment>
+                    );
+                  })}
+               </div>
             </div>
             
             <div className="mt-4 bg-evofit-bg-secondary p-4 rounded-xl border border-evofit-border shadow-inner">

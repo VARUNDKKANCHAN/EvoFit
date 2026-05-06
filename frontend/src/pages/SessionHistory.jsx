@@ -121,6 +121,7 @@ export default function SessionHistory() {
   const [exerciseFilter, setExerciseFilter] = useState('all');
   const [daysFilter, setDaysFilter] = useState(null);
   const [sortOrder, setSortOrder] = useState('newest');
+  const [visibleCount, setVisibleCount] = useState(10);
 
   const fetchSessions = async () => {
     try {
@@ -146,6 +147,11 @@ export default function SessionHistory() {
     fetchSessions();
   }, [daysFilter]);
 
+  // Reset visible count when filters change
+  useEffect(() => {
+    setVisibleCount(10);
+  }, [searchQuery, exerciseFilter, daysFilter, sortOrder]);
+
   // Derived data
   const filteredAndSortedSessions = useMemo(() => {
     let result = sessions.filter(s => {
@@ -166,6 +172,10 @@ export default function SessionHistory() {
     return result;
   }, [sessions, searchQuery, exerciseFilter, sortOrder]);
 
+  const visibleSessions = useMemo(() => {
+    return filteredAndSortedSessions.slice(0, visibleCount);
+  }, [filteredAndSortedSessions, visibleCount]);
+
   const groupedSessions = useMemo(() => {
     const groups = {
       today: [],
@@ -178,7 +188,7 @@ export default function SessionHistory() {
     const oneWeekAgo = new Date(today);
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
-    filteredAndSortedSessions.forEach(s => {
+    visibleSessions.forEach(s => {
       const d = new Date(s.date);
       if (d >= today) {
         groups.today.push(s);
@@ -190,7 +200,7 @@ export default function SessionHistory() {
     });
 
     return groups;
-  }, [filteredAndSortedSessions]);
+  }, [visibleSessions]);
 
   const summaryStats = useMemo(() => {
     if (sessions.length === 0) return { total: 0, avgForm: 0, bestExercise: '-' };
@@ -368,9 +378,22 @@ export default function SessionHistory() {
           )}
         </div>
 
+        {/* Load More Button */}
+        {visibleCount < filteredAndSortedSessions.length && (
+          <div className="flex justify-center mt-8">
+            <button 
+              onClick={() => setVisibleCount(prev => prev + 10)}
+              className="flex items-center gap-2 px-8 py-3 bg-evofit-bg-card border border-evofit-border rounded-xl text-sm font-bold text-evofit-purple-main hover:bg-evofit-purple-main hover:text-white hover:border-evofit-purple-main transition-all shadow-sm group"
+            >
+              Load More Sessions
+              <ChevronDown size={16} className="group-hover:translate-y-0.5 transition-transform" />
+            </button>
+          </div>
+        )}
+
         {/* Footer info */}
         <p className="text-center text-[12px] text-evofit-text-muted mt-8">
-          Showing {filteredAndSortedSessions.length} sessions. Data synced with EvoFit Cloud.
+          Showing {Math.min(visibleCount, filteredAndSortedSessions.length)} of {filteredAndSortedSessions.length} sessions. Data synced with EvoFit Cloud.
         </p>
 
       </div>
