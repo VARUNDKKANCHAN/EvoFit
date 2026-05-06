@@ -369,6 +369,17 @@ function PageHeader({ title, onMenuClick }) {
 
   const xp = user?.xp ?? 0;
   const level = user?.level ?? 1;
+  const tier = (lvl) => {
+    if (lvl >= 100) return 'Evo Legend';
+    if (lvl >= 60)  return 'Grandmaster';
+    if (lvl >= 40)  return 'Master';
+    if (lvl >= 25)  return 'Elite';
+    if (lvl >= 15)  return 'Titan';
+    if (lvl >= 10)  return 'Warrior';
+    if (lvl >= 5)   return 'Vanguard';
+    return 'Initiate';
+  };
+  const tierName = tier(level);
   const xpToNext = level * 1000;
   const xpPct = Math.min(100, Math.round((xp / xpToNext) * 100));
   const initials = (user?.fullName || user?.username || '?').charAt(0).toUpperCase();
@@ -421,7 +432,7 @@ function PageHeader({ title, onMenuClick }) {
                 {user?.fullName || user?.username || 'Guest'}
               </p>
               <p className="m-0 text-[11px] font-medium text-evofit-text-muted leading-tight mt-0.5">
-                {user ? `Lv.${level} · ${xp.toLocaleString()} XP` : 'Standard User'}
+                {user ? `${tierName} · ${xp.toLocaleString()} XP` : 'Standard User'}
               </p>
             </div>
             <div className={`w-8 h-8 rounded-full bg-gradient-to-br from-evofit-purple-main to-evofit-purple-dark flex items-center justify-center text-[12px] font-black text-white border border-white/20 shadow-sm transition-all duration-200 ${dropdownOpen ? 'ring-2 ring-evofit-purple-main/30' : ''}`}>
