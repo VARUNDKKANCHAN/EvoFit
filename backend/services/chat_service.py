@@ -185,6 +185,20 @@ class ChatService:
 
             # 4. Call Groq LLM
             response = self.llm.invoke(messages)
+            
+            # 5. Extract token usage and update user stats
+            try:
+                usage = response.response_metadata.get("token_usage", {})
+                total_tokens = usage.get("total_tokens", 0)
+                
+                if total_tokens > 0:
+                    user = db.query(User).filter(User.id == user_id).first()
+                    if user:
+                        user.rag_tokens_total += total_tokens
+                        db.commit()
+            except Exception as e:
+                print(f"Error updating RAG token usage: {e}")
+                
             return response.content
 
         except Exception as e:

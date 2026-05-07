@@ -298,8 +298,20 @@ def get_dashboard_summary(
             date=row.date
         ) for row in pb_query
     ]
-    # Sort by reps or exercise name
-    personal_bests.sort(key=lambda x: x.max_reps, reverse=True)
+    # 9. Global Rank Calculation
+    # Admins do not compete
+    if user and user.is_admin:
+        global_rank = 0 # Or some indicator that they aren't ranked
+    else:
+        # Count how many non-admin users have higher Level, OR same Level but more XP
+        higher_ranked_count = db.query(models.User).filter(
+            models.User.is_admin == False,
+            (
+                (models.User.level > user.level) | 
+                ((models.User.level == user.level) & (models.User.xp > user.xp))
+            )
+        ).count()
+        global_rank = higher_ranked_count + 1
 
     return DashboardSummaryResponse(
         kpis=KPIStats(
@@ -319,6 +331,7 @@ def get_dashboard_summary(
         distribution=distribution,
         targets=targets,
         insights=insights,
+        global_rank=global_rank,
         personal_bests=personal_bests,
         recovery_estimate=recovery_estimate
     )

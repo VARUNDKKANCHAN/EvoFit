@@ -99,6 +99,7 @@ class UserResponse(UserBase):
     is_admin: bool
     xp: int
     level: int
+    rag_tokens_total: int
 
     class Config:
         from_attributes = True
@@ -267,6 +268,7 @@ class DashboardSummaryResponse(BaseModel):
     distribution: List[DistributionItem]
     targets: List[DashboardTargetItem]
     insights: List[str]
+    global_rank: int
     personal_bests: List[PersonalBestItem] = []
     recovery_estimate: Optional[str] = None
 
@@ -293,6 +295,7 @@ class MeResponse(BaseModel):
     created_at: datetime
     is_active: bool
     is_admin: bool
+    rag_tokens_total: int
     # Profile fields
     full_name: Optional[str] = None
     age: Optional[int] = None

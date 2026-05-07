@@ -124,7 +124,7 @@ export default function Dashboard() {
               </p>
               <div className="flex flex-wrap gap-3 mt-5">
                 {[
-                  { icon: <Trophy size={15} />, label: 'Global Rank', value: '#42', color: '#F59E0B' },
+                  { icon: <Trophy size={15} />, label: 'Global Rank', value: data?.global_rank ? `#${data.global_rank}` : '...', color: '#F59E0B' },
                   { icon: <Flame size={15} />, label: 'Active Streak', value: `${kpis?.active_streak || 0} days`, color: '#7C3AED' },
                   { icon: <ArrowUpRight size={15} />, label: 'Growth', value: '+12%', color: '#22C55E' },
                 ].map(p => (

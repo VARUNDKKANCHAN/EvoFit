@@ -14,6 +14,7 @@ class User(Base):
     is_admin = Column(Boolean, default=False)
     xp = Column(Integer, default=0)
     level = Column(Integer, default=1)
+    rag_tokens_total = Column(Integer, default=0)
 
     # Relationships
     profile = relationship("UserProfile", back_populates="user", uselist=False)

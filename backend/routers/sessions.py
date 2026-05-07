@@ -36,6 +36,7 @@ def get_all_sessions(
     result = []
     for s in sessions:
         sparkline = []
+        
         if s.json_report:
             try:
                 report = json.loads(s.json_report)

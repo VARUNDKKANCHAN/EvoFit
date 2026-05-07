@@ -47,5 +47,9 @@ export const adminApi = {
   revokeToken: async (tokenId) => {
     const response = await axios.delete(`${API_URL}/tokens/${tokenId}`, { headers: getAuthHeader() });
     return response.data;
+  },
+  flushCache: async () => {
+    const response = await axios.post(`${API_URL}/system/flush-cache`, null, { headers: getAuthHeader() });
+    return response.data;
   }
 };

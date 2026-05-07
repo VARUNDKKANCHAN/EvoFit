@@ -54,6 +54,12 @@ def login_for_access_token(user_credentials: schemas.UserLogin, db: Session = De
             detail="Invalid username or password"
         )
 
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Account is deactivated"
+        )
+
     access_token = auth_service.create_access_token(data={"sub": user.username})
     return {"access_token": access_token, "token_type": "bearer"}
 
@@ -71,6 +77,7 @@ def get_me(current_user: models.User = Depends(auth_service.get_current_user), d
         created_at=current_user.created_at,
         is_active=current_user.is_active,
         is_admin=current_user.is_admin,
+        rag_tokens_total=current_user.rag_tokens_total,
         full_name=profile.full_name if profile else None,
         age=profile.age if profile else None,
         weight_kg=profile.weight_kg if profile else None,
@@ -107,6 +114,7 @@ def update_my_profile(
         created_at=current_user.created_at,
         is_active=current_user.is_active,
         is_admin=current_user.is_admin,
+        rag_tokens_total=current_user.rag_tokens_total,
         full_name=db_profile.full_name,
         age=db_profile.age,
         weight_kg=db_profile.weight_kg,
@@ -148,7 +156,8 @@ def get_leaderboard(
             models.User.username,
             models.User.level,
             all_time_expr.label("total_xp")
-        ).order_by(desc("total_xp"))
+        ).filter(models.User.is_admin == False)\
+         .order_by(desc(models.User.level), desc(models.User.xp))
     else:
         # 2. Daily/Weekly queries based on WorkoutSession reps
         days = 1 if timeframe == "Daily" else 7
@@ -166,11 +175,12 @@ def get_leaderboard(
             models.User.username,
             models.User.level,
             func.coalesce(session_subquery.c.period_xp, 0).label("total_xp")
-        ).outerjoin(session_subquery, models.User.id == session_subquery.c.user_id)\
+        ).filter(models.User.is_admin == False)\
+         .outerjoin(session_subquery, models.User.id == session_subquery.c.user_id)\
          .order_by(desc("total_xp"))
 
-    # Execute total count for percentile and pagination
-    total_users = db.query(models.User).count()
+    # Execute total count for percentile and pagination (exclude admins)
+    total_users = db.query(models.User).filter(models.User.is_admin == False).count()
     
     # Execute full leaderboard for rank calculation (if small) 
     # For a real large-scale app, we'd use a window function rank() in SQL.
@@ -181,8 +191,20 @@ def get_leaderboard(
     current_user_rank = -1
     current_user_xp = 0
     
+    last_val = None
+    last_rank = 0
+    
     for idx, row in enumerate(all_results):
-        rank = idx + 1
+        # Tie-handling: if Level and XP are same as previous, keep same rank
+        current_val = (row.level, row.total_xp)
+        if current_val == last_val:
+            rank = last_rank
+        else:
+            rank = idx + 1
+        
+        last_val = current_val
+        last_rank = rank
+        
         is_current = (row.id == current_user.id)
         if is_current:
             current_user_rank = rank
@@ -191,16 +213,18 @@ def get_leaderboard(
         leaderboard_data.append({
             "id": row.id,
             "username": row.username,
-            "xp": row.total_xp,
+            "xp": row.total_xp, # Lifetime XP
             "level": row.level,
             "rank": rank,
             "is_current_user": is_current
         })
 
-    # Calculate Percentile
+    # Calculate Percentile (exclude admins)
     percentile = 100
-    if total_users > 0 and current_user_rank > 0:
+    if not current_user.is_admin and total_users > 0 and current_user_rank > 0:
         percentile = max(1, round(((total_users - current_user_rank + 1) / total_users) * 100))
+    elif current_user.is_admin:
+        percentile = 0
 
     # Paginate the results
     paginated_leaderboard = leaderboard_data[offset : offset + limit]

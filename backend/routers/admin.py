@@ -49,13 +49,18 @@ def get_admin_stats(db: Session = Depends(get_db), _ = Depends(admin_required)):
     # Average form score across all users
     avg_form = db.query(func.avg(models.WorkoutSession.form_score)).scalar() or 0.0
 
+    # Total API Token Usage
+    total_token_uses = db.query(func.sum(models.SystemToken.use_count)).scalar() or 0
+    
     return {
         "total_users": total_users,
         "active_users": active_users,
         "total_sessions": total_sessions,
         "sessions_today": sessions_today,
         "total_reps": int(total_reps),
-        "avg_form_score": round(float(avg_form), 2)
+        "avg_form_score": round(float(avg_form), 2),
+        "total_api_uses": int(total_token_uses),
+        "total_rag_tokens": db.query(func.sum(models.User.rag_tokens_total)).scalar() or 0
     }
 
 @router.get("/users", response_model=List[schemas.MeResponse])
@@ -91,6 +96,7 @@ def list_users(
             created_at=u.created_at,
             is_active=u.is_active,
             is_admin=u.is_admin,
+            rag_tokens_total=u.rag_tokens_total,
             full_name=profile.full_name if profile else None,
             age=profile.age if profile else None,
             weight_kg=profile.weight_kg if profile else None,
@@ -159,12 +165,19 @@ def get_system_status(db: Session = Depends(get_db), _ = Depends(admin_required)
     # 3. System Metrics (Safe fallback if psutil is missing)
     memory_usage = 0
     cpu_usage = 0
+    disk_usage = 0
+    uptime_sec = 0
     
     if psutil:
         try:
             process = psutil.Process(os.getpid())
             memory_usage = process.memory_info().rss / (1024 * 1024) # MB
             cpu_usage = process.cpu_percent(interval=0.1)
+            uptime_sec = time.time() - process.create_time()
+            
+            # Disk health
+            disk = psutil.disk_usage('/')
+            disk_usage = disk.percent
         except Exception:
             pass
     
@@ -174,9 +187,18 @@ def get_system_status(db: Session = Depends(get_db), _ = Depends(admin_required)
         "api_server": "operational",
         "memory_usage_mb": round(memory_usage, 2),
         "cpu_usage_percent": cpu_usage,
+        "disk_usage_percent": disk_usage,
+        "uptime_seconds": int(uptime_sec),
         "latency_ms": round(latency, 2),
         "server_time": datetime.now().isoformat()
     }
+
+@router.post("/system/flush-cache")
+def flush_system_cache(_ = Depends(admin_required)):
+    """Simulate flushing system cache / temporary files."""
+    # In a real app with Redis: redis_client.flushall()
+    # For now, we just return a success message
+    return {"message": "System cache flushed successfully"}
 
 @router.get("/tokens", response_model=List[schemas.SystemTokenResponse])
 def list_system_tokens(db: Session = Depends(get_db), _ = Depends(admin_required)):

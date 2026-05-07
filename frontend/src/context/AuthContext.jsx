@@ -71,8 +71,8 @@ export function AuthProvider({ children }) {
         saveUser(userObj);
       } catch (error) {
         console.error('Session sync failed:', error);
-        // Only logout if it's truly a 401 (token expired/invalid)
-        if (error.response?.status === 401) {
+        // Only logout if it's truly a 401 or 403 (token expired or account deactivated)
+        if (error.response?.status === 401 || error.response?.status === 403) {
           logout();
         }
       }

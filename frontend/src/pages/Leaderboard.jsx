@@ -101,9 +101,11 @@ export default function Leaderboard() {
                 <div>
                   <div className="flex items-center gap-2">
                     <h2 className="text-lg font-bold text-evofit-text-primary">{user?.username}</h2>
-                    <span className="bg-emerald-500/10 text-emerald-500 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-500/20">
-                      Top {101 - (data?.percentile || 0)}% globally
-                    </span>
+                    {data && (
+                      <span className="bg-emerald-500/10 text-emerald-500 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-500/20 animate-fade-in">
+                        Top {Math.max(1, 100 - (data.percentile || 0))}% globally
+                      </span>
+                    )}
                   </div>
                   <div className="mt-2 flex items-center gap-3">
                     <span className="text-xs font-semibold text-evofit-text-muted">Level {user?.level}</span>
@@ -171,7 +173,7 @@ export default function Leaderboard() {
                     
                     <div className="flex items-center gap-1.5 text-evofit-text-primary font-bold text-sm bg-evofit-bg-secondary px-4 py-1.5 rounded-full border border-evofit-border">
                       <Zap size={14} className="text-evofit-purple-main fill-evofit-purple-main" />
-                      {u.xp.toLocaleString()} XP
+                      {u.xp.toLocaleString()} Total XP
                     </div>
                   </div>
                 </motion.div>
@@ -218,7 +220,7 @@ export default function Leaderboard() {
                   <th className="px-6 py-3 text-[10px] font-bold text-evofit-text-muted uppercase tracking-wider">User</th>
                   <th className="px-6 py-3 text-[10px] font-bold text-evofit-text-muted uppercase tracking-wider text-center">Level</th>
                   <th className="px-6 py-3 text-[10px] font-bold text-evofit-text-muted uppercase tracking-wider">Progress</th>
-                  <th className="px-6 py-3 text-[10px] font-bold text-evofit-text-muted uppercase tracking-wider text-right">Total XP</th>
+                  <th className="px-6 py-3 text-[10px] font-bold text-evofit-text-muted uppercase tracking-wider text-right">Lifetime Performance</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-evofit-border">

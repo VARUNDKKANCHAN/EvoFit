@@ -27,8 +27,8 @@ def create_admin():
                 email="admin@evofit.com",
                 password_hash=hashed_pwd,
                 is_admin=True,
-                level=99,
-                xp=100000
+                level=0,
+                xp=0
             )
             db.add(new_admin)
             db.commit()

@@ -92,81 +92,84 @@ async def predict_exercise(file: UploadFile = File(...), current_user: models.Us
             db.add(session_row)
         
         db.commit()
-
-        # Achievement logic
-        new_badges = []
-        from sqlalchemy import func
-        for ex in result.get("exercise_breakdown", []):
-            label = ex.get("label")
-            reps = ex.get("rep_count", 0)
-            avg_conf = result.get("confidence", 0) * 100
-            
-            total_ever = db.query(func.sum(models.WorkoutSession.reps_actual)).filter(models.WorkoutSession.exercise == label, models.WorkoutSession.user_id == user_id).scalar() or 0
-            
-            # Badge 1: 500 Club
-            if total_ever >= 500:
-                badge = f"500 {label.capitalize()} Reps Club"
-                exists = db.query(models.Achievement).filter(models.Achievement.badge_name == badge, models.Achievement.user_id == user_id).first()
-                if not exists:
-                    new_achive = models.Achievement(
-                        badge_name=badge, 
-                        description=f"You've smashed 500 total reps of {label}!", 
-                        icon="star",
-                        user_id=user_id
-                    )
-                    db.add(new_achive)
-                    new_badges.append(badge)
-            
-            # Badge 2: Volume King (100+ reps in one session)
-            if reps >= 100:
-                badge = f"{label.capitalize()} Volume King"
-                exists = db.query(models.Achievement).filter(models.Achievement.badge_name == badge, models.Achievement.user_id == user_id).first()
-                if not exists:
-                    new_achive = models.Achievement(
-                        badge_name=badge, 
-                        description=f"Over 100 reps of {label} in a single session! Unstoppable.", 
-                        icon="flame",
-                        user_id=user_id
-                    )
-                    db.add(new_achive)
-                    new_badges.append(badge)
-
-            # Badge 3: Set Sniper (Form >= 95%)
-            if avg_conf >= 95.0 and reps >= 10:
-                badge = f"{label.capitalize()} Set Sniper"
-                exists = db.query(models.Achievement).filter(models.Achievement.badge_name == badge, models.Achievement.user_id == user_id).first()
-                if not exists:
-                    new_achive = models.Achievement(
-                        badge_name=badge, 
-                        description=f"Near perfect form on {label} for a full set. Flawless execution.", 
-                        icon="target",
-                        user_id=user_id
-                    )
-                    db.add(new_achive)
-                    new_badges.append(badge)
-            
-            # Badge 4: New Ground (First time)
-            session_count = db.query(models.WorkoutSession).filter(models.WorkoutSession.exercise == label, models.WorkoutSession.user_id == user_id).count()
-            if session_count == 1: # Only the one we just inserted
-                badge = f"New Ground: {label.capitalize()}"
-                exists = db.query(models.Achievement).filter(models.Achievement.badge_name == badge, models.Achievement.user_id == user_id).first()
-                if not exists:
-                    new_achive = models.Achievement(
-                        badge_name=badge, 
-                        description=f"Welcome to {label}. The journey of a thousand reps begins here.", 
-                        icon="pulse",
-                        user_id=user_id
-                    )
-                    db.add(new_achive)
-                    new_badges.append(badge)
         
-        db.commit()
+        # Achievement logic (skip for admins)
+        new_badges = []
+        if not current_user.is_admin:
+            from sqlalchemy import func
+            for ex in result.get("exercise_breakdown", []):
+                # ... [existing achievement logic] ...
+                label = ex.get("label")
+                reps = ex.get("rep_count", 0)
+                avg_conf = result.get("confidence", 0) * 100
+                
+                total_ever = db.query(func.sum(models.WorkoutSession.reps_actual)).filter(models.WorkoutSession.exercise == label, models.WorkoutSession.user_id == user_id).scalar() or 0
+                
+                # Badge 1: 500 Club
+                if total_ever >= 500:
+                    badge = f"500 {label.capitalize()} Reps Club"
+                    exists = db.query(models.Achievement).filter(models.Achievement.badge_name == badge, models.Achievement.user_id == user_id).first()
+                    if not exists:
+                        new_achive = models.Achievement(
+                            badge_name=badge, 
+                            description=f"You've smashed 500 total reps of {label}!", 
+                            icon="star",
+                            user_id=user_id
+                        )
+                        db.add(new_achive)
+                        new_badges.append(badge)
+                
+                # Badge 2: Volume King (100+ reps in one session)
+                if reps >= 100:
+                    badge = f"{label.capitalize()} Volume King"
+                    exists = db.query(models.Achievement).filter(models.Achievement.badge_name == badge, models.Achievement.user_id == user_id).first()
+                    if not exists:
+                        new_achive = models.Achievement(
+                            badge_name=badge, 
+                            description=f"Over 100 reps of {label} in a single session! Unstoppable.", 
+                            icon="flame",
+                            user_id=user_id
+                        )
+                        db.add(new_achive)
+                        new_badges.append(badge)
+
+                # Badge 3: Set Sniper (Form >= 95%)
+                if avg_conf >= 95.0 and reps >= 10:
+                    badge = f"{label.capitalize()} Set Sniper"
+                    exists = db.query(models.Achievement).filter(models.Achievement.badge_name == badge, models.Achievement.user_id == user_id).first()
+                    if not exists:
+                        new_achive = models.Achievement(
+                            badge_name=badge, 
+                            description=f"Near perfect form on {label} for a full set. Flawless execution.", 
+                            icon="target",
+                            user_id=user_id
+                        )
+                        db.add(new_achive)
+                        new_badges.append(badge)
+                
+                # Badge 4: New Ground (First time)
+                session_count = db.query(models.WorkoutSession).filter(models.WorkoutSession.exercise == label, models.WorkoutSession.user_id == user_id).count()
+                if session_count == 1: # Only the one we just inserted
+                    badge = f"New Ground: {label.capitalize()}"
+                    exists = db.query(models.Achievement).filter(models.Achievement.badge_name == badge, models.Achievement.user_id == user_id).first()
+                    if not exists:
+                        new_achive = models.Achievement(
+                            badge_name=badge, 
+                            description=f"Welcome to {label}. The journey of a thousand reps begins here.", 
+                            icon="pulse",
+                            user_id=user_id
+                        )
+                        db.add(new_achive)
+                        new_badges.append(badge)
+            
+            db.commit()
+        
         result["new_achievements"] = new_badges
 
-        # --- XP LOGIC ---
+        # --- XP LOGIC (skip for admins) ---
         user = db.query(models.User).filter(models.User.id == user_id).first()
         leveled_up = False
-        if user:
+        if user and not user.is_admin:
             gained_xp = 0
             for ex in result.get("exercise_breakdown", []):
                 reps = ex.get("rep_count", 0)
@@ -189,6 +192,9 @@ async def predict_exercise(file: UploadFile = File(...), current_user: models.Us
             db.commit()
             result["new_xp_total"] = user.xp
             result["leveled_up"] = leveled_up
+        elif user and user.is_admin:
+            result["new_xp_total"] = 0
+            result["leveled_up"] = False
 
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))
