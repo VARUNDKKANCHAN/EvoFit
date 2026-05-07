@@ -31,8 +31,10 @@ def admin_required(current_user: models.User = Depends(auth_service.get_current_
     return current_user
 
 @router.get("/stats")
-def get_admin_stats(db: Session = Depends(get_db), _ = Depends(admin_required)):
+def get_admin_stats(db: Session = Depends(get_db), current_user: models.User = Depends(admin_required)):
     """Fetch high-level platform metrics for the admin dashboard."""
+    print(f"[ADMIN] Stats requested by {current_user.username}")
+    
     total_users = db.query(models.User).count()
     active_users = db.query(models.User).filter(models.User.is_active == True).count()
     
@@ -44,22 +46,20 @@ def get_admin_stats(db: Session = Depends(get_db), _ = Depends(admin_required)):
     sessions_today = db.query(models.WorkoutSession).filter(models.WorkoutSession.date == today).count()
     
     # Platform-wide total volume (sum of reps)
-    total_reps = db.query(func.sum(models.WorkoutSession.reps_actual)).scalar() or 0
+    total_reps_raw = db.query(func.sum(models.WorkoutSession.reps_actual)).scalar()
+    total_reps = int(total_reps_raw) if total_reps_raw is not None else 0
     
     # Average form score across all users
-    avg_form = db.query(func.avg(models.WorkoutSession.form_score)).scalar() or 0.0
+    avg_form_raw = db.query(func.avg(models.WorkoutSession.form_score)).scalar()
+    avg_form = float(avg_form_raw) if avg_form_raw is not None else 0.0
 
-    # Total API Token Usage
-    total_token_uses = db.query(func.sum(models.SystemToken.use_count)).scalar() or 0
-    
     return {
         "total_users": total_users,
         "active_users": active_users,
         "total_sessions": total_sessions,
         "sessions_today": sessions_today,
-        "total_reps": int(total_reps),
-        "avg_form_score": round(float(avg_form), 2),
-        "total_api_uses": int(total_token_uses),
+        "total_reps": total_reps,
+        "avg_form_score": round(avg_form, 2),
         "total_rag_tokens": db.query(func.sum(models.User.rag_tokens_total)).scalar() or 0
     }
 
@@ -91,12 +91,14 @@ def list_users(
             id=u.id,
             username=u.username,
             email=u.email,
-            xp=u.xp,
-            level=u.level,
+            xp=u.xp or 0,
+            level=u.level or 1,
             created_at=u.created_at,
             is_active=u.is_active,
             is_admin=u.is_admin,
-            rag_tokens_total=u.rag_tokens_total,
+            rag_tokens_total=u.rag_tokens_total or 0,
+            rag_tokens_today=u.rag_tokens_today or 0,
+            rag_tokens_daily_limit=u.rag_tokens_daily_limit or 5000,
             full_name=profile.full_name if profile else None,
             age=profile.age if profile else None,
             weight_kg=profile.weight_kg if profile else None,
@@ -124,6 +126,22 @@ def update_user_status(
     db_user.is_active = is_active
     db.commit()
     return {"message": f"User status updated to {'active' if is_active else 'inactive'}"}
+
+@router.put("/users/{user_id}/token-limit")
+def update_user_token_limit(
+    user_id: int, 
+    payload: schemas.TokenLimitUpdate, 
+    db: Session = Depends(get_db), 
+    _ = Depends(admin_required)
+):
+    """Update the daily AI token limit for a user."""
+    db_user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    db_user.rag_tokens_daily_limit = payload.daily_limit
+    db.commit()
+    return {"message": f"Daily token limit for {db_user.username} set to {payload.daily_limit}"}
 
 @router.delete("/sessions/{session_id}")
 def delete_session(
@@ -199,48 +217,3 @@ def flush_system_cache(_ = Depends(admin_required)):
     # In a real app with Redis: redis_client.flushall()
     # For now, we just return a success message
     return {"message": "System cache flushed successfully"}
-
-@router.get("/tokens", response_model=List[schemas.SystemTokenResponse])
-def list_system_tokens(db: Session = Depends(get_db), _ = Depends(admin_required)):
-    """List all system API tokens."""
-    return db.query(models.SystemToken).all()
-
-@router.post("/tokens", response_model=schemas.SystemTokenResponse)
-def create_system_token(
-    payload: schemas.SystemTokenCreate, 
-    db: Session = Depends(get_db), 
-    admin: models.User = Depends(admin_required)
-):
-    """Generate a new secure API token for system access."""
-    # Generate a secure random token
-    raw_token = f"ef_{secrets.token_urlsafe(32)}"
-    
-    expires_at = None
-    if payload.expires_in_days:
-        expires_at = datetime.now() + timedelta(days=payload.expires_in_days)
-        
-    db_token = models.SystemToken(
-        name=payload.name,
-        token=raw_token,
-        created_by=admin.id,
-        expires_at=expires_at
-    )
-    db.add(db_token)
-    db.commit()
-    db.refresh(db_token)
-    return db_token
-
-@router.delete("/tokens/{token_id}")
-def revoke_system_token(
-    token_id: int, 
-    db: Session = Depends(get_db), 
-    _ = Depends(admin_required)
-):
-    """Revoke (deactivate) an API token."""
-    db_token = db.query(models.SystemToken).filter(models.SystemToken.id == token_id).first()
-    if not db_token:
-        raise HTTPException(status_code=404, detail="Token not found")
-    
-    db_token.is_active = False
-    db.commit()
-    return {"message": "Token revoked successfully"}

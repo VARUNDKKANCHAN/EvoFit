@@ -36,20 +36,12 @@ export const adminApi = {
     const response = await axios.get(`${API_URL}/system-status`, { headers: getAuthHeader() });
     return response.data;
   },
-  getTokens: async () => {
-    const response = await axios.get(`${API_URL}/tokens`, { headers: getAuthHeader() });
-    return response.data;
-  },
-  createToken: async (name, expiresInDays) => {
-    const response = await axios.post(`${API_URL}/tokens`, { name, expires_in_days: expiresInDays }, { headers: getAuthHeader() });
-    return response.data;
-  },
-  revokeToken: async (tokenId) => {
-    const response = await axios.delete(`${API_URL}/tokens/${tokenId}`, { headers: getAuthHeader() });
-    return response.data;
-  },
   flushCache: async () => {
     const response = await axios.post(`${API_URL}/system/flush-cache`, null, { headers: getAuthHeader() });
+    return response.data;
+  },
+  updateTokenLimit: async (userId, dailyLimit) => {
+    const response = await axios.put(`${API_URL}/users/${userId}/token-limit`, { daily_limit: dailyLimit }, { headers: getAuthHeader() });
     return response.data;
   }
 };

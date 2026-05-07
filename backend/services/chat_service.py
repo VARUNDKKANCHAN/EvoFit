@@ -178,24 +178,39 @@ class ChatService:
             5. Always maintain a motivational "coach" persona.
             """
 
+            # 4. Check Daily Limit and Reset if needed
+            from datetime import date
+            today = date.today()
+            user = db.query(User).filter(User.id == user_id).first()
+            
+            if user:
+                # Daily Reset Logic
+                if user.last_rag_use_date != today:
+                    user.rag_tokens_today = 0
+                    user.last_rag_use_date = today
+                    db.commit()
+                
+                # Limit Check
+                if user.rag_tokens_today >= user.rag_tokens_daily_limit:
+                    return f"Daily AI limit reached ({user.rag_tokens_daily_limit} tokens). Please try again tomorrow or contact an administrator to increase your limit."
+
             messages = [
                 SystemMessage(content=system_prompt),
                 HumanMessage(content=query)
             ]
 
-            # 4. Call Groq LLM
+            # 5. Call Groq LLM
             response = self.llm.invoke(messages)
             
-            # 5. Extract token usage and update user stats
+            # 6. Extract token usage and update user stats
             try:
                 usage = response.response_metadata.get("token_usage", {})
                 total_tokens = usage.get("total_tokens", 0)
                 
-                if total_tokens > 0:
-                    user = db.query(User).filter(User.id == user_id).first()
-                    if user:
-                        user.rag_tokens_total += total_tokens
-                        db.commit()
+                if total_tokens > 0 and user:
+                    user.rag_tokens_total += total_tokens
+                    user.rag_tokens_today += total_tokens
+                    db.commit()
             except Exception as e:
                 print(f"Error updating RAG token usage: {e}")
                 
