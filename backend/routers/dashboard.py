@@ -227,13 +227,13 @@ def get_dashboard_summary(
     
     streak = get_active_streak(db, user_id)
     if reps_week > 0 and user:
-        try:
-            prompt = f"User level {user.level}, {user.xp} XP, {streak} day streak, did {reps_week} reps this week with {avg_form}% form. Give a SINGLE short, punchy sentence of game-style motivation (e.g. 'Level {user.level} warrior! Your {avg_form}% form is carrying you to the next rank.'). Keep it under 15 words. No quotes, no intro."
-            msg = [SystemMessage(content="You are a fitness RPG game announcer."), HumanMessage(content=prompt)]
-            ai_insight = chat_service.llm.invoke(msg).content.strip().replace('"', '')
-            insights.append(ai_insight)
-        except:
-            insights.append(f"Level {user.level} warrior! Keep grinding that XP.")
+        # High-performance logic-based motivation (replaces slow synchronous AI)
+        if streak >= 3:
+            insights.append(f"Level {user.level} warrior! Your {streak}-day streak is legendary. Keep grinding!")
+        elif avg_form >= 90:
+            insights.append(f"Flawless technique! That {avg_form}% form is your greatest weapon.")
+        else:
+            insights.append(f"Level {user.level} Athlete! Gain more XP to reach the next rank.")
             
     if reps_week > 100:
         insights.append(f"Volume check: You've lifted {reps_week} reps this week. Keep up the momentum!")
@@ -299,11 +299,12 @@ def get_dashboard_summary(
         ) for row in pb_query
     ]
     # 9. Global Rank Calculation
-    # Admins do not compete
+    # Admins do not compete in the global leaderboard
     if user and user.is_admin:
-        global_rank = 0 # Or some indicator that they aren't ranked
+        global_rank = -1
     else:
         # Count how many non-admin users have higher Level, OR same Level but more XP
+        # This matches the standard competition ranking used in the Leaderboard
         higher_ranked_count = db.query(models.User).filter(
             models.User.is_admin == False,
             (

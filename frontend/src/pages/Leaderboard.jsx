@@ -91,7 +91,9 @@ export default function Leaderboard() {
             <div className="flex items-center gap-6 w-full md:w-auto">
               <div className="flex flex-col items-center justify-center px-6 border-r border-evofit-border">
                 <span className="text-xs font-semibold text-evofit-text-muted uppercase tracking-wider mb-1">Your Rank</span>
-                <span className="text-4xl font-bold text-evofit-purple-main">#{data?.current_user_rank > 0 ? data.current_user_rank : '—'}</span>
+                <span className="text-4xl font-bold text-evofit-purple-main">
+                  {data?.current_user_rank > 0 ? `#${data.current_user_rank}` : (data?.current_user_rank === -1 ? 'Admin' : '—')}
+                </span>
               </div>
               
               <div className="flex items-center gap-4 flex-1">
