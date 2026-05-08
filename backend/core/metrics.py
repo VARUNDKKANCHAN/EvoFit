@@ -24,6 +24,12 @@ class MetricsStore:
         with self.lock:
             self.failed_logins += 1
 
+    def reset(self):
+        with self.lock:
+            self.groq_latency_ms = 0.0
+            self.total_500_errors = 0
+            self.failed_logins = 0
+
     def get_metrics(self):
         with self.lock:
             return {

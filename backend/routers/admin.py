@@ -259,17 +259,20 @@ def flush_system_cache(
     db: Session = Depends(get_db),
     admin: models.User = Depends(admin_required)
 ):
-    """Simulate flushing system cache / temporary files."""
+    """Reset system metrics and log the audit event."""
+    from ..core.metrics import GLOBAL_METRICS
+    GLOBAL_METRICS.reset()
+    
     # Audit Log
     audit = models.AdminAuditLog(
         admin_id=admin.id,
         action="FLUSH_CACHE",
-        details="System cache flushed"
+        details="System metrics and in-memory cache reset"
     )
     db.add(audit)
     db.commit()
     
-    return {"message": "System cache flushed successfully"}
+    return {"message": "System metrics and cache flushed successfully"}
 
 @router.get("/audit-logs")
 def get_audit_logs(
