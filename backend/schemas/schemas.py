@@ -100,6 +100,7 @@ class UserResponse(UserBase):
     xp: int
     level: int
     rag_tokens_total: int
+    rag_token_limit: int
 
     class Config:
         from_attributes = True
@@ -296,6 +297,7 @@ class MeResponse(BaseModel):
     is_active: bool
     is_admin: bool
     rag_tokens_total: int
+    rag_token_limit: int
     # Profile fields
     full_name: Optional[str] = None
     age: Optional[int] = None
@@ -325,22 +327,3 @@ class LeaderboardResponse(BaseModel):
 class ActivityHeatmapResponse(BaseModel):
     activity: Dict[str, int] # Date string -> Intensity (e.g. rep count)
 
-# --- SYSTEM TOKEN SCHEMAS ---
-
-class SystemTokenCreate(BaseModel):
-    name: str
-    expires_in_days: Optional[int] = 30
-
-class SystemTokenResponse(BaseModel):
-    id: int
-    name: str
-    token: str
-    created_at: datetime
-    expires_at: Optional[datetime] = None
-    last_used_at: Optional[datetime] = None
-    is_active: bool
-    use_count: int
-    created_by: int
-
-    class Config:
-        from_attributes = True

@@ -150,6 +150,15 @@ class ChatService:
         """Generate a personalized RAG response."""
         db = SessionLocal()
         try:
+            # 0. Check token limit
+            user = db.query(User).filter(User.id == user_id).first()
+            if not user:
+                return "User not found."
+            
+            limit = user.rag_token_limit if user.rag_token_limit is not None else 50000
+            if user.rag_tokens_total and user.rag_tokens_total >= limit:
+                return f"You have reached your AI token limit ({limit} tokens). Please contact an administrator to increase your limit."
+
             # 1. Retrieve knowledge context from ChromaDB
             docs = self.vector_store.similarity_search(query, k=3)
             kb_context = "\n".join([d.page_content for d in docs])

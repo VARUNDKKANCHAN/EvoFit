@@ -19,10 +19,8 @@ const AdminPanel = () => {
   const [activeTab, setActiveTab] = useState('system'); // Default to System now
   const [systemStatus, setSystemStatus] = useState(null);
   const [statusHistory, setStatusHistory] = useState([]);
-  const [tokens, setTokens] = useState([]);
-  const [tokenLoading, setTokenLoading] = useState(false);
-  const [newTokenName, setNewTokenName] = useState('');
   const [isFlushing, setIsFlushing] = useState(false);
+  const [editingLimits, setEditingLimits] = useState({});
 
   const pollingRef = useRef(null);
 
@@ -30,7 +28,6 @@ const AdminPanel = () => {
   useEffect(() => {
     if (user?.isAdmin) {
       fetchData();
-      fetchTokens();
       startPolling();
     }
     return () => stopPolling();
@@ -102,22 +99,9 @@ const AdminPanel = () => {
     }
   };
 
-  const fetchTokens = async () => {
-    try {
-      setTokenLoading(true);
-      const data = await withRetry(() => adminApi.getTokens());
-      setTokens(data);
-    } catch (error) {
-      const detail = error.response?.data?.detail || error.message || 'Unknown network error';
-      notify('error', 'Token Error', `Could not load API tokens: ${detail}`);
-    } finally {
-      setTokenLoading(false);
-    }
-  };
 
   const handleManualRefresh = () => {
     fetchData();
-    fetchTokens();
     fetchSystemStatus();
     notify('info', 'Refreshing', 'System data is being re-synced...');
   };
@@ -149,27 +133,31 @@ const AdminPanel = () => {
     }
   };
 
-  const handleCreateToken = async () => {
-    if (!newTokenName) return;
+  const handleUpdateLimit = async (userId) => {
     try {
-      const token = await adminApi.createToken(newTokenName, 30);
-      setTokens([...tokens, token]);
-      setNewTokenName('');
-      notify('success', 'Token Created', 'New API token has been generated.');
+      const newLimit = parseInt(editingLimits[userId], 10);
+      if (isNaN(newLimit) || newLimit < 0) {
+         notify('error', 'Invalid Input', 'Please enter a valid positive number for the token limit.');
+         return;
+      }
+      const response = await adminApi.updateUserTokenLimit(userId, newLimit);
+      setUsers(users.map(u => 
+        u.id === userId ? { ...u, rag_token_limit: response.rag_token_limit } : u
+      ));
+      
+      // Clear editing state for this user
+      setEditingLimits(prev => {
+        const next = { ...prev };
+        delete next[userId];
+        return next;
+      });
+      
+      notify('success', 'Limit Updated', `AI token limit successfully updated to ${newLimit.toLocaleString()}.`);
     } catch (error) {
-      notify('error', 'Action Failed', 'Could not create token.');
+      notify('error', 'Update Failed', error.response?.data?.detail || 'Could not update token limit.');
     }
   };
 
-  const handleRevokeToken = async (id) => {
-    try {
-      await adminApi.revokeToken(id);
-      setTokens(tokens.map(t => t.id === id ? { ...t, is_active: false } : t));
-      notify('success', 'Token Revoked', 'API token is no longer active.');
-    } catch (error) {
-      notify('error', 'Action Failed', 'Could not revoke token.');
-    }
-  };
 
   const formatUptime = (seconds) => {
     if (!seconds) return '0s';
@@ -222,7 +210,7 @@ const AdminPanel = () => {
           </button>
 
           <div className="flex items-center gap-2 bg-evofit-bg-secondary/50 backdrop-blur-md p-1.5 rounded-2xl border border-evofit-border">
-            {['system', 'tokens', 'users'].map((tab) => (
+            {['system', 'ai usage', 'users'].map((tab) => (
               <button 
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -369,10 +357,11 @@ const AdminPanel = () => {
           </motion.div>
         )}
 
-        {/* ── TOKENS VIEW ───────────────────────────────── */}
-        {activeTab === 'tokens' && (
+
+        {/* ── AI USAGE VIEW ───────────────────────────────── */}
+        {activeTab === 'ai usage' && (
           <motion.div 
-            key="tokens"
+            key="ai usage"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
@@ -381,133 +370,108 @@ const AdminPanel = () => {
             <div className="bg-evofit-bg-card border border-evofit-border rounded-3xl p-8">
                <div className="flex flex-col md:flex-row items-start justify-between gap-6 mb-8">
                   <div>
-                    <h3 className="text-lg font-bold text-evofit-text-primary m-0">API Token Management</h3>
-                    <p className="text-evofit-text-muted text-xs mt-1">Manage secure keys for system integrations and AI model access.</p>
+                    <h3 className="text-lg font-bold text-evofit-text-primary m-0">AI Usage & Quota Management</h3>
+                    <p className="text-evofit-text-muted text-xs mt-1">Monitor Groq LLM token consumption and enforce limits per user.</p>
                   </div>
                   <div className="bg-evofit-purple-main/10 border border-evofit-purple-main/20 px-4 py-3 rounded-2xl">
-                     <p className="text-[10px] font-black text-evofit-purple-light uppercase tracking-widest m-0 mb-1">Lifetime Token Usage</p>
-                     <p className="text-xl font-black text-evofit-text-primary m-0">{(stats?.total_api_uses || 0).toLocaleString()}</p>
+                     <p className="text-[10px] font-black text-evofit-purple-light uppercase tracking-widest m-0 mb-1">Global AI Token Usage</p>
+                     <p className="text-xl font-black text-evofit-text-primary m-0">{(stats?.total_rag_tokens || 0).toLocaleString()}</p>
                   </div>
-               </div>
-
-               <div className="flex gap-4 mb-8">
-                  <input 
-                    type="text" 
-                    placeholder="Identify token purpose (e.g. Production Mobile App)"
-                    value={newTokenName}
-                    onChange={(e) => setNewTokenName(e.target.value)}
-                    className="flex-1 bg-evofit-bg-secondary border border-evofit-border rounded-2xl px-5 py-3 text-sm text-evofit-text-primary focus:outline-none focus:ring-4 focus:ring-evofit-purple-main/10 transition-all"
-                  />
-                  <button 
-                    onClick={handleCreateToken}
-                    disabled={!newTokenName}
-                    className="px-8 py-3 rounded-2xl bg-evofit-purple-main text-white text-xs font-black uppercase tracking-widest hover:bg-evofit-purple-dark transition-all shadow-xl shadow-evofit-purple-main/20 disabled:opacity-50"
-                  >
-                    Generate Key
-                  </button>
                </div>
 
                <div className="overflow-x-auto">
                  <table className="w-full text-left border-collapse">
                    <thead>
                      <tr className="text-[11px] font-black text-evofit-text-muted uppercase tracking-widest border-b border-evofit-border">
-                        <th className="pb-4 px-2">Identifier</th>
-                        <th className="pb-4 px-2">Security Key</th>
-                        <th className="pb-4 px-2">Utilization</th>
-                        <th className="pb-4 px-2 status">Status</th>
-                        <th className="pb-4 px-2 text-right">Actions</th>
+                        <th className="pb-4 px-2">User Profile</th>
+                        <th className="pb-4 px-2">Token Consumption</th>
+                        <th className="pb-4 px-2 w-1/3">Limit Progress</th>
+                        <th className="pb-4 px-2 text-right">Edit Quota Limit</th>
                      </tr>
                    </thead>
                    <tbody className="divide-y divide-evofit-border">
-                     {tokens.map(t => (
-                       <tr key={t.id} className={`group ${!t.is_active ? 'opacity-40 grayscale' : ''}`}>
-                         <td className="py-5 px-2">
-                            <p className="text-sm font-bold text-evofit-text-primary m-0">{t.name}</p>
-                            <p className="text-[10px] text-evofit-text-muted m-0">Created {new Date(t.created_at).toLocaleDateString()}</p>
-                         </td>
-                         <td className="py-5 px-2">
-                            <div className="flex items-center gap-2">
-                               <code className="bg-evofit-bg-secondary px-3 py-1.5 rounded-lg text-[10px] text-evofit-purple-light font-mono select-all border border-evofit-border">
-                                 {t.is_active ? t.token : 'REVOKED'}
-                               </code>
-                            </div>
-                         </td>
-                         <td className="py-5 px-2">
-                            <span className="text-xs font-black text-evofit-text-primary">{t.use_count} requests</span>
-                         </td>
-                         <td className="py-5 px-2">
-                            <span className={`text-[9px] font-black px-2.5 py-1 rounded-full ${t.is_active ? 'bg-green-500/10 text-green-500 border border-green-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'}`}>
-                               {t.is_active ? 'ACTIVE' : 'REVOKED'}
-                            </span>
-                         </td>
-                         <td className="py-5 px-2 text-right">
-                           {t.is_active && (
-                             <button 
-                                onClick={() => handleRevokeToken(t.id)}
-                                className="p-2 rounded-xl hover:bg-red-500/10 text-evofit-text-muted hover:text-red-500 transition-all"
-                             >
-                               <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                                 <path d="M18.36 6.64a9 9 0 1 1-12.73 0M12 2v10" />
-                               </svg>
-                             </button>
-                           )}
-                         </td>
-                       </tr>
-                     ))}
+                     {users.map(u => {
+                       const consumed = u.rag_tokens_total || 0;
+                       const limit = u.rag_token_limit || 50000;
+                       const pct = Math.min(100, (consumed / limit) * 100);
+                       const isNearLimit = pct > 85;
+                       const isEditing = editingLimits[u.id] !== undefined;
+                       
+                       return (
+                         <tr key={u.id} className="group">
+                           <td className="py-5 px-2">
+                              <div className="flex items-center gap-3">
+                                 <div className="w-8 h-8 rounded-xl bg-evofit-bg-secondary flex items-center justify-center font-black text-evofit-text-primary border border-evofit-border">
+                                    {u.username.charAt(0).toUpperCase()}
+                                 </div>
+                                 <div>
+                                    <p className="text-sm font-bold text-evofit-text-primary m-0">@{u.username}</p>
+                                    <p className="text-[10px] text-evofit-text-muted m-0">{u.email}</p>
+                                 </div>
+                              </div>
+                           </td>
+                           <td className="py-5 px-2">
+                              <p className="text-xs font-black text-evofit-text-primary m-0">{consumed.toLocaleString()} <span className="text-[9px] text-evofit-text-muted uppercase">tokens</span></p>
+                           </td>
+                           <td className="py-5 px-2 pr-8">
+                              <div className="space-y-1.5">
+                                 <div className="flex justify-between text-[9px] font-black uppercase tracking-widest text-evofit-text-muted">
+                                    <span>{pct.toFixed(1)}% Used</span>
+                                    <span className={isNearLimit ? 'text-red-500' : 'text-evofit-purple-light'}>{limit.toLocaleString()} MAX</span>
+                                 </div>
+                                 <div className="h-2 bg-evofit-bg-secondary rounded-full overflow-hidden border border-evofit-border">
+                                   <div 
+                                     className={`h-full ${isNearLimit ? 'bg-red-500' : 'bg-evofit-purple-main'}`}
+                                     style={{ width: `${pct}%` }}
+                                   />
+                                 </div>
+                              </div>
+                           </td>
+                           <td className="py-5 px-2 text-right">
+                             {isEditing ? (
+                               <div className="flex items-center justify-end gap-2">
+                                 <input 
+                                   type="number"
+                                   min="0"
+                                   value={editingLimits[u.id]}
+                                   onChange={(e) => setEditingLimits({...editingLimits, [u.id]: e.target.value})}
+                                   className="w-24 bg-evofit-bg-secondary border border-evofit-border rounded-lg px-2 py-1 text-xs text-evofit-text-primary focus:outline-none"
+                                 />
+                                 <button 
+                                   onClick={() => handleUpdateLimit(u.id)}
+                                   className="p-1.5 rounded-lg bg-green-500/10 text-green-500 hover:bg-green-500 hover:text-white transition-all"
+                                 >
+                                   <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                   </svg>
+                                 </button>
+                                 <button 
+                                   onClick={() => {
+                                     const next = {...editingLimits};
+                                     delete next[u.id];
+                                     setEditingLimits(next);
+                                   }}
+                                   className="p-1.5 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all"
+                                 >
+                                   <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                   </svg>
+                                 </button>
+                               </div>
+                             ) : (
+                               <button 
+                                 onClick={() => setEditingLimits({...editingLimits, [u.id]: limit})}
+                                 className="px-4 py-2 rounded-xl bg-evofit-bg-secondary border border-evofit-border text-[10px] font-black uppercase tracking-widest text-evofit-text-muted hover:text-evofit-purple-light hover:border-evofit-purple-main/30 transition-all"
+                               >
+                                 Edit Limit
+                               </button>
+                             )}
+                           </td>
+                         </tr>
+                       );
+                     })}
                    </tbody>
                  </table>
-               </div>
-
-               {/* New Section: User AI Consumption Breakdown */}
-               <div className="mt-12 pt-8 border-t border-evofit-border">
-                  <div className="flex items-center gap-3 mb-8">
-                    <div className="p-2.5 rounded-2xl bg-evofit-purple-main/10 text-evofit-purple-light border border-evofit-purple-main/20">
-                      <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-bold text-evofit-text-primary m-0">User AI Consumption (Groq)</h3>
-                      <p className="text-evofit-text-muted text-xs m-0 mt-0.5">Real-time breakdown of RAG tokens consumed by individual users.</p>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {users
-                      .filter(u => (u.rag_tokens_total || 0) > 0)
-                      .sort((a, b) => b.rag_tokens_total - a.rag_tokens_total)
-                      .slice(0, 6)
-                      .map(u => (
-                      <div key={u.id} className="p-5 rounded-3xl bg-evofit-bg-secondary/50 border border-evofit-border flex items-center justify-between group hover:border-evofit-purple-main/30 transition-all hover:bg-evofit-bg-secondary">
-                        <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-2xl bg-evofit-bg-primary flex items-center justify-center text-xs font-black text-evofit-text-muted border border-evofit-border group-hover:text-evofit-purple-light transition-colors">
-                            {u.username.charAt(0).toUpperCase()}
-                          </div>
-                          <div>
-                            <p className="text-sm font-bold text-evofit-text-primary m-0">@{u.username}</p>
-                            <p className="text-[11px] font-black text-evofit-purple-light m-0">{(u.rag_tokens_total || 0).toLocaleString()} <span className="text-[9px] text-evofit-text-muted uppercase tracking-tighter">Tokens</span></p>
-                          </div>
-                        </div>
-                        <div className="h-1.5 w-16 bg-evofit-bg-primary rounded-full overflow-hidden border border-evofit-border">
-                          <motion.div 
-                            className="h-full bg-gradient-to-r from-evofit-purple-main to-evofit-purple-light"
-                            initial={{ width: 0 }}
-                            animate={{ width: `${Math.min(100, ((u.rag_tokens_total || 0) / (stats?.total_rag_tokens || 1)) * 100)}%` }}
-                            transition={{ duration: 1, ease: "easeOut" }}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                    {users.filter(u => (u.rag_tokens_total || 0) > 0).length === 0 && (
-                      <div className="col-span-full py-8 text-center bg-evofit-bg-secondary/30 rounded-3xl border border-dashed border-evofit-border">
-                         <p className="text-xs text-evofit-text-muted m-0">No AI token usage recorded yet.</p>
-                      </div>
-                    )}
-                  </div>
-                  
-                  {users.filter(u => (u.rag_tokens_total || 0) > 0).length > 6 && (
-                    <p className="text-[10px] text-evofit-text-muted mt-6 text-center font-bold uppercase tracking-widest opacity-60">Showing Top AI Consumers • View full list in Users tab</p>
-                  )}
                </div>
             </div>
           </motion.div>
