@@ -57,10 +57,20 @@ export const adminApi = {
     return response.data;
   },
   getSystemStatus: async () => {
-    const response = await axios.get(`${API_URL}/system-status`, { headers: getAuthHeader() });
-    return response.data;
+    return withRetry(async () => {
+      const response = await axios.get(`${API_URL}/system-status`, { headers: getAuthHeader() });
+      return response.data;
+    });
   },
-
+  getAuditLogs: async (params = {}) => {
+    return withRetry(async () => {
+      const response = await axios.get(`${API_URL}/audit-logs`, { 
+        headers: getAuthHeader(),
+        params
+      });
+      return response.data;
+    });
+  },
   flushCache: async () => {
     const response = await axios.post(`${API_URL}/system/flush-cache`, null, { headers: getAuthHeader() });
     return response.data;

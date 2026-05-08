@@ -81,9 +81,19 @@ export const AIUsageTab = React.memo(({ stats }) => {
                   className="w-full bg-evofit-bg-secondary border border-evofit-border rounded-2xl py-2 pl-12 pr-4 text-sm text-evofit-text-primary focus:outline-none focus:ring-2 focus:ring-evofit-purple-main/20"
                 />
               </div>
-              <div className="bg-evofit-purple-main/10 border border-evofit-purple-main/20 px-4 py-2 rounded-2xl whitespace-nowrap">
-                 <p className="text-[10px] font-black text-evofit-purple-light uppercase tracking-widest m-0 mb-1">Global Usage</p>
-                 <p className="text-xl font-black text-evofit-text-primary m-0">{(stats?.total_rag_tokens || 0).toLocaleString()}</p>
+              <div className="flex gap-4">
+                <div className="bg-evofit-bg-secondary border border-evofit-border px-4 py-2 rounded-2xl whitespace-nowrap">
+                   <p className="text-[10px] font-black text-evofit-text-muted uppercase tracking-widest m-0 mb-1">API Latency</p>
+                   <p className="text-xl font-black text-evofit-text-primary m-0">{stats?.groq_latency_ms || 0}<span className="text-[10px] text-evofit-text-muted ml-1">ms</span></p>
+                </div>
+                <div className="bg-evofit-bg-secondary border border-evofit-border px-4 py-2 rounded-2xl whitespace-nowrap">
+                   <p className="text-[10px] font-black text-evofit-text-muted uppercase tracking-widest m-0 mb-1">Est. Cost</p>
+                   <p className="text-xl font-black text-evofit-text-primary m-0">${((stats?.total_rag_tokens || 0) * 0.0002 / 1000).toFixed(4)}</p>
+                </div>
+                <div className="bg-evofit-purple-main/10 border border-evofit-purple-main/20 px-4 py-2 rounded-2xl whitespace-nowrap">
+                   <p className="text-[10px] font-black text-evofit-purple-light uppercase tracking-widest m-0 mb-1">Global Tokens</p>
+                   <p className="text-xl font-black text-evofit-purple-light m-0">{(stats?.total_rag_tokens || 0).toLocaleString()}</p>
+                </div>
               </div>
             </div>
          </div>

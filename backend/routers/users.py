@@ -4,6 +4,8 @@ from ..database.database import get_db
 from ..database import models
 from ..schemas import schemas
 from ..services import auth_service
+from ..core.metrics import GLOBAL_METRICS
+from sqlalchemy.sql import func
 
 router = APIRouter(
     prefix="/users",
@@ -49,6 +51,7 @@ def login_for_access_token(user_credentials: schemas.UserLogin, db: Session = De
     user = db.query(models.User).filter(models.User.username == user_credentials.username).first()
 
     if not user or not auth_service.verify_password(user_credentials.password, user.password_hash):
+        GLOBAL_METRICS.increment_failed_login()
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid username or password"
@@ -59,6 +62,10 @@ def login_for_access_token(user_credentials: schemas.UserLogin, db: Session = De
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Account is deactivated"
         )
+
+    # Update last login time
+    user.last_login = func.now()
+    db.commit()
 
     access_token = auth_service.create_access_token(data={"sub": user.username})
     return {"access_token": access_token, "token_type": "bearer"}

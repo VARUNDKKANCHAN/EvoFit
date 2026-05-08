@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from backend.routers import predict, targets, users, dashboard, achievements, sessions, chat, target_analysis, activity_heatmap, admin
 from backend.database.database import engine, Base
@@ -24,6 +24,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from backend.core.metrics import GLOBAL_METRICS
+
+@app.middleware("http")
+async def track_errors(request: Request, call_next):
+    try:
+        response = await call_next(request)
+        if response.status_code >= 500:
+            GLOBAL_METRICS.increment_error()
+        return response
+    except Exception as e:
+        GLOBAL_METRICS.increment_error()
+        raise e
 
 # Create all database tables on startup if they don't exist
 @app.on_event("startup")

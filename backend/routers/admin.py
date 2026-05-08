@@ -57,6 +57,22 @@ def get_admin_stats(db: Session = Depends(get_db), current_user: models.User = D
     total_rag_raw = db.query(func.sum(models.User.rag_tokens_total)).scalar()
     total_rag_tokens = int(total_rag_raw) if total_rag_raw is not None else 0
     
+    # Advanced Analytics
+    from ..core.metrics import GLOBAL_METRICS
+    twenty_four_hours_ago = datetime.now() - timedelta(days=1)
+    dau = db.query(models.User).filter(models.User.last_login >= twenty_four_hours_ago).count()
+    
+    thirty_days_ago = datetime.now() - timedelta(days=30)
+    mau = db.query(models.User).filter(models.User.last_login >= thirty_days_ago).count()
+    
+    try:
+        db_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "evofit.db")
+        db_size_mb = round(os.path.getsize(db_path) / (1024 * 1024), 2)
+    except Exception:
+        db_size_mb = 0.0
+        
+    metrics = GLOBAL_METRICS.get_metrics()
+
     return {
         "total_users": total_users,
         "active_users": active_users,
@@ -64,7 +80,13 @@ def get_admin_stats(db: Session = Depends(get_db), current_user: models.User = D
         "sessions_today": sessions_today,
         "total_reps": total_reps,
         "avg_form_score": round(avg_form, 2),
-        "total_rag_tokens": total_rag_tokens
+        "total_rag_tokens": total_rag_tokens,
+        "dau": dau,
+        "mau": mau,
+        "db_size_mb": db_size_mb,
+        "groq_latency_ms": metrics["groq_latency_ms"],
+        "total_500_errors": metrics["total_500_errors"],
+        "failed_logins": metrics["failed_logins"]
     }
 
 @router.get("/users", response_model=List[schemas.MeResponse])
@@ -127,6 +149,15 @@ def update_user_status(
         raise HTTPException(status_code=404, detail="User not found")
     
     db_user.is_active = is_active
+    
+    # Audit Log
+    audit = models.AdminAuditLog(
+        admin_id=admin.id,
+        action="DEACTIVATE_USER" if not is_active else "ACTIVATE_USER",
+        details=f"Status of user '{db_user.username}' (ID: {user_id}) set to {is_active}"
+    )
+    db.add(audit)
+    
     db.commit()
     return {"message": f"User status updated to {'active' if is_active else 'inactive'}"}
 
@@ -143,8 +174,17 @@ def update_user_token_limit(
         raise HTTPException(status_code=404, detail="User not found")
     
     db_user.rag_token_limit = limit
+    
+    # Audit Log
+    audit = models.AdminAuditLog(
+        admin_id=admin.id,
+        action="UPDATE_TOKEN_LIMIT",
+        details=f"Token limit of user '{db_user.username}' (ID: {user_id}) updated to {limit}"
+    )
+    db.add(audit)
+    
     db.commit()
-    return {"message": "User token limit updated successfully", "rag_token_limit": limit}
+    return {"message": f"Token limit updated to {limit}", "rag_token_limit": limit}
 
 @router.delete("/sessions/{session_id}")
 def delete_session(
@@ -215,8 +255,42 @@ def get_system_status(db: Session = Depends(get_db), _ = Depends(admin_required)
     }
 
 @router.post("/system/flush-cache")
-def flush_system_cache(_ = Depends(admin_required)):
+def flush_system_cache(
+    db: Session = Depends(get_db),
+    admin: models.User = Depends(admin_required)
+):
     """Simulate flushing system cache / temporary files."""
-    # In a real app with Redis: redis_client.flushall()
-    # For now, we just return a success message
+    # Audit Log
+    audit = models.AdminAuditLog(
+        admin_id=admin.id,
+        action="FLUSH_CACHE",
+        details="System cache flushed"
+    )
+    db.add(audit)
+    db.commit()
+    
     return {"message": "System cache flushed successfully"}
+
+@router.get("/audit-logs")
+def get_audit_logs(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    admin: models.User = Depends(admin_required)
+):
+    """Fetch recent admin audit logs."""
+    logs = db.query(models.AdminAuditLog)\
+             .options(joinedload(models.AdminAuditLog.admin))\
+             .order_by(models.AdminAuditLog.timestamp.desc())\
+             .offset(skip).limit(limit).all()
+             
+    results = []
+    for log in logs:
+        results.append({
+            "id": log.id,
+            "admin_username": log.admin.username if log.admin else "Unknown",
+            "action": log.action,
+            "details": log.details,
+            "timestamp": log.timestamp.isoformat() if log.timestamp else None
+        })
+    return results

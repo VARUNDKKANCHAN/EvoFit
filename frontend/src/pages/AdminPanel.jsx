@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext';
 import { SystemTab } from '../components/admin/SystemTab';
 import { UsersTab } from '../components/admin/UsersTab';
 import { AIUsageTab } from '../components/admin/AIUsageTab';
+import { AuditLogTab } from '../components/admin/AuditLogTab';
 
 const AdminPanel = () => {
   const { user, loading: authLoading } = useAuth();
@@ -119,7 +120,7 @@ const AdminPanel = () => {
           </button>
 
           <div className="flex items-center gap-2 bg-evofit-bg-secondary/50 backdrop-blur-md p-1.5 rounded-2xl border border-evofit-border">
-            {['system', 'ai usage', 'users'].map((tab) => (
+            {['system', 'ai usage', 'users', 'security'].map((tab) => (
               <button 
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -136,6 +137,7 @@ const AdminPanel = () => {
         {activeTab === 'system' && <SystemTab stats={stats} systemStatus={systemStatus} statusHistory={statusHistory} />}
         {activeTab === 'ai usage' && <AIUsageTab stats={stats} />}
         {activeTab === 'users' && <UsersTab />}
+        {activeTab === 'security' && <AuditLogTab />}
       </AnimatePresence>
     </div>
   );

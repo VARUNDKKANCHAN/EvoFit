@@ -1,4 +1,5 @@
 import os
+import time
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
 from langchain_huggingface import HuggingFaceEmbeddings
@@ -8,6 +9,7 @@ from langchain_core.messages import SystemMessage, HumanMessage
 from sqlalchemy.orm import Session
 from backend.database.models import WorkoutSession, User, UserProfile, BodyMetric
 from backend.database.database import SessionLocal
+from backend.core.metrics import GLOBAL_METRICS
 
 load_dotenv()
 
@@ -193,7 +195,10 @@ class ChatService:
             ]
 
             # 4. Call Groq LLM
+            start_time = time.time()
             response = self.llm.invoke(messages)
+            latency = (time.time() - start_time) * 1000
+            GLOBAL_METRICS.update_latency(latency)
             
             # 5. Extract token usage and update user stats
             try:

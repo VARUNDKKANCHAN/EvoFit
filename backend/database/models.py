@@ -16,6 +16,7 @@ class User(Base):
     level = Column(Integer, default=1)
     rag_tokens_total = Column(Integer, default=0)
     rag_token_limit = Column(Integer, default=50000)
+    last_login = Column(DateTime(timezone=True), nullable=True)
 
     # Relationships
     profile = relationship("UserProfile", back_populates="user", uselist=False)
@@ -88,3 +89,13 @@ class BodyMetric(Base):
 
     user = relationship("User", back_populates="metrics")
 
+class AdminAuditLog(Base):
+    """Tracks administrative actions for security auditing"""
+    __tablename__ = "admin_audit_logs"
+    id = Column(Integer, primary_key=True, index=True)
+    admin_id = Column(Integer, ForeignKey("users.id"))
+    action = Column(String, nullable=False)
+    details = Column(String, nullable=True)
+    timestamp = Column(DateTime(timezone=True), server_default=func.now())
+    
+    admin = relationship("User", foreign_keys=[admin_id])

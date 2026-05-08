@@ -140,16 +140,28 @@ export const SystemTab = React.memo(({ stats, systemStatus, statusHistory }) => 
                  <p className="text-[10px] font-black text-evofit-text-muted uppercase tracking-widest m-0">Platform Statistics</p>
                  <div className="grid grid-cols-2 gap-4">
                     <div className="p-3 rounded-xl bg-evofit-bg-secondary/50 border border-evofit-border">
-                       <p className="text-[9px] font-bold text-evofit-text-muted m-0">Active Users</p>
-                       <p className="text-lg font-black text-evofit-text-primary m-0">{stats?.active_users || 0}</p>
+                       <p className="text-[9px] font-bold text-evofit-text-muted m-0">DAU / MAU</p>
+                       <p className="text-lg font-black text-evofit-text-primary m-0">{stats?.dau || 0} / {stats?.mau || 0}</p>
                     </div>
                     <div className="p-3 rounded-xl bg-evofit-bg-secondary/50 border border-evofit-border">
                        <p className="text-[9px] font-bold text-evofit-text-muted m-0">Total Sessions</p>
                        <p className="text-lg font-black text-evofit-text-primary m-0">{stats?.total_sessions || 0}</p>
                     </div>
-                    <div className="p-3 rounded-xl bg-evofit-bg-secondary/50 border border-evofit-border col-span-2">
-                       <p className="text-[9px] font-bold text-evofit-text-muted m-0">Global AI Token Usage (Groq)</p>
-                       <p className="text-lg font-black text-evofit-purple-light m-0">{(stats?.total_rag_tokens || 0).toLocaleString()}</p>
+                    <div className="p-3 rounded-xl bg-evofit-bg-secondary/50 border border-evofit-border">
+                       <p className="text-[9px] font-bold text-evofit-text-muted m-0">API 500 Errors</p>
+                       <p className={`text-lg font-black m-0 ${(stats?.total_500_errors || 0) > 0 ? 'text-red-500' : 'text-evofit-text-primary'}`}>{stats?.total_500_errors || 0}</p>
+                    </div>
+                    <div className="p-3 rounded-xl bg-evofit-bg-secondary/50 border border-evofit-border">
+                       <p className="text-[9px] font-bold text-evofit-text-muted m-0">Failed Logins</p>
+                       <p className={`text-lg font-black m-0 ${(stats?.failed_logins || 0) > 10 ? 'text-yellow-500' : 'text-evofit-text-primary'}`}>{stats?.failed_logins || 0}</p>
+                    </div>
+                    <div className="p-3 rounded-xl bg-evofit-bg-secondary/50 border border-evofit-border">
+                       <p className="text-[9px] font-bold text-evofit-text-muted m-0">Avg ML Confidence</p>
+                       <p className="text-lg font-black text-evofit-text-primary m-0">{stats?.avg_form_score ? stats.avg_form_score.toFixed(1) : 0}%</p>
+                    </div>
+                    <div className="p-3 rounded-xl bg-evofit-bg-secondary/50 border border-evofit-border">
+                       <p className="text-[9px] font-bold text-evofit-text-muted m-0">Database Size</p>
+                       <p className="text-lg font-black text-evofit-text-primary m-0">{stats?.db_size_mb || 0} MB</p>
                     </div>
                  </div>
               </div>
