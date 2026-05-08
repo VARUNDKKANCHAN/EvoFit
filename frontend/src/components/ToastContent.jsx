@@ -123,8 +123,9 @@ const ToastContent = ({ type = 'info', title, subtitle, closeToast }) => {
         onClick={closeToast}
         style={{
           flexShrink: 0,
-          padding: 6,
-          borderRadius: 8,
+          padding: '8px',
+          marginRight: '-4px',
+          borderRadius: '10px',
           border: 'none',
           background: 'transparent',
           cursor: 'pointer',
@@ -132,11 +133,11 @@ const ToastContent = ({ type = 'info', title, subtitle, closeToast }) => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          opacity: 0.55,
-          transition: 'opacity 0.15s, background 0.15s',
+          opacity: 0.8,
+          transition: 'all 0.15s ease',
         }}
-        onMouseEnter={e => { e.currentTarget.style.opacity = 1; e.currentTarget.style.background = 'var(--bg-primary)'; }}
-        onMouseLeave={e => { e.currentTarget.style.opacity = 0.55; e.currentTarget.style.background = 'transparent'; }}
+        onMouseEnter={e => { e.currentTarget.style.opacity = 1; e.currentTarget.style.background = 'var(--bg-primary)'; e.currentTarget.style.color = 'var(--text-primary)'; }}
+        onMouseLeave={e => { e.currentTarget.style.opacity = 0.8; e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-muted)'; }}
         aria-label="Dismiss notification"
       >
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"

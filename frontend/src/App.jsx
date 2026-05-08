@@ -729,16 +729,17 @@ export default function App() {
     <Router>
       <AppShell />
       <ToastContainer
-        position="top-right"
-        autoClose={4000}
+        position="bottom-right"
+        autoClose={2500}
         hideProgressBar={true}
         newestOnTop={true}
-        closeOnClick={false}
+        closeOnClick={true}
         rtl={false}
-        pauseOnFocusLoss
+        pauseOnFocusLoss={false}
         draggable
-        pauseOnHover
+        pauseOnHover={false}
         theme="dark"
+        limit={3}
       />
     </Router>
   );
