@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Navigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { adminApi } from '../api/admin';
@@ -13,12 +13,50 @@ const AdminPanel = () => {
   const { notify } = useNotifications();
   const [stats, setStats] = useState(null);
   const [activeTab, setActiveTab] = useState('system');
+  const [systemStatus, setSystemStatus] = useState(null);
+  const [statusHistory, setStatusHistory] = useState([]);
+  const pollingRef = useRef(null);
 
   useEffect(() => {
     if (user?.isAdmin) {
       fetchStats();
+      startPolling();
     }
+    return () => stopPolling();
   }, [user]);
+
+  const startPolling = () => {
+    if (pollingRef.current) return;
+    fetchSystemStatus();
+    pollingRef.current = setInterval(fetchSystemStatus, 5000);
+  };
+
+  const stopPolling = () => {
+    if (pollingRef.current) {
+      clearInterval(pollingRef.current);
+      pollingRef.current = null;
+    }
+  };
+
+  const fetchSystemStatus = async () => {
+    try {
+      const data = await adminApi.getSystemStatus();
+      setSystemStatus(data);
+      
+      setStatusHistory(prev => {
+        const newPoint = {
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+          cpu: data.cpu_usage_percent,
+          mem: data.memory_usage_mb,
+          latency: data.latency_ms
+        };
+        const updated = [...prev, newPoint];
+        return updated.slice(-20);
+      });
+    } catch (error) {
+      console.error('Diagnostic poll failed:', error);
+    }
+  };
 
   const fetchStats = async () => {
     try {
@@ -31,7 +69,16 @@ const AdminPanel = () => {
 
   const handleManualRefresh = () => {
     fetchStats();
+    fetchSystemStatus();
     notify('info', 'Refreshing', 'System data is being re-synced...');
+  };
+
+  const formatUptime = (seconds) => {
+    if (!seconds) return '0s';
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = Math.floor(seconds % 60);
+    return `${h}h ${m}m ${s}s`;
   };
 
   if (authLoading) return null;
@@ -55,7 +102,7 @@ const AdminPanel = () => {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
               </span>
-              <p className="text-evofit-text-muted text-[11px] font-black uppercase tracking-widest m-0">Live Monitoring Active</p>
+              <p className="text-evofit-text-muted text-[11px] font-black uppercase tracking-widest m-0">Live Monitoring Active • {formatUptime(systemStatus?.uptime_seconds)}</p>
             </div>
           </div>
         </div>
@@ -86,7 +133,7 @@ const AdminPanel = () => {
       </div>
 
       <AnimatePresence mode="wait">
-        {activeTab === 'system' && <SystemTab stats={stats} />}
+        {activeTab === 'system' && <SystemTab stats={stats} systemStatus={systemStatus} statusHistory={statusHistory} />}
         {activeTab === 'ai usage' && <AIUsageTab stats={stats} />}
         {activeTab === 'users' && <UsersTab />}
       </AnimatePresence>

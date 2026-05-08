@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { adminApi } from '../../api/admin';
 import { useNotifications } from '../../context/NotificationContext';
 
-export const AIUsageTab = ({ stats }) => {
+export const AIUsageTab = React.memo(({ stats }) => {
   const { notify } = useNotifications();
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState('');
@@ -192,4 +192,4 @@ export const AIUsageTab = ({ stats }) => {
       </div>
     </motion.div>
   );
-};
+});

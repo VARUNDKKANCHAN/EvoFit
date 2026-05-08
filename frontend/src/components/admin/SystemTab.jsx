@@ -4,51 +4,9 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { adminApi } from '../../api/admin';
 import { useNotifications } from '../../context/NotificationContext';
 
-export const SystemTab = ({ stats }) => {
+export const SystemTab = React.memo(({ stats, systemStatus, statusHistory }) => {
   const { notify } = useNotifications();
-  const [systemStatus, setSystemStatus] = useState(null);
-  const [statusHistory, setStatusHistory] = useState([]);
   const [isFlushing, setIsFlushing] = useState(false);
-  const pollingRef = useRef(null);
-
-  useEffect(() => {
-    fetchSystemStatus(); // Initial call
-    startPolling();
-    return () => stopPolling();
-  }, []);
-
-  const startPolling = () => {
-    if (pollingRef.current) return;
-    pollingRef.current = setInterval(fetchSystemStatus, 5000); // Every 5 seconds
-  };
-
-  const stopPolling = () => {
-    if (pollingRef.current) {
-      clearInterval(pollingRef.current);
-      pollingRef.current = null;
-    }
-  };
-
-  const fetchSystemStatus = async () => {
-    try {
-      const data = await adminApi.getSystemStatus();
-      setSystemStatus(data);
-      
-      // Update history for charts (keep last 20 points)
-      setStatusHistory(prev => {
-        const newPoint = {
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-          cpu: data.cpu_usage_percent,
-          mem: data.memory_usage_mb,
-          latency: data.latency_ms
-        };
-        const updated = [...prev, newPoint];
-        return updated.slice(-20);
-      });
-    } catch (error) {
-      console.error('Diagnostic poll failed:', error);
-    }
-  };
 
   const handleFlushCache = async () => {
     try {
@@ -201,7 +159,7 @@ export const SystemTab = ({ stats }) => {
       </div>
     </motion.div>
   );
-};
+});
 
 const HealthCard = ({ title, status, value, icon }) => {
   const isOperational = status === 'operational';

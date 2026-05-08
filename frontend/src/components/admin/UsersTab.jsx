@@ -4,7 +4,7 @@ import { adminApi } from '../../api/admin';
 import { useNotifications } from '../../context/NotificationContext';
 import { useAuth } from '../../context/AuthContext';
 
-export const UsersTab = () => {
+export const UsersTab = React.memo(() => {
   const { user } = useAuth();
   const { notify } = useNotifications();
   const [users, setUsers] = useState([]);
@@ -138,4 +138,4 @@ export const UsersTab = () => {
       </div>
     </motion.div>
   );
-};
+});
