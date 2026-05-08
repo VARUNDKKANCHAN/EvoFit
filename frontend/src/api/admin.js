@@ -7,17 +7,34 @@ const getAuthHeader = () => {
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
+const withRetry = async (fn, maxRetries = 2) => {
+  let lastError;
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await fn();
+    } catch (err) {
+      lastError = err;
+      if (i < maxRetries - 1) await new Promise(r => setTimeout(r, 1000));
+    }
+  }
+  throw lastError;
+};
+
 export const adminApi = {
   getStats: async () => {
-    const response = await axios.get(`${API_URL}/stats`, { headers: getAuthHeader() });
-    return response.data;
+    return withRetry(async () => {
+      const response = await axios.get(`${API_URL}/stats`, { headers: getAuthHeader() });
+      return response.data;
+    });
   },
   getUsers: async (params = {}) => {
-    const response = await axios.get(`${API_URL}/users`, { 
-      headers: getAuthHeader(),
-      params
+    return withRetry(async () => {
+      const response = await axios.get(`${API_URL}/users`, { 
+        headers: getAuthHeader(),
+        params
+      });
+      return response.data;
     });
-    return response.data;
   },
   updateUserStatus: async (userId, isActive) => {
     const response = await axios.put(`${API_URL}/users/${userId}/status`, null, {

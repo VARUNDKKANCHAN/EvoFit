@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func
 from typing import List, Optional
 from datetime import datetime, date, timedelta
@@ -76,7 +76,7 @@ def list_users(
     _ = Depends(admin_required)
 ):
     """List all platform users with profile data."""
-    query = db.query(models.User)
+    query = db.query(models.User).options(joinedload(models.User.profile))
     
     if search:
         query = query.filter(
