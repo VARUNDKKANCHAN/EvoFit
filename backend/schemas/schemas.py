@@ -259,6 +259,8 @@ class KPIStats(BaseModel):
     avg_form_score: float
     consistency_score: float
     active_streak: int
+    reps_growth_pct: float = 0.0
+    form_growth_pct: float = 0.0
 
 class DashboardSummaryResponse(BaseModel):
     kpis: KPIStats

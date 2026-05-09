@@ -60,9 +60,17 @@ def get_dashboard_summary(
     last_week = today - timedelta(days=7)
 
     # 1. KPI Aggregations
+    two_weeks_ago = today - timedelta(days=14)
+
     reps_week = db.query(func.sum(models.WorkoutSession.reps_actual)).filter(
         models.WorkoutSession.user_id == user_id,
         models.WorkoutSession.date >= last_week
+    ).scalar() or 0
+
+    reps_prev_week = db.query(func.sum(models.WorkoutSession.reps_actual)).filter(
+        models.WorkoutSession.user_id == user_id,
+        models.WorkoutSession.date >= two_weeks_ago,
+        models.WorkoutSession.date < last_week
     ).scalar() or 0
 
     avg_form_raw = db.query(func.avg(models.WorkoutSession.form_score)).filter(
@@ -70,6 +78,23 @@ def get_dashboard_summary(
         models.WorkoutSession.date >= last_week
     ).scalar() or 0.0
     avg_form = round(avg_form_raw, 2)
+
+    avg_form_prev_raw = db.query(func.avg(models.WorkoutSession.form_score)).filter(
+        models.WorkoutSession.user_id == user_id,
+        models.WorkoutSession.date >= two_weeks_ago,
+        models.WorkoutSession.date < last_week
+    ).scalar() or 0.0
+
+    # Growth Calculations
+    reps_growth = 0.0
+    if reps_prev_week > 0:
+        reps_growth = round(((reps_week - reps_prev_week) / reps_prev_week) * 100, 1)
+    elif reps_week > 0:
+        reps_growth = 100.0 # First week growth baseline
+
+    form_growth = 0.0
+    if avg_form_prev_raw > 0:
+        form_growth = round(((avg_form_raw - avg_form_prev_raw) / avg_form_prev_raw) * 100, 1)
 
     # For consistency, we'll fetch recently processed sessions to pull rhythm from JSON if available
     recent_sessions_raw = db.query(models.WorkoutSession).filter(
@@ -319,7 +344,9 @@ def get_dashboard_summary(
             total_reps_lifted=reps_week,
             avg_form_score=round(float(avg_form), 1),
             consistency_score=round(float(avg_consistency), 1),
-            active_streak=streak
+            active_streak=streak,
+            reps_growth_pct=reps_growth,
+            form_growth_pct=form_growth
         ),
         user_progression=UserProgression(
             xp=user.xp if user else 0,

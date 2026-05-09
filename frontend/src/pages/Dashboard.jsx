@@ -120,7 +120,7 @@ export default function Dashboard() {
                 Welcome back, <span className="text-evofit-purple-main">{user?.username || 'Athlete'}</span> 👋
               </h1>
               <p className="text-evofit-text-secondary m-0 text-base">
-                Your performance is up <span className="text-[#22C55E] font-semibold">12%</span> this week. Today is a great day to crush your PR.
+                Your performance is {kpis?.reps_growth_pct >= 0 ? 'up' : 'down'} <span className={kpis?.reps_growth_pct >= 0 ? "text-[#22C55E] font-semibold" : "text-red-500 font-semibold"}>{Math.abs(kpis?.reps_growth_pct || 0)}%</span> this week. Today is a great day to crush your PR.
               </p>
               <div className="flex flex-wrap gap-3 mt-5">
                 {[
@@ -131,7 +131,7 @@ export default function Dashboard() {
                     color: '#F59E0B' 
                   },
                   { icon: <Flame size={15} />, label: 'Active Streak', value: `${kpis?.active_streak || 0} days`, color: '#7C3AED' },
-                  { icon: <ArrowUpRight size={15} />, label: 'Growth', value: '+12%', color: '#22C55E' },
+                  { icon: <ArrowUpRight size={15} />, label: 'Growth', value: `${kpis?.reps_growth_pct >= 0 ? '+' : ''}${kpis?.reps_growth_pct || 0}%`, color: kpis?.reps_growth_pct >= 0 ? '#22C55E' : '#EF4444' },
                 ].map(p => (
                   <div key={p.label} className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-evofit-border bg-evofit-bg-primary">
                     <span style={{ color: p.color }}>{p.icon}</span>
@@ -180,8 +180,8 @@ export default function Dashboard() {
 
         {/* ── KPI GRID ───────────────────────────────────────── */}
         <motion.div variants={stagger} className="grid grid-cols-2 xl:grid-cols-4 gap-4">
-          <KpiCard icon={<Dumbbell size={18} />} label="Weekly Reps" value={(kpis?.total_reps_lifted || 0).toLocaleString()} badge="+14%" accent="#7C3AED" tooltip={TOOLTIP_CONTENT.weeklyReps} />
-          <KpiCard icon={<ShieldCheck size={18} />} label="Avg Form Score" value={kpis?.avg_form_score > 0 ? `${kpis.avg_form_score}%` : '0%'} accent="#06B6D4" tooltip={TOOLTIP_CONTENT.avgFormScore}>
+          <KpiCard icon={<Dumbbell size={18} />} label="Weekly Reps" value={(kpis?.total_reps_lifted || 0).toLocaleString()} badge={`${kpis?.reps_growth_pct >= 0 ? '+' : ''}${kpis?.reps_growth_pct || 0}%`} accent="#7C3AED" tooltip={TOOLTIP_CONTENT.weeklyReps} />
+          <KpiCard icon={<ShieldCheck size={18} />} label="Avg Form Score" value={kpis?.avg_form_score > 0 ? `${kpis.avg_form_score}%` : '0%'} badge={kpis?.form_growth_pct !== 0 ? `${kpis?.form_growth_pct >= 0 ? '+' : ''}${kpis?.form_growth_pct}%` : null} accent="#06B6D4" tooltip={TOOLTIP_CONTENT.avgFormScore}>
             <div className="w-9 h-9">
               <CircularProgressbar value={kpis?.avg_form_score || 0} strokeWidth={13}
                 styles={buildStyles({ pathColor: '#06B6D4', trailColor: '#E5E7EB', strokeLinecap: 'round' })} />
