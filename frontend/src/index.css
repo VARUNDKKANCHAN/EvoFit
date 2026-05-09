@@ -242,9 +242,9 @@ html:not(.dark) .recharts-grid line {
 }
 
 /* ─── INPUTS ─────────────────────────────────────────────── */
-html:not(.dark) input,
-html:not(.dark) select,
-html:not(.dark) textarea {
+input,
+select,
+textarea {
   color: var(--text-primary);
   border-color: var(--border);
 }

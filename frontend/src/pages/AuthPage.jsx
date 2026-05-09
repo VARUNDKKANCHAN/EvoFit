@@ -82,42 +82,91 @@ const AthleteHologram = () => {
         className="relative z-10"
       >
         <svg width="400" height="600" viewBox="0 0 200 300" className="drop-shadow-[0_0_30px_rgba(129,140,248,0.4)]">
-          {/* Wireframe Silhouette */}
-          <path 
-            d="M100,20 L110,40 L105,60 L95,60 L90,40 Z" 
-            fill="none" stroke="#818cf8" strokeWidth="0.5" className="opacity-40"
-          />
-          <path 
-            d="M95,60 L105,60 L115,100 L110,160 L90,160 L85,100 Z" 
-            fill="none" stroke="#818cf8" strokeWidth="0.5" className="opacity-60"
-          />
-          {/* Limbs & Joints */}
-          <g stroke="#818cf8" strokeWidth="1" fill="none">
-            <circle cx="100" cy="30" r="10" className="animate-pulse" /> {/* Head */}
-            <line x1="85" y1="70" x2="60" y2="120" /> {/* Left Arm */}
-            <line x1="60" y1="120" x2="50" y2="170" /> 
-            <line x1="115" y1="70" x2="140" y2="120" /> {/* Right Arm */}
-            <line x1="140" y1="120" x2="150" y2="170" />
-            <line x1="90" y1="160" x2="80" y2="220" /> {/* Left Leg */}
+          {/* Wireframe Silhouette - Breathing */}
+          <motion.g
+            animate={{ 
+              y: [0, -2, 0],
+              scaleY: [1, 1.01, 1]
+            }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <path 
+              d="M100,20 L110,40 L105,60 L95,60 L90,40 Z" 
+              fill="none" stroke="#818cf8" strokeWidth="0.5" className="opacity-40"
+            />
+            <motion.path 
+              d="M95,60 L105,60 L115,100 L110,160 L90,160 L85,100 Z" 
+              fill="none" stroke="#818cf8" strokeWidth="0.5" className="opacity-60"
+              animate={{ opacity: [0.4, 0.8, 0.4] }}
+              transition={{ duration: 3, repeat: Infinity }}
+            />
+          </motion.g>
+
+          {/* Limbs & Joints with Micro-movements */}
+          <motion.g 
+            stroke="#818cf8" strokeWidth="1" fill="none"
+            animate={{ y: [0, -1, 0] }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <motion.circle 
+              cx="100" cy="30" r="10" 
+              animate={{ r: [10, 11, 10], opacity: [0.2, 0.5, 0.2] }} 
+              transition={{ duration: 4, repeat: Infinity }}
+            /> 
+            
+            {/* Left Arm */}
+            <motion.g animate={{ rotate: [-1, 1, -1], originX: "100px", originY: "70px" }} transition={{ duration: 5, repeat: Infinity }}>
+              <line x1="85" y1="70" x2="60" y2="120" />
+              <line x1="60" y1="120" x2="50" y2="170" /> 
+            </motion.g>
+
+            {/* Right Arm */}
+            <motion.g animate={{ rotate: [1, -1, 1], originX: "100px", originY: "70px" }} transition={{ duration: 5, repeat: Infinity, delay: 0.5 }}>
+              <line x1="115" y1="70" x2="140" y2="120" />
+              <line x1="140" y1="120" x2="150" y2="170" />
+            </motion.g>
+
+            {/* Legs */}
+            <line x1="90" y1="160" x2="80" y2="220" />
             <line x1="80" y1="220" x2="85" y2="280" />
-            <line x1="110" y1="160" x2="120" y2="220" /> {/* Right Leg */}
+            <line x1="110" y1="160" x2="120" y2="220" />
             <line x1="120" y1="220" x2="115" y2="280" />
-          </g>
+          </motion.g>
+
           {/* Glowing Joints */}
           <g fill="#c084fc">
-            <circle cx="85" cy="70" r="2" className="animate-pulse" />
-            <circle cx="115" cy="70" r="2" className="animate-pulse" />
-            <circle cx="60" cy="120" r="2" className="animate-pulse" />
-            <circle cx="140" cy="120" r="2" className="animate-pulse" />
-            <circle cx="100" cy="160" r="2" className="animate-pulse" />
-            <circle cx="80" cy="220" r="2" className="animate-pulse" />
-            <circle cx="120" cy="220" r="2" className="animate-pulse" />
+            {[
+              {cx: 85, cy: 70}, {cx: 115, cy: 70}, 
+              {cx: 60, cy: 120}, {cx: 140, cy: 120}, 
+              {cx: 100, cy: 160}, {cx: 80, cy: 220}, {cx: 120, cy: 220}
+            ].map((p, i) => (
+              <motion.circle 
+                key={i} cx={p.cx} cy={p.cy} r="2" 
+                animate={{ 
+                  scale: [1, 1.5, 1],
+                  opacity: [0.4, 1, 0.4]
+                }} 
+                transition={{ duration: 2, repeat: Infinity, delay: i * 0.2 }}
+              />
+            ))}
           </g>
+
+          {/* Scanning Line */}
+          <motion.line
+            x1="40" y1="0" x2="160" y2="0"
+            stroke="#c084fc" strokeWidth="0.5" className="opacity-20"
+            animate={{ y: [20, 280, 20] }}
+            transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+          />
         </svg>
       </motion.div>
       
       {/* Ambient Glows */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-indigo-600/20 blur-[100px] rounded-full" />
+      <motion.div 
+        animate={{ opacity: [0.1, 0.3, 0.1], scale: [1, 1.1, 1] }}
+        transition={{ duration: 5, repeat: Infinity }}
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-indigo-600/20 blur-[100px] rounded-full" 
+      />
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200px] h-[200px] bg-purple-600/10 blur-[80px] rounded-full" />
     </div>
   );
@@ -222,9 +271,9 @@ export default function AuthPage() {
     <div 
       ref={rootRef}
       onMouseMove={handleMouseMove}
-      className="relative min-h-screen bg-[#020617] flex flex-col lg:flex-row overflow-hidden font-['Inter']"
+      className="dark relative min-h-screen bg-[#020617] flex flex-col lg:flex-row overflow-hidden font-['Inter']"
       style={{
-        '--mouse-glow': 'radial-gradient(600px circle at var(--mouse-x) var(--mouse-y), rgba(99, 102, 241, 0.08), transparent 40%)'
+        '--mouse-glow': `radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(99, 102, 241, 0.08), transparent 40%)`
       }}
     >
       <div className="absolute inset-0 pointer-events-none" style={{ background: 'var(--mouse-glow)' }} />
