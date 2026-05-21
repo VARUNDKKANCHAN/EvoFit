@@ -18,6 +18,7 @@ import {
   Crown
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import PremiumBadge from '../components/PremiumBadge';
 
 const ICON_MAP = {
   star: <Star size={24} />,
@@ -216,13 +217,13 @@ export default function TrophyRoom() {
                 )}
                 
                 <div className="flex gap-5">
-                  <div className={`w-16 h-16 rounded-2xl flex items-center justify-center shrink-0 shadow-sm border ${
-                    badge.is_locked 
-                    ? 'bg-evofit-bg-primary border-evofit-border text-evofit-text-muted/30' 
-                    : 'bg-evofit-purple-main/5 border-evofit-purple-main/10 text-evofit-purple-main group-hover:scale-110 transition-transform duration-300'
-                  }`}>
-                    {badge.is_locked ? <Lock size={24} /> : (ICON_MAP[badge.icon] || <Award size={24} />)}
-                  </div>
+                  <PremiumBadge 
+                    icon={badge.icon} 
+                    rarity={badge.rarity} 
+                    isLocked={badge.is_locked} 
+                    size={64}
+                    badgeName={badge.badge_name}
+                  />
                   
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
@@ -266,9 +267,13 @@ export default function TrophyRoom() {
           
           <div className="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
             <div className="flex items-center gap-6">
-              <div className="w-20 h-20 rounded-2xl bg-premium-gradient flex items-center justify-center text-white shadow-lg shadow-evofit-purple-main/20">
-                <Crown size={36} />
-              </div>
+              <PremiumBadge 
+                icon="voyager" 
+                rarity="Elite" 
+                size={80} 
+                isLocked={false} 
+                badgeName="Elite Voyager" 
+              />
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <h4 className="text-xl font-bold text-evofit-text-primary">Upcoming: Elite Voyager</h4>

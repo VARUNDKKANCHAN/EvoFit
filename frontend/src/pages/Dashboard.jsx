@@ -14,6 +14,7 @@ import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 import { motion } from 'framer-motion';
 import MetricTooltip from '../components/MetricTooltip';
+import LevelCrest from '../components/LevelCrest';
 
 const TOOLTIP_CONTENT = {
   weeklyReps: "Total number of repetitions completed across all exercises this week.",
@@ -148,7 +149,7 @@ export default function Dashboard() {
             <div className="xl:w-72 p-5 rounded-xl border border-evofit-border bg-evofit-bg-primary flex flex-col gap-4">
               <div className="flex justify-between items-center">
                 <p className="m-0 text-sm font-bold text-evofit-text-primary">Level Progress</p>
-                <span className="text-lg font-black text-evofit-purple-main">Lvl {prog.level || 1}</span>
+                <LevelCrest level={prog.level || 1} size={48} showGlow={true} />
               </div>
               <div>
                 <div className="flex justify-between text-[11px] text-evofit-text-muted font-medium mb-2">

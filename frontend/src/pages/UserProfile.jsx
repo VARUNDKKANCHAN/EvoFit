@@ -2,17 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/auth';
 
-/* ── Level tier colors ── */
-const getLevelTier = (level) => {
-  if (level >= 100) return { name: 'Evo Legend', color: '#C084FC', gradient: 'from-fuchsia-600 to-purple-600', glow: 'rgba(192,132,252,0.6)', icon: '🌌' };
-  if (level >= 60) return { name: 'Grandmaster', color: '#F87171', gradient: 'from-red-600 to-orange-500', glow: 'rgba(248,113,113,0.5)', icon: '🔥' };
-  if (level >= 40) return { name: 'Master', color: '#60A5FA', gradient: 'from-blue-600 to-cyan-400', glow: 'rgba(96,165,250,0.5)', icon: '💎' };
-  if (level >= 25) return { name: 'Elite', color: '#FBBF24', gradient: 'from-amber-500 to-yellow-300', glow: 'rgba(251,191,36,0.5)', icon: '👑' };
-  if (level >= 15) return { name: 'Titan', color: '#A78BFA', gradient: 'from-purple-600 to-indigo-500', glow: 'rgba(167,139,250,0.5)', icon: '🛡️' };
-  if (level >= 10) return { name: 'Warrior', color: '#F472B6', gradient: 'from-pink-500 to-rose-400', glow: 'rgba(244,114,182,0.4)', icon: '⚔️' };
-  if (level >= 5)  return { name: 'Vanguard', color: '#34D399', gradient: 'from-emerald-500 to-teal-400', glow: 'rgba(52,211,153,0.4)', icon: '🔰' };
-  return { name: 'Initiate', color: '#94A3B8', gradient: 'from-slate-500 to-gray-400', glow: 'rgba(148,163,184,0.3)', icon: '⚪' };
-};
+import LevelCrest, { getLevelTier } from '../components/LevelCrest';
 
 const fitnessGoals = [
   'Build Strength/Muscle',
@@ -229,12 +219,8 @@ export default function UserProfile() {
                 {initials}
               </div>
               {/* Level badge */}
-              <div
-                className="absolute -bottom-1 -right-1 text-[12px] font-black px-2.5 py-1.5 rounded-xl text-white shadow-2xl border-2 border-evofit-bg-card flex items-center gap-1.5"
-                style={{ background: `linear-gradient(135deg, ${tier.color}, #1e1e1e)` }}
-              >
-                <span>{tier.icon}</span>
-                <span>LVL {level}</span>
+              <div className="absolute -bottom-2 -right-2">
+                <LevelCrest level={level} size={54} showGlow={true} />
               </div>
             </div>
 
