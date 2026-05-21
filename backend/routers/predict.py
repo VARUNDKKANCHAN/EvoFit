@@ -22,7 +22,8 @@ ALLOWED_EXTENSIONS = {".csv", ".pkl"}
 async def predict_exercise(file: UploadFile = File(...), current_user: models.User = Depends(auth_service.get_current_user), db: Session = Depends(get_db)):
     """
     Upload a sensor data file (.csv or .pkl).
-    Saves results to the database and detects new achievements.
+    Consolidates raw exercise breakdown segments to prevent duplicate session writes,
+    saves results to the database, and detects new achievements.
     """
     import os
     ext = os.path.splitext(file.filename.lower())[1]
@@ -37,24 +38,43 @@ async def predict_exercise(file: UploadFile = File(...), current_user: models.Us
         file_bytes = await file.read()
         result = predict_from_upload(file_bytes, file.filename)
         
-        # --- SAVE TO DATABASE ---
+        # --- CONSOLIDATE EXERCISE BREAKDOWNS TO PREVENT DUPLICATES ---
         user_id = current_user.id
         session_date_str = result.get("session_date")
         session_date = date.fromisoformat(session_date_str) if session_date_str else date.today()
         
+        consolidated = {}
         for ex in result.get("exercise_breakdown", []):
             label = ex.get("label")
-            reps = ex.get("rep_count", 0)
-            avg_conf = ex.get("avg_confidence", result.get("confidence", 0))
+            if not label:
+                continue
+            if label not in consolidated:
+                consolidated[label] = {
+                    "label": label,
+                    "rep_count": 0,
+                    "confidences": [],
+                    "set_details": [],
+                    "rep_details": [],
+                    "rhythm_waveform": []
+                }
+            c = consolidated[label]
+            c["rep_count"] += ex.get("rep_count", 0)
+            c["confidences"].append(ex.get("avg_confidence", result.get("confidence", 0)))
+            c["set_details"].extend(ex.get("set_details", []))
+            c["rep_details"].extend(ex.get("rep_details", []))
+            c["rhythm_waveform"].extend(ex.get("rhythm_waveform", []))
+
+        # --- SAVE UNIQUE EXERCISES TO DATABASE ---
+        for label, ex_data in consolidated.items():
+            reps = ex_data["rep_count"]
+            avg_conf = sum(ex_data["confidences"]) / len(ex_data["confidences"]) if ex_data["confidences"] else 0.0
+            sets = ex_data["set_details"]
+            avg_power = sum(s.get("mean_power", 0) for s in sets) / len(sets) if sets else 0.0
             
-            sets = ex.get("set_details", [])
-            avg_power = sum(s.get("mean_power", 0) for s in sets) / len(sets) if sets else 0
-            
-            # Store the individual exercise breakdown as JSON for specific re-rendering later
             report_data = {
-                "rep_details": ex.get("rep_details", []),
-                "set_details": ex.get("set_details", []),
-                "rhythm_waveform": ex.get("rhythm_waveform", []),
+                "rep_details": ex_data["rep_details"],
+                "set_details": ex_data["set_details"],
+                "rhythm_waveform": ex_data["rhythm_waveform"],
                 "summary": {
                     "duration": result.get("duration"),
                     "time_range": result.get("time_range"),
@@ -65,7 +85,6 @@ async def predict_exercise(file: UploadFile = File(...), current_user: models.Us
             }
             
             try:
-                # Optimized prompt to be data-driven and avoid hallucinations like "100 reps"
                 prompt = (
                     f"User finished {label} exercise. Reps: {reps}. Form: {avg_conf * 100:.1f}%. "
                     f"Best set summary: {result.get('best_set_summary')}. Consistency: {result.get('overall_consistency')}. "
@@ -76,7 +95,7 @@ async def predict_exercise(file: UploadFile = File(...), current_user: models.Us
                 msg = [SystemMessage(content="You are a fitness RPG game announcer."), HumanMessage(content=prompt)]
                 ai_text = f"AI Analysis: {chat_service.llm.invoke(msg).content.strip().replace('\"', '')}"
                 report_data["summary"]["ai_insight"] = ai_text
-                result["ai_insight"] = ai_text # Expose to frontend immediately
+                result["ai_insight"] = ai_text
             except Exception:
                 pass
 
@@ -97,11 +116,9 @@ async def predict_exercise(file: UploadFile = File(...), current_user: models.Us
         new_badges = []
         if not current_user.is_admin:
             from sqlalchemy import func
-            for ex in result.get("exercise_breakdown", []):
-                # ... [existing achievement logic] ...
-                label = ex.get("label")
-                reps = ex.get("rep_count", 0)
-                avg_conf = result.get("confidence", 0) * 100
+            for label, ex_data in consolidated.items():
+                reps = ex_data["rep_count"]
+                avg_conf = (sum(ex_data["confidences"]) / len(ex_data["confidences"]) if ex_data["confidences"] else 0.0) * 100.0
                 
                 total_ever = db.query(func.sum(models.WorkoutSession.reps_actual)).filter(models.WorkoutSession.exercise == label, models.WorkoutSession.user_id == user_id).scalar() or 0
                 
@@ -149,7 +166,7 @@ async def predict_exercise(file: UploadFile = File(...), current_user: models.Us
                 
                 # Badge 4: New Ground (First time)
                 session_count = db.query(models.WorkoutSession).filter(models.WorkoutSession.exercise == label, models.WorkoutSession.user_id == user_id).count()
-                if session_count == 1: # Only the one we just inserted
+                if session_count == 1:
                     badge = f"New Ground: {label.capitalize()}"
                     exists = db.query(models.Achievement).filter(models.Achievement.badge_name == badge, models.Achievement.user_id == user_id).first()
                     if not exists:
@@ -166,16 +183,15 @@ async def predict_exercise(file: UploadFile = File(...), current_user: models.Us
         
         result["new_achievements"] = new_badges
 
-        # --- XP LOGIC (skip for admins) ---
+        # --- XP LOGIC ---
         user = db.query(models.User).filter(models.User.id == user_id).first()
         leveled_up = False
         if user and not user.is_admin:
             gained_xp = 0
-            for ex in result.get("exercise_breakdown", []):
-                reps = ex.get("rep_count", 0)
+            for label, ex_data in consolidated.items():
+                reps = ex_data["rep_count"]
                 gained_xp += reps * 10
             
-            # Form bonus from overall confidence
             overall_form = result.get("confidence", 0) * 100
             if overall_form > 80.0:
                 gained_xp += int((overall_form - 80.0) * 5)

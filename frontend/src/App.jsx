@@ -14,6 +14,7 @@ import Chatbot from './pages/Chatbot';
 import Leaderboard from './pages/Leaderboard';
 import TargetAnalysis from './pages/TargetAnalysis';
 import AdminPanel from './pages/AdminPanel';
+import CohortComparison from './pages/CohortComparison';
 import ThemeToggle from './components/ThemeToggle';
 import FloatingChatbot from './components/FloatingChatbot';
 import CelebrationModal from './components/CelebrationModal';
@@ -653,6 +654,7 @@ function AppShell() {
       case '/signup': return 'Create Account';
       case '/upload': return 'AI Dataset Upload';
       case '/analytics': return 'Performance Analytics';
+      case '/comparison': return 'Cohort Benchmarking';
       case '/targets': return 'Target Monitoring';
       case '/history': return 'Workout History';
       case '/trophy': return 'EvoFit Trophy Room';
@@ -700,6 +702,7 @@ function AppShell() {
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/upload"    element={<UploadPredict />} />
                 <Route path="/analytics" element={<Analytics />} />
+                <Route path="/comparison" element={<CohortComparison />} />
                 <Route path="/targets"   element={<Targets />} />
                 <Route path="/history"   element={<SessionHistory />} />
                 <Route path="/trophy"    element={<TrophyRoom />} />
