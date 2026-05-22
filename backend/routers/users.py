@@ -15,6 +15,20 @@ router = APIRouter(
 @router.post("/register", response_model=schemas.UserResponse, status_code=status.HTTP_201_CREATED)
 def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     """Create a new user account and initialize their profile."""
+    # Password strength validation using regex
+    import re
+    password = user.password
+    if len(password) < 8:
+        raise HTTPException(status_code=400, detail="Password must be at least 8 characters long")
+    if not re.search(r"[A-Z]", password):
+        raise HTTPException(status_code=400, detail="Password must contain at least one uppercase letter")
+    if not re.search(r"[a-z]", password):
+        raise HTTPException(status_code=400, detail="Password must contain at least one lowercase letter")
+    if not re.search(r"\d", password):
+        raise HTTPException(status_code=400, detail="Password must contain at least one number")
+    if not re.search(r"[@$!%*?&#]", password):
+        raise HTTPException(status_code=400, detail="Password must contain at least one special character (@$!%*?&#)")
+
     db_user = db.query(models.User).filter(
         (models.User.email == user.email) | (models.User.username == user.username)
     ).first()

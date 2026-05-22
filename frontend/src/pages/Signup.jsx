@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useNotifications } from '../context/NotificationContext';
 
 function Particles() {
   const dots = Array.from({ length: 15 }, (_, i) => ({
@@ -30,6 +31,7 @@ export default function Signup() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const { register } = useAuth();
+  const { notify } = useNotifications();
   const navigate = useNavigate();
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
@@ -37,7 +39,23 @@ export default function Signup() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (form.password !== form.confirmPassword) {
-       // A toast will be handled or a simple alert for now
+       notify('error', 'Registration failed', 'Passwords do not match.');
+       return;
+    }
+
+    // Password strength regex validation:
+    // - At least 8 characters
+    // - At least one uppercase letter
+    // - At least one lowercase letter
+    // - At least one number
+    // - At least one special character from @$!%*?&#
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
+    if (!passwordRegex.test(form.password)) {
+       notify(
+         'error', 
+         'Weak Password', 
+         'Password must be at least 8 characters long, and contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&#).'
+       );
        return;
     }
     
