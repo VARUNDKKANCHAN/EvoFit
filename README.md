@@ -1,204 +1,263 @@
-# AI-Powered Full-Stack Fitness Tracking System
+# EvoFit — AI-Powered Fitness Tracking System
 
-## 1. Abstract
+![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.100%2B-009688?logo=fastapi&logoColor=white)
+![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)
+![License](https://img.shields.io/badge/License-MIT-7C3AED)
+![ML Accuracy](https://img.shields.io/badge/ML%20Accuracy-98.51%25-22C55E)
 
-Strength training is a critical component of a balanced fitness regimen, yet existing wearable technology offers little to no automated support for free-weight exercise tracking. This project proposes, designs, and implements an AI-Powered Full-Stack Fitness Tracking System — a complete web application that uses wristband accelerometer and gyroscope data to automatically classify barbell exercises, count repetitions, detect improper form, and visualize workout performance.
+> An end-to-end fitness intelligence platform that uses wristband IMU sensor data to automatically **classify barbell exercises**, **count repetitions**, **detect form quality**, and deliver **personalized AI coaching** through a stunning React dashboard.
 
-The machine learning core achieves 98.51% classification accuracy using a Random Forest model trained on 5 participants performing 5 fundamental barbell exercises (Bench Press, Deadlift, Overhead Press, Barbell Row, Squat). The system is extended with a modern React.js dashboard for interactive visualizations, a FastAPI backend for model serving, a target-setting module for workout goal management, and an AI chatbot powered by Retrieval-Augmented Generation (RAG) that answers personalized workout questions based on the user's actual training data.
+---
 
-This document provides a complete technical blueprint of the project — covering the problem background, system architecture, ML pipeline, full-stack design, RAG chatbot design, tech stack, implementation plan, and expected outcomes — in a beginner-friendly format.
+## ✨ Key Features
 
-## 2. Introduction & Background
+| Feature | Description |
+|---|---|
+| 🤖 **ML Classifier** | Random Forest model — 98.51% accuracy across 5 barbell exercises |
+| 🔁 **Rep Counter** | Smoothed magnitude peak detection from accelerometer data |
+| 📊 **Interactive Dashboard** | Volume trends, form scores, XP progression, personal bests |
+| 🎯 **Target System** | Set weekly rep goals with live progress tracking |
+| 🧠 **RAG AI Coach** | LangChain + ChromaDB + Groq LLaMA 3.1 — answers using your actual workout data |
+| 🏆 **Gamification** | XP, levels, achievement badges, global leaderboard |
+| 🔥 **Activity Heatmap** | 365-day GitHub-style workout frequency heatmap |
+| 👥 **Cohort Comparison** | Benchmark against anonymized community averages |
+| 🔐 **Admin Panel** | Full RBAC, audit logs, user management, token controls |
+| 🌙 **Dark / Light Mode** | Seamless theme switching with no flash on load |
 
-### 2.1 What is this Project About?
+---
 
-Imagine a smartphone app that watches you lift weights and tells you: which exercise you just did, how many reps you completed, whether your form was correct, and whether you are hitting your weekly targets. That is exactly what this project builds.
-The system collects motion data from a wristband sensor (just like a smartwatch), processes it through a machine learning pipeline, and presents all insights through a beautiful web dashboard. A built-in AI chatbot can answer questions like 'How many squats did I do this week?' or 'Am I improving on bench press?' — all powered by your own workout data.
+## 🏗️ Tech Stack
 
-### 2.2 Why is this Problem Important?
+| Layer | Technology |
+|---|---|
+| **Frontend** | React 18 · Vite · Tailwind CSS · Recharts · Framer Motion |
+| **Backend** | FastAPI · SQLAlchemy · Pydantic v2 · Uvicorn |
+| **Machine Learning** | scikit-learn · pandas · NumPy · SciPy · joblib |
+| **AI / RAG** | LangChain · ChromaDB · HuggingFace `all-MiniLM-L6-v2` · Groq API |
+| **Auth** | JWT (HS256) · bcrypt via passlib |
+| **Database** | SQLite (dev) / PostgreSQL (prod) via SQLAlchemy |
+| **DevOps** | Docker · Docker Compose |
 
-• Current fitness wearables (Fitbit, Apple Watch) track running and cycling well, but NOT free weight training.
-• Personal trainers are expensive and not accessible to everyone.
-• Bad exercise form causes serious injuries — especially with heavy weights.
-• There is no affordable digital solution that tracks, counts, and coaches strength training automatically.
-• This project fills that gap using machine learning and modern web technology.
+---
 
-### 2.3 Research Foundation
+## ⚡ Quick Start
 
-This project is built on the research paper:
-"Exploring the Possibilities of Context-Aware Applications for Strength Training" — Dave Ebbelaar, Vrije Universiteit Amsterdam. The paper collected wristband sensor data from 5 participants performing 5 barbell exercises and trained ML models achieving 98.51% classification accuracy.
+### Prerequisites
+- Python 3.10+
+- Node.js 18+ with npm
+- A [Groq API Key](https://console.groq.com) (free tier available)
 
-Your project extends this research by adding a full-stack web interface, target-setting, real-time visualization, and an AI chatbot on top of the ML models.
+### 1. Clone the Repository
 
-## 3. Project Objectives
+```bash
+git clone https://github.com/your-username/EvoFit.git
+cd EvoFit
+```
 
-### 3.1 Primary Objectives
+### 2. Configure Environment Variables
 
-1. Build a complete ML pipeline that classifies 5 barbell exercises from sensor data with 95%+ accuracy.
-2. Implement an automatic repetition counter using peak detection algorithms.
-3. Create a target-setting feature where users define weekly workout goals.
-4. Develop a React.js web dashboard with interactive charts showing exercise history, rep counts, and model accuracy.
-5. Build a FastAPI backend that serves ML predictions through REST API endpoints.
-6. Implement an AI chatbot using RAG (Retrieval-Augmented Generation) that answers workout questions using the user's actual data.
-7. Package the full application with Docker for easy deployment.
+Create a `.env` file in the project root:
 
-### 3.2 Secondary Objectives
+```env
+DATABASE_URL=sqlite:///./evofit.db
+JWT_SECRET=your_super_secret_key_minimum_32_chars
+ACCESS_TOKEN_EXPIRE_MINUTES=60
+GROQ_API_KEY=gsk_your_groq_api_key_here
+```
 
-• Implement form detection for bench press (correct / too high / no touch).
-• Add MLflow experiment tracking to log every training run automatically.
-• Create a participant comparison view showing performance across users.
-• Export workout reports as downloadable PDFs.
+### 3. Backend Setup
 
-## 4. System Overview — How Everything Connects
+```bash
+# Create and activate virtual environment
+python -m venv venv
+.\venv\Scripts\activate        # Windows
+# source venv/bin/activate     # Linux/macOS
 
-The system has 5 main components that work together. Here is how data flows from sensor to insight:
+# Install Python dependencies
+pip install -r requirements.txt
 
-Sensor Data (CSV files) → ML Pipeline → FastAPI Backend → React Dashboard → User sees results + AI Chatbot answers questions
+# Initialize database and seed data
+python seed_data.py
+python create_admin.py         # Creates admin: evofit_admin / AdminPass_123
+```
 
-| Component          | What it Does                                            | Technology Used                  |
-| ------------------ | ------------------------------------------------------- | -------------------------------- |
-| Data Pipeline      | Reads CSV sensor files, cleans data, engineers features | Python, pandas, NumPy, SciPy     |
-| ML Model           | Classifies exercises, counts reps, detects form errors  | scikit-learn, Random Forest      |
-| Backend API        | Serves predictions, manages users, stores data          | FastAPI, PostgreSQL, JWT         |
-| Frontend Dashboard | Shows charts, goals, history, chatbot UI                | React.js, Recharts, Tailwind CSS |
-| AI Chatbot (RAG)   | Answers workout questions using your data               | LangChain, ChromaDB, Groq API    |
-| DevOps             | Packages and deploys the whole application              | Docker, GitHub, Render           |
+### 4. Frontend Setup
 
-## 5. Machine Learning Pipeline (Detailed)
+```bash
+cd frontend
+npm install
+```
 
-This is the core intelligence of the project. It has 5 stages.
+### 5. Run the Application
 
-### 5.1 Stage 1 — Data Collection (make_dataset.py)
+**Terminal 1 — Backend API** (from project root, venv active):
+```bash
+python -m uvicorn backend.main:app --reload
+# API runs at http://localhost:8000
+# Swagger docs at http://localhost:8000/docs
+```
 
-Raw sensor data comes from MbientLab wristband sensors.
-• Accelerometer at 12.5 Hz
-• Gyroscope at 25 Hz
-Resampled to 200ms uniform interval and saved as `01_data_processed.pkl`.
+**Terminal 2 — Frontend Dev Server:**
+```bash
+cd frontend
+npm run dev
+# Dashboard runs at http://localhost:5173
+```
 
-### 5.2 Stage 2 — Outlier Removal (remove_outliers.py)
+---
 
-Cleans data using Chauvenet's Criterion per exercise. Saved as `02_outliers_removed_chauvenets.pkl`.
-
-### 5.3 Stage 3 — Feature Engineering (build_features.py)
-
-• Butterworth Low-Pass Filter (cutoff 1.3Hz)
-• Principal Component Analysis (PCA)
-• Temporal Features (mean, std per window)
-• Frequency Features (Fourier Transform)
-• Clustering (K-Means k=5)
-
-### 5.4 Stage 4 — Model Training (train_model.py)
-
-Random Forest is the winning model with 98.51% accuracy via grid search (n_estimators=100, min_samples_leaf=2, criterion=gini).
-
-### 5.5 Stage 5 — Repetition Counting (count_repetitions.py)
-
-Peak detection algorithm counts reps via smoothed acceleration magnitude.
-
-## 6. Full-Stack Application Architecture
-
-### 6.1 Backend — FastAPI (Python)
-
-REST API endpoints:
-
-- POST `/predict`
-- GET `/metrics`
-- POST `/targets`
-- GET `/targets/{user_id}`
-- GET `/history/{user_id}`
-- POST `/chat`
-- POST `/auth/register`
-- POST `/auth/login`
-
-### 6.2 Database — PostgreSQL
-
-Tables: `users`, `workout_sessions`, `model_results`, `targets`, `chat_history`.
-
-### 6.3 Frontend — React.js Dashboard
-
-Pages: Dashboard Home, Upload & Predict, Analytics, Targets & Progress, AI Chatbot.
-
-### 6.4 Target Setting Feature
-
-Users set weekly targets, get live progress bars, notifications, and historical reports.
-
-## 7. AI Chatbot — Retrieval-Augmented Generation (RAG)
-
-Personalized workout chatbot using LangChain, ChromaDB, sentence-transformers, and Groq API (LLaMA 3).
-
-## 8. Complete Technology Stack
-
-- **Backend & ML:** Python, FastAPI, scikit-learn, pandas, NumPy, SciPy, MLflow, joblib, PostgreSQL, SQLAlchemy, Pydantic, JWT.
-- **Frontend:** React.js, Recharts, Tailwind CSS, Axios, React Router v6, React Query.
-- **RAG:** LangChain, ChromaDB, HuggingFace embeddings, Groq API.
-- **DevOps:** Docker, Github, Render.
-
-## 9. Project Folder Structure
+## 📁 Project Structure
 
 ```text
-evofit/
-│
-├── backend/                      ← FastAPI
-│   ├── main.py
-│   ├── routers/
-│   │   └── predict.py
-│   ├── services/
-│   │   └── ml_service.py
+EvoFit/
+├── backend/                        ← FastAPI Server
+│   ├── core/                       ← Global metrics & config
 │   ├── database/
-│   │   ├── db.py
-│   │   └── models.py
-│   ├── schemas/
-│   │   └── schemas.py
-│   └── requirements.txt
+│   │   ├── database.py             ← SQLAlchemy engine & session
+│   │   └── models.py               ← ORM table definitions
+│   ├── routers/                    ← API endpoint modules
+│   │   ├── admin.py                ← Admin RBAC control center
+│   │   ├── body_metrics.py         ← Weight & body fat logging
+│   │   ├── chat.py                 ← RAG AI Coach endpoint
+│   │   ├── cohort.py               ← Community benchmarking
+│   │   ├── dashboard.py            ← Summary aggregation
+│   │   ├── predict.py              ← ML upload & classification
+│   │   ├── sessions.py             ← Workout session history
+│   │   ├── target_analysis.py      ← Target deep-dive analytics
+│   │   ├── targets.py              ← Weekly rep target CRUD
+│   │   ├── activity_heatmap.py     ← 365-day heatmap data
+│   │   ├── achievements.py         ← Badge unlock history
+│   │   └── users.py                ← Auth, profile & leaderboard
+│   ├── schemas/schemas.py          ← Pydantic request/response models
+│   ├── services/
+│   │   ├── auth_service.py         ← JWT & bcrypt utilities
+│   │   └── chat_service.py         ← LangChain RAG pipeline
+│   ├── tests/test_all.py           ← PyTest integration test suite
+│   └── main.py                     ← FastAPI application entry point
 │
-├── ml/                           ← Machine Learning
-│   ├── pipeline/
-│   │   └── pipeline.py
-│   │
+├── ml/                             ← Machine Learning Pipeline
+│   ├── data_pipeline/make_dataset.py
 │   ├── features/
-│   │   ├── build_features.py
-│   │   ├── remove_outliers.py
-│   │   ├── count_repetitions.py
-│   │   ├── DataTransformation.py
-│   │   ├── FrequencyAbstraction.py
-│   │   └── TemporalAbstraction.py
-│   │
-│   ├── models/
-│   │   ├── train_model.py
-│   │   ├── predict_model.py
-│   │   ├── LearningAlgorithms.py
-│   │   └── model.pkl
-│   │
-│   └── data_pipeline/
-│       └── make_dataset.py
+│   │   ├── build_features.py       ← Butterworth, PCA, Fourier
+│   │   └── count_repetitions.py    ← Peak detection rep counter
+│   └── models/
+│       └── train_model.py          ← Random Forest grid search
 │
 ├── data/
-│   ├── raw/
-│   ├── interim/
-│   └── processed/
+│   ├── chroma_db/                  ← ChromaDB vector index (git-ignored)
+│   ├── raw/                        ← Raw sensor CSV files
+│   └── knowledge/
+│       └── exercise_guides.md      ← RAG knowledge base
 │
-├── frontend/                     ← React App
+├── frontend/                       ← React Application
 │   ├── src/
-│   │   ├── pages/
-│   │   │   ├── Dashboard.jsx
-│   │   │   ├── Upload.jsx
-│   │   │   ├── Analytics.jsx
-│   │   │   └── Targets.jsx
-│   │   │
-│   │   ├── components/
+│   │   ├── components/             ← Reusable UI components
 │   │   │   ├── Sidebar.jsx
-│   │   │   ├── Navbar.jsx
-│   │   │   ├── Card.jsx
-│   │   │   ├── Chart.jsx
-│   │   │   └── UploadBox.jsx
-│   │   │
-│   │   ├── api/
-│   │   │   └── api.js
-│   │   │
-│   │   └── App.js
-│   │
-│   └── package.json
+│   │   │   ├── FloatingChatbot.jsx
+│   │   │   ├── CelebrationModal.jsx
+│   │   │   ├── LevelCrest.jsx
+│   │   │   ├── PremiumBadge.jsx
+│   │   │   └── ThemeToggle.jsx
+│   │   ├── context/                ← Auth & notification state
+│   │   ├── pages/                  ← Full page views
+│   │   │   ├── Dashboard.jsx
+│   │   │   ├── UploadPredict.jsx
+│   │   │   ├── Analytics.jsx
+│   │   │   ├── PerformanceAnalytics.jsx
+│   │   │   ├── Targets.jsx
+│   │   │   ├── TrophyRoom.jsx
+│   │   │   ├── SessionHistory.jsx
+│   │   │   ├── Leaderboard.jsx
+│   │   │   ├── UserProfile.jsx
+│   │   │   ├── Chatbot.jsx
+│   │   │   ├── CohortComparison.jsx
+│   │   │   ├── TargetAnalysis.jsx
+│   │   │   ├── AdminPanel.jsx
+│   │   │   └── NotFound.jsx
+│   │   ├── index.css               ← Design system (CSS vars, animations)
+│   │   └── App.jsx                 ← Router, layout, global header
+│   ├── tailwind.config.js
+│   └── vite.config.js
 │
-├── README.md
-└── requirements.txt
+├── .env                            ← Secrets (git-ignored)
+├── .gitignore
+├── LICENSE                         ← MIT License
+├── requirements.txt                ← Python dependencies
+├── seed_data.py                    ← Database seeder
+├── create_admin.py                 ← Admin account creator
+├── run_tests.py                    ← Test suite runner
+└── e2e_test.py                     ← End-to-end prediction verifier
 ```
+
+---
+
+## 🔌 API Reference
+
+All protected endpoints require `Authorization: Bearer <token>`.
+
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| `POST` | `/users/register` | Public | Register new account |
+| `POST` | `/users/login` | Public | Authenticate → JWT |
+| `GET` | `/users/me` | User | Full user + profile data |
+| `PUT` | `/users/me/profile` | User | Update demographics |
+| `PUT` | `/users/me/password` | User | Change password |
+| `GET` | `/users/leaderboard` | User | Global XP leaderboard |
+| `POST` | `/predict/` | User | Upload CSV → classification |
+| `GET` | `/targets/` | User | List active rep targets |
+| `POST` | `/targets/` | User | Create rep target |
+| `GET` | `/targets/progress` | User | Live completion % |
+| `GET` | `/body-metrics/` | User | List body metric history |
+| `POST` | `/body-metrics/` | User | Log weight / body fat |
+| `DELETE` | `/body-metrics/{id}` | User | Remove entry |
+| `GET` | `/dashboard/summary` | User | Full dashboard payload |
+| `GET` | `/sessions/` | User | Workout session history |
+| `GET` | `/achievements/` | User | Badge unlock history |
+| `GET` | `/activity-heatmap/` | User | 365-day heatmap |
+| `GET` | `/cohort/comparison` | User | Community benchmarks |
+| `POST` | `/chat/` | User | RAG AI Coach query |
+| `GET` | `/admin/stats` | Admin | Platform-wide stats |
+| `GET` | `/admin/users` | Admin | All user accounts |
+| `PUT` | `/admin/users/{id}/status` | Admin | Activate / deactivate |
+| `PUT` | `/admin/users/{id}/token-limit` | Admin | Set RAG token cap |
+| `GET` | `/admin/audit-logs` | Admin | Admin action log |
+
+---
+
+## 🧪 Testing
+
+```bash
+# Run full PyTest suite (isolated DB)
+python run_tests.py
+
+# End-to-end prediction verification (requires running server)
+python -m uvicorn backend.main:app &
+python e2e_test.py
+```
+
+---
+
+## 🐳 Docker Deployment
+
+```bash
+# Build and start all services (backend + frontend + PostgreSQL)
+docker-compose up -d --build
+
+# Check logs
+docker-compose logs -f backend
+```
+
+---
+
+## 📄 License
+
+This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🙏 Acknowledgements
+
+- Research foundation: **Dave Ebbelaar, Vrije Universiteit Amsterdam** — *"Exploring the Possibilities of Context-Aware Applications for Strength Training"*
+- IMU sensor dataset provided by VU Amsterdam
+- AI inference powered by [Groq](https://groq.com) (LLaMA 3.1)

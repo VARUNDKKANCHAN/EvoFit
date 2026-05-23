@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard';
 import AuthPage from './pages/AuthPage';
 import UploadPredict from './pages/UploadPredict';
 import Analytics from './pages/Analytics';
+import PerformanceAnalytics from './pages/PerformanceAnalytics';
 import Targets from './pages/Targets';
 import TrophyRoom from './pages/TrophyRoom';
 import SessionHistory from './pages/SessionHistory';
@@ -15,6 +16,7 @@ import Leaderboard from './pages/Leaderboard';
 import TargetAnalysis from './pages/TargetAnalysis';
 import AdminPanel from './pages/AdminPanel';
 import CohortComparison from './pages/CohortComparison';
+import NotFound from './pages/NotFound';
 import ThemeToggle from './components/ThemeToggle';
 import FloatingChatbot from './components/FloatingChatbot';
 import CelebrationModal from './components/CelebrationModal';
@@ -653,7 +655,8 @@ function AppShell() {
       case '/login': return 'Authentication';
       case '/signup': return 'Create Account';
       case '/upload': return 'AI Dataset Upload';
-      case '/analytics': return 'Performance Analytics';
+      case '/analytics': return 'Workout Analytics';
+      case '/performance-analytics': return 'Performance Analytics';
       case '/comparison': return 'Cohort Benchmarking';
       case '/targets': return 'Target Monitoring';
       case '/history': return 'Workout History';
@@ -702,6 +705,7 @@ function AppShell() {
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/upload"    element={<UploadPredict />} />
                 <Route path="/analytics" element={<Analytics />} />
+                <Route path="/performance-analytics" element={<PerformanceAnalytics />} />
                 <Route path="/comparison" element={<CohortComparison />} />
                 <Route path="/targets"   element={<Targets />} />
                 <Route path="/history"   element={<SessionHistory />} />
@@ -711,6 +715,8 @@ function AppShell() {
                 <Route path="/chatbot"   element={<Chatbot />} />
                 <Route path="/admin"     element={<AdminPanel />} />
                 <Route path="/target-analysis/:exercise" element={<TargetAnalysis />} />
+                {/* 404 Fallback */}
+                <Route path="*" element={<NotFound />} />
               </Routes>
             </AnimatedPage>
           </AnimatePresence>

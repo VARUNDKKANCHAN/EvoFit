@@ -124,7 +124,7 @@ export default function PerformanceAnalytics() {
   };
 
   return (
-    <div className="flex-1 bg-[#F8FAFC] min-h-screen font-inter">
+    <div className="flex-1 min-h-full" style={{ background: 'var(--bg-primary)' }}>
       <motion.div 
         variants={containerVars}
         initial="initial"
@@ -135,23 +135,36 @@ export default function PerformanceAnalytics() {
         <header className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className="flex flex-col">
-              <span className="text-[#64748B] text-xs font-semibold uppercase tracking-wider mb-1">Active Exercise</span>
+              <span className="text-xs font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--text-muted)' }}>Active Exercise</span>
               <div className="flex items-center gap-3">
                 {exerciseBreakdown.length > 1 ? (
                   <select 
                     value={activeExercise} 
                     onChange={(e) => setActiveExercise(e.target.value)}
-                    className="bg-white border border-[#E5E7EB] px-4 py-2 rounded-xl shadow-sm text-sm font-bold text-[#0F172A] outline-none focus:ring-2 focus:ring-[#7C3AED]/20 focus:border-[#7C3AED] transition-all cursor-pointer appearance-none pr-10 relative"
-                    style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%2364748B\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'/%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center', backgroundSize: '16px' }}
+                    className="px-4 py-2 rounded-xl shadow-sm text-sm font-bold outline-none transition-all cursor-pointer appearance-none pr-10"
+                    style={{
+                      background: 'var(--bg-card)',
+                      border: '1px solid var(--border)',
+                      color: 'var(--text-primary)',
+                      backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%2364748B\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'/%3E%3C/svg%3E")',
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: 'right 12px center',
+                      backgroundSize: '16px',
+                    }}
                   >
                     {exerciseBreakdown.map(ex => (
                       <option key={ex.label} value={ex.label}>{ex.label.charAt(0).toUpperCase() + ex.label.slice(1)}</option>
                     ))}
                   </select>
                 ) : (
-                  <div className="flex items-center gap-2 bg-white border border-[#E5E7EB] px-4 py-2 rounded-xl shadow-sm">
-                    <Dumbbell size={16} className="text-[#7C3AED]" />
-                    <span className="text-[#0F172A] text-sm font-bold">{activeExercise.charAt(0).toUpperCase() + activeExercise.slice(1)}</span>
+                  <div
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl shadow-sm"
+                    style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
+                  >
+                    <Dumbbell size={16} style={{ color: 'var(--purple-main)' }} />
+                    <span className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
+                      {activeExercise.charAt(0).toUpperCase() + activeExercise.slice(1)}
+                    </span>
                   </div>
                 )}
               </div>
@@ -159,11 +172,17 @@ export default function PerformanceAnalytics() {
           </div>
           
           <div className="flex items-center gap-3 self-end md:self-center">
-            <button className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-[#64748B] bg-white border border-[#E5E7EB] rounded-xl hover:bg-slate-50 transition-colors shadow-sm">
+            <button
+              className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl transition-colors shadow-sm hover:opacity-80"
+              style={{ color: 'var(--text-muted)', background: 'var(--bg-card)', border: '1px solid var(--border)' }}
+            >
               <BarChart3 size={16} />
               <span>Full Report</span>
             </button>
-            <button className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-[#7C3AED] rounded-xl hover:bg-[#6D28D9] transition-colors shadow-sm">
+            <button
+              className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl transition-colors shadow-sm hover:opacity-90"
+              style={{ background: 'var(--purple-main)' }}
+            >
               <Zap size={16} />
               <span>Share Insight</span>
             </button>
@@ -174,32 +193,39 @@ export default function PerformanceAnalytics() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           
           {/* PRIMARY KPI */}
-          <motion.div variants={itemVars} className="lg:col-span-1 bg-white border border-[#E5E7EB] rounded-2xl p-8 shadow-sm flex flex-col justify-between relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:scale-110 transition-transform duration-500">
-              <ShieldCheck size={120} className="text-[#7C3AED]" />
+          <motion.div
+            variants={itemVars}
+            className="lg:col-span-1 rounded-2xl p-8 shadow-sm flex flex-col justify-between relative overflow-hidden group saas-card"
+          >
+            <div className="absolute top-0 right-0 p-8 opacity-[0.04] group-hover:scale-110 transition-transform duration-500">
+              <ShieldCheck size={120} style={{ color: 'var(--purple-main)' }} />
             </div>
             <div>
               <div className="flex items-center justify-between mb-6">
                 <MetricTooltip content={TOOLTIP_CONTENT.formScore}>
-                  <span className="text-[#64748B] text-sm font-medium uppercase tracking-wider">Average Form Score</span>
+                  <span className="text-sm font-medium uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
+                    Average Form Score
+                  </span>
                 </MetricTooltip>
-                <div className="p-2 bg-purple-50 rounded-lg">
-                  <ShieldCheck size={20} className="text-[#7C3AED]" />
+                <div className="p-2 rounded-lg" style={{ background: 'rgba(124,58,237,0.1)' }}>
+                  <ShieldCheck size={20} style={{ color: 'var(--purple-main)' }} />
                 </div>
               </div>
               <div className="flex items-baseline gap-2">
-                <span className="text-6xl font-extrabold text-[#0F172A]">{displayData.formScore}%</span>
-                <div className="flex items-center text-[#22C55E] text-sm font-bold bg-green-50 px-2 py-0.5 rounded-full">
+                <span className="text-6xl font-extrabold" style={{ color: 'var(--text-primary)' }}>
+                  {displayData.formScore}%
+                </span>
+                <div className="flex items-center text-sm font-bold px-2 py-0.5 rounded-full" style={{ color: '#22C55E', background: 'rgba(34,197,94,0.1)' }}>
                   <ArrowUpRight size={14} />
                   <span>2.4%</span>
                 </div>
               </div>
             </div>
-            <div className="mt-8 pt-6 border-t border-[#F1F5F9]">
+            <div className="mt-8 pt-6" style={{ borderTop: '1px solid var(--border)' }}>
               <div className="flex items-center justify-between">
-                <span className="text-[#64748B] text-sm">Performance Tier</span>
-                <span className="text-[#22C55E] text-sm font-bold flex items-center gap-1.5">
-                   <div className="w-2 h-2 bg-[#22C55E] rounded-full animate-pulse" />
+                <span className="text-sm" style={{ color: 'var(--text-muted)' }}>Performance Tier</span>
+                <span className="text-sm font-bold flex items-center gap-1.5" style={{ color: '#22C55E' }}>
+                   <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: '#22C55E' }} />
                    {displayData.status}
                 </span>
               </div>
@@ -209,28 +235,31 @@ export default function PerformanceAnalytics() {
           {/* SUPPORTING KPIs */}
           <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
             {[
-              { label: 'Total Reps', val: displayData.totalReps, sub: '+12 from last week', icon: <Dumbbell size={20} />, color: 'purple' },
-              { label: 'Consistency', val: displayData.consistency, sub: 'High Stability', icon: <Activity size={20} />, color: 'blue' },
-              { label: 'Session Duration', val: displayData.duration, sub: 'Active time', icon: <Clock size={20} />, color: 'orange' },
-              { label: 'Best Set', val: displayData.bestSet, sub: 'Personal Record', icon: <Zap size={20} />, color: 'amber' },
+              { label: 'Total Reps', val: displayData.totalReps, sub: '+12 from last week', icon: <Dumbbell size={20} />, tooltipKey: 'totalReps' },
+              { label: 'Consistency', val: displayData.consistency, sub: 'High Stability', icon: <Activity size={20} />, tooltipKey: 'consistency' },
+              { label: 'Session Duration', val: displayData.duration, sub: 'Active time', icon: <Clock size={20} />, tooltipKey: 'duration' },
+              { label: 'Best Set', val: displayData.bestSet, sub: 'Personal Record', icon: <Zap size={20} />, tooltipKey: 'bestSet' },
             ].map((kpi, i) => (
-              <motion.div key={i} variants={itemVars} className="bg-white border border-[#E5E7EB] rounded-2xl p-6 shadow-sm hover:border-[#7C3AED]/30 transition-colors group">
+              <motion.div
+                key={i}
+                variants={itemVars}
+                className="rounded-2xl p-6 shadow-sm saas-card group"
+                style={{ borderColor: 'var(--border)' }}
+              >
                 <div className="flex items-center justify-between mb-4">
-                  <MetricTooltip content={
-                    kpi.label === 'Total Reps' ? TOOLTIP_CONTENT.totalReps :
-                    kpi.label === 'Consistency' ? TOOLTIP_CONTENT.consistency :
-                    kpi.label === 'Session Duration' ? TOOLTIP_CONTENT.duration :
-                    TOOLTIP_CONTENT.bestSet
-                  }>
-                    <span className="text-[#64748B] text-sm font-medium">{kpi.label}</span>
+                  <MetricTooltip content={TOOLTIP_CONTENT[kpi.tooltipKey]}>
+                    <span className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>{kpi.label}</span>
                   </MetricTooltip>
-                  <div className={`p-2 rounded-xl bg-slate-50 text-[#64748B] group-hover:text-[#7C3AED] transition-colors`}>
+                  <div
+                    className="p-2 rounded-xl transition-colors"
+                    style={{ background: 'var(--bg-primary)', color: 'var(--text-muted)' }}
+                  >
                     {kpi.icon}
                   </div>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-2xl font-bold text-[#0F172A]">{kpi.val}</span>
-                  <span className="text-xs text-[#64748B] mt-1">{kpi.sub}</span>
+                  <span className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{kpi.val}</span>
+                  <span className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>{kpi.sub}</span>
                 </div>
               </motion.div>
             ))}
@@ -238,17 +267,23 @@ export default function PerformanceAnalytics() {
         </div>
 
         {/* --- MAIN CHART --- */}
-        <motion.div variants={itemVars} className="bg-white border border-[#E5E7EB] rounded-2xl p-8 shadow-sm mb-8">
+        <motion.div variants={itemVars} className="rounded-2xl p-8 shadow-sm mb-8 saas-card">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
             <div>
-              <h3 className="text-lg font-bold text-[#0F172A]">Rep-by-Rep Form Analysis</h3>
-              <p className="text-sm text-[#64748B]">Real-time form score tracking across current session</p>
+              <h3 className="text-lg font-bold m-0" style={{ color: 'var(--text-primary)' }}>Rep-by-Rep Form Analysis</h3>
+              <p className="text-sm mt-1 m-0" style={{ color: 'var(--text-muted)' }}>Real-time form score tracking across current session</p>
             </div>
-            <div className="flex items-center gap-1 bg-[#F8FAFC] p-1 rounded-xl border border-[#E5E7EB]">
+            <div
+              className="flex items-center gap-1 p-1 rounded-xl"
+              style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)' }}
+            >
               {['Score', 'Rhythm'].map((tab) => (
                 <button 
                   key={tab}
-                  className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${tab === 'Score' ? 'bg-white text-[#7C3AED] shadow-sm border border-[#E5E7EB]' : 'text-[#64748B] hover:text-[#0F172A]'}`}
+                  className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${tab === 'Score' ? 'shadow-sm' : 'hover:opacity-80'}`}
+                  style={tab === 'Score'
+                    ? { background: 'var(--bg-card)', color: 'var(--purple-main)', border: '1px solid var(--border)' }
+                    : { background: 'transparent', color: 'var(--text-muted)' }}
                 >
                   {tab}
                 </button>
@@ -260,43 +295,46 @@ export default function PerformanceAnalytics() {
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={displayData.chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
-                  <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#7C3AED" stopOpacity={0.1}/>
-                    <stop offset="95%" stopColor="#7C3AED" stopOpacity={0}/>
+                  <linearGradient id="colorScorePA" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="var(--purple-main)" stopOpacity={0.15}/>
+                    <stop offset="95%" stopColor="var(--purple-main)" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
                 <XAxis 
                   dataKey="name" 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fill: '#64748B', fontSize: 12 }} 
+                  tick={{ fill: 'var(--text-muted)', fontSize: 12 }} 
                   dy={10}
                 />
                 <YAxis 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fill: '#64748B', fontSize: 12 }} 
+                  tick={{ fill: 'var(--text-muted)', fontSize: 12 }} 
                   domain={[60, 100]}
                 />
                 <RechartsTooltip 
-                  cursor={{ stroke: '#7C3AED', strokeWidth: 1, strokeDasharray: '4 4' }}
+                  cursor={{ stroke: 'var(--purple-main)', strokeWidth: 1, strokeDasharray: '4 4' }}
                   contentStyle={{ 
                     borderRadius: '12px', 
-                    border: '1px solid #E5E7EB', 
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
-                    padding: '12px'
+                    border: '1px solid var(--border)', 
+                    background: 'var(--bg-card)',
+                    boxShadow: 'var(--card-shadow)',
+                    padding: '12px',
+                    color: 'var(--text-primary)',
                   }}
-                  itemStyle={{ fontWeight: 'bold', fontSize: '13px' }}
+                  itemStyle={{ fontWeight: 'bold', fontSize: '13px', color: 'var(--text-primary)' }}
+                  labelStyle={{ color: 'var(--text-muted)', fontSize: 11 }}
                 />
                 <Area 
                   type="monotone" 
                   dataKey="score" 
-                  stroke="#7C3AED" 
+                  stroke="var(--purple-main)" 
                   strokeWidth={3} 
                   fillOpacity={1} 
-                  fill="url(#colorScore)" 
-                  activeDot={{ r: 6, fill: '#7C3AED', stroke: '#fff', strokeWidth: 2 }}
+                  fill="url(#colorScorePA)" 
+                  activeDot={{ r: 6, fill: 'var(--purple-main)', stroke: 'var(--bg-card)', strokeWidth: 2 }}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -307,59 +345,59 @@ export default function PerformanceAnalytics() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           
           {/* A. Form Quality */}
-          <motion.div variants={itemVars} className="bg-white border border-[#E5E7EB] rounded-2xl p-6 shadow-sm">
+          <motion.div variants={itemVars} className="rounded-2xl p-6 shadow-sm saas-card">
             <div className="flex items-center gap-2 mb-6">
-              <div className="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center text-[#22C55E]">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(34,197,94,0.1)', color: '#22C55E' }}>
                 <ShieldCheck size={18} />
               </div>
               <MetricTooltip content={TOOLTIP_CONTENT.formQuality}>
-                <h3 className="font-bold text-[#0F172A]">Form Quality</h3>
+                <h3 className="font-bold m-0" style={{ color: 'var(--text-primary)' }}>Form Quality</h3>
               </MetricTooltip>
             </div>
             <div className="space-y-6">
               <div>
                 <div className="flex justify-between text-sm mb-2">
-                  <span className="text-[#64748B]">Form Breakdown</span>
-                  <span className="font-bold text-[#0F172A]">Excellent</span>
+                  <span style={{ color: 'var(--text-muted)' }}>Form Breakdown</span>
+                  <span className="font-bold" style={{ color: 'var(--text-primary)' }}>Excellent</span>
                 </div>
-                <div className="h-2 bg-[#F1F5F9] rounded-full overflow-hidden">
-                  <div className="h-full bg-[#22C55E] w-[88%] rounded-full" />
+                <div className="h-2 rounded-full overflow-hidden" style={{ background: 'var(--border)' }}>
+                  <div className="h-full rounded-full" style={{ width: '88%', background: '#22C55E' }} />
                 </div>
               </div>
               <div>
                 <div className="flex justify-between text-sm mb-2">
                   <MetricTooltip content={TOOLTIP_CONTENT.stability}>
-                    <span className="text-[#64748B]">Stability Metric</span>
+                    <span style={{ color: 'var(--text-muted)' }}>Stability Metric</span>
                   </MetricTooltip>
-                  <span className="font-bold text-[#0F172A]">94/100</span>
+                  <span className="font-bold" style={{ color: 'var(--text-primary)' }}>94/100</span>
                 </div>
-                <div className="h-2 bg-[#F1F5F9] rounded-full overflow-hidden">
-                  <div className="h-full bg-[#7C3AED] w-[94%] rounded-full" />
+                <div className="h-2 rounded-full overflow-hidden" style={{ background: 'var(--border)' }}>
+                  <div className="h-full rounded-full" style={{ width: '94%', background: 'var(--purple-main)' }} />
                 </div>
               </div>
             </div>
           </motion.div>
 
           {/* B. Performance Timing */}
-          <motion.div variants={itemVars} className="bg-white border border-[#E5E7EB] rounded-2xl p-6 shadow-sm">
+          <motion.div variants={itemVars} className="rounded-2xl p-6 shadow-sm saas-card">
             <div className="flex items-center gap-2 mb-6">
-              <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-500">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(59,130,246,0.1)', color: '#3B82F6' }}>
                 <Timer size={18} />
               </div>
               <MetricTooltip content={TOOLTIP_CONTENT.rhythm}>
-                <h3 className="font-bold text-[#0F172A]">Performance Timing</h3>
+                <h3 className="font-bold m-0" style={{ color: 'var(--text-primary)' }}>Performance Timing</h3>
               </MetricTooltip>
             </div>
             <div className="space-y-6">
               <div>
                 <div className="flex justify-between text-sm mb-2">
-                  <span className="text-[#64748B]">Rhythm</span>
-                  <span className="font-bold text-[#0F172A]">Consistent</span>
+                  <span style={{ color: 'var(--text-muted)' }}>Rhythm</span>
+                  <span className="font-bold" style={{ color: 'var(--text-primary)' }}>Consistent</span>
                 </div>
                 <div className="flex gap-1 h-2">
                   {[100, 95, 98, 92, 96, 94].map((h, i) => (
-                    <div key={i} className="flex-1 bg-blue-100 rounded-full overflow-hidden">
-                       <div className="bg-blue-500 h-full" style={{ width: `${h}%` }} />
+                    <div key={i} className="flex-1 rounded-full overflow-hidden" style={{ background: 'rgba(59,130,246,0.15)' }}>
+                       <div className="h-full" style={{ width: `${h}%`, background: '#3B82F6' }} />
                     </div>
                   ))}
                 </div>
@@ -367,48 +405,52 @@ export default function PerformanceAnalytics() {
               <div>
                 <div className="flex justify-between text-sm mb-2">
                   <MetricTooltip content={TOOLTIP_CONTENT.tut}>
-                    <span className="text-[#64748B]">Time Under Tension</span>
+                    <span style={{ color: 'var(--text-muted)' }}>Time Under Tension</span>
                   </MetricTooltip>
-                  <span className="font-bold text-[#0F172A]">2.4s avg</span>
+                  <span className="font-bold" style={{ color: 'var(--text-primary)' }}>2.4s avg</span>
                 </div>
-                <div className="h-2 bg-[#F1F5F9] rounded-full overflow-hidden">
-                  <div className="h-full bg-blue-400 w-[72%] rounded-full" />
+                <div className="h-2 rounded-full overflow-hidden" style={{ background: 'var(--border)' }}>
+                  <div className="h-full rounded-full" style={{ width: '72%', background: '#60A5FA' }} />
                 </div>
               </div>
             </div>
           </motion.div>
 
           {/* C. Endurance */}
-          <motion.div variants={itemVars} className="bg-white border border-[#E5E7EB] rounded-2xl p-6 shadow-sm">
+          <motion.div variants={itemVars} className="rounded-2xl p-6 shadow-sm saas-card">
             <div className="flex items-center gap-2 mb-6">
-              <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center text-orange-500">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(249,115,22,0.1)', color: '#F97316' }}>
                 <TrendingUp size={18} />
               </div>
               <MetricTooltip content={TOOLTIP_CONTENT.fatigue}>
-                <h3 className="font-bold text-[#0F172A]">Endurance</h3>
+                <h3 className="font-bold m-0" style={{ color: 'var(--text-primary)' }}>Endurance</h3>
               </MetricTooltip>
             </div>
             <div className="space-y-6">
               <div>
                 <div className="flex justify-between text-sm mb-2">
-                  <span className="text-[#64748B]">Fatigue Map</span>
-                  <span className="font-bold text-[#0F172A]">Low Decline</span>
+                  <span style={{ color: 'var(--text-muted)' }}>Fatigue Map</span>
+                  <span className="font-bold" style={{ color: 'var(--text-primary)' }}>Low Decline</span>
                 </div>
                 <div className="flex items-end gap-1 h-8">
                   {[40, 45, 42, 38, 35, 30].map((h, i) => (
-                    <div key={i} className="flex-1 bg-orange-100 rounded-sm" style={{ height: `${h}px` }} />
+                    <div
+                      key={i}
+                      className="flex-1 rounded-sm"
+                      style={{ height: `${h}px`, background: 'rgba(249,115,22,0.25)' }}
+                    />
                   ))}
                 </div>
               </div>
               <div>
                 <div className="flex justify-between text-sm mb-2">
                   <MetricTooltip content={TOOLTIP_CONTENT.recovery}>
-                    <span className="text-[#64748B]">Recovery Rate</span>
+                    <span style={{ color: 'var(--text-muted)' }}>Recovery Rate</span>
                   </MetricTooltip>
-                  <span className="font-bold text-[#0F172A]">Optimal</span>
+                  <span className="font-bold" style={{ color: 'var(--text-primary)' }}>Optimal</span>
                 </div>
-                <div className="h-2 bg-[#F1F5F9] rounded-full overflow-hidden">
-                  <div className="h-full bg-orange-400 w-[85%] rounded-full" />
+                <div className="h-2 rounded-full overflow-hidden" style={{ background: 'var(--border)' }}>
+                  <div className="h-full rounded-full" style={{ width: '85%', background: '#FB923C' }} />
                 </div>
               </div>
             </div>
@@ -416,33 +458,43 @@ export default function PerformanceAnalytics() {
         </div>
 
         {/* --- INSIGHT SECTION --- */}
-        <motion.div variants={itemVars} className="bg-[#FFFFFF] border border-[#E5E7EB] rounded-2xl p-8 shadow-sm">
+        <motion.div variants={itemVars} className="rounded-2xl p-8 shadow-sm saas-card">
           <div className="flex items-center gap-2 mb-6">
-            <div className="p-2 bg-purple-50 rounded-lg">
-              <Lightbulb size={20} className="text-[#7C3AED]" />
+            <div className="p-2 rounded-lg" style={{ background: 'rgba(124,58,237,0.1)' }}>
+              <Lightbulb size={20} style={{ color: 'var(--purple-main)' }} />
             </div>
-            <h3 className="text-xl font-bold text-[#0F172A]">Key Performance Insights</h3>
+            <h3 className="text-xl font-bold m-0" style={{ color: 'var(--text-primary)' }}>Key Performance Insights</h3>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <ul className="space-y-4">
               {displayData.insights.map((insight, i) => (
                 <li key={i} className="flex gap-3">
-                  <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-[#7C3AED] shrink-0" />
-                  <p className="text-[#334155] leading-relaxed text-sm font-medium">{insight}</p>
+                  <div className="mt-1.5 w-1.5 h-1.5 rounded-full shrink-0" style={{ background: 'var(--purple-main)' }} />
+                  <p className="leading-relaxed text-sm font-medium m-0" style={{ color: 'var(--text-secondary)' }}>
+                    {insight}
+                  </p>
                 </li>
               ))}
             </ul>
             
-            <div className="bg-[#F8FAFC] rounded-2xl p-6 border border-[#E5E7EB] flex flex-col justify-center">
+            <div
+              className="rounded-2xl p-6 flex flex-col justify-center"
+              style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)' }}
+            >
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-full bg-[#7C3AED] flex items-center justify-center text-white font-bold">AI</div>
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold"
+                  style={{ background: 'var(--purple-main)' }}
+                >
+                  AI
+                </div>
                 <div>
-                  <p className="text-sm font-bold text-[#0F172A]">Coach's Suggestion</p>
-                  <p className="text-xs text-[#64748B]">Powered by EvoFit Intelligence</p>
+                  <p className="text-sm font-bold m-0" style={{ color: 'var(--text-primary)' }}>Coach's Suggestion</p>
+                  <p className="text-xs m-0" style={{ color: 'var(--text-muted)' }}>Powered by EvoFit Intelligence</p>
                 </div>
               </div>
-              <p className="text-sm text-[#334155] leading-relaxed italic">
+              <p className="text-sm leading-relaxed italic m-0" style={{ color: 'var(--text-secondary)' }}>
                 "Based on your current stability metrics, we recommend increasing your working weight by 2.5kg for the next session. Your form is exceptionally consistent at this volume."
               </p>
             </div>
@@ -450,15 +502,33 @@ export default function PerformanceAnalytics() {
         </motion.div>
 
         {/* --- FOOTER --- */}
-        <footer className="mt-12 flex flex-col sm:flex-row items-center justify-between border-t border-[#E5E7EB] pt-8 gap-4 pb-12">
-          <div className="flex items-center gap-2 text-[#64748B] text-sm">
+        <footer
+          className="mt-12 flex flex-col sm:flex-row items-center justify-between pt-8 gap-4 pb-12"
+          style={{ borderTop: '1px solid var(--border)' }}
+        >
+          <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--text-muted)' }}>
             <Info size={16} />
-            <span>Data updated 2 hours ago based on session #4829</span>
+            <span>Data updated based on your most recent prediction session.</span>
           </div>
           <div className="flex items-center gap-6">
-            <button className="text-[#64748B] text-sm font-medium hover:text-[#7C3AED] transition-colors">Documentation</button>
-            <button className="text-[#64748B] text-sm font-medium hover:text-[#7C3AED] transition-colors">Support</button>
-            <button className="text-[#64748B] text-sm font-medium hover:text-[#7C3AED] transition-colors">Feedback</button>
+            <button
+              className="text-sm font-medium transition-colors hover:opacity-80"
+              style={{ color: 'var(--text-muted)' }}
+            >
+              Documentation
+            </button>
+            <button
+              className="text-sm font-medium transition-colors hover:opacity-80"
+              style={{ color: 'var(--text-muted)' }}
+            >
+              Support
+            </button>
+            <button
+              className="text-sm font-medium transition-colors hover:opacity-80"
+              style={{ color: 'var(--text-muted)' }}
+            >
+              Feedback
+            </button>
           </div>
         </footer>
 

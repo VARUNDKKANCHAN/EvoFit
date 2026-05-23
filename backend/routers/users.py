@@ -154,6 +154,50 @@ def get_user_profile(current_user: models.User = Depends(auth_service.get_curren
         raise HTTPException(status_code=404, detail="Profile not found")
     return profile
 
+
+@router.put("/me/password", status_code=status.HTTP_200_OK)
+def change_password(
+    payload: schemas.PasswordChangeRequest,
+    current_user: models.User = Depends(auth_service.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Change the current user's password.
+    Requires the existing password for verification and enforces complexity rules on the new one.
+    """
+    import re
+
+    # 1. Verify old password
+    if not auth_service.verify_password(payload.old_password, current_user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Current password is incorrect."
+        )
+
+    # 2. Enforce new password complexity
+    new_pw = payload.new_password
+    if len(new_pw) < 8:
+        raise HTTPException(status_code=400, detail="Password must be at least 8 characters long.")
+    if not re.search(r"[A-Z]", new_pw):
+        raise HTTPException(status_code=400, detail="Password must contain at least one uppercase letter.")
+    if not re.search(r"[a-z]", new_pw):
+        raise HTTPException(status_code=400, detail="Password must contain at least one lowercase letter.")
+    if not re.search(r"\d", new_pw):
+        raise HTTPException(status_code=400, detail="Password must contain at least one number.")
+    if not re.search(r"[@$!%*?&#]", new_pw):
+        raise HTTPException(status_code=400, detail="Password must contain at least one special character (@$!%*?&#).")
+
+    # 3. Prevent reuse of the same password
+    if auth_service.verify_password(new_pw, current_user.password_hash):
+        raise HTTPException(status_code=400, detail="New password must be different from the current password.")
+
+    # 4. Hash and save
+    current_user.password_hash = auth_service.get_password_hash(new_pw)
+    db.commit()
+
+    return {"message": "Password updated successfully."}
+
+
 @router.get("/leaderboard", response_model=schemas.LeaderboardResponse)
 def get_leaderboard(
     timeframe: str = "All-time",

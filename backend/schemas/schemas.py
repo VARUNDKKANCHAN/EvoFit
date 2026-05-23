@@ -5,7 +5,7 @@ Pydantic models for API request/response validation.
 These define exactly what the frontend receives as JSON.
 """
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 from typing import Dict, List, Optional, Any
 from datetime import date, datetime
 
@@ -102,8 +102,7 @@ class UserResponse(UserBase):
     rag_tokens_total: int
     rag_token_limit: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class ProfileBase(BaseModel):
     full_name: Optional[str] = None
@@ -117,8 +116,7 @@ class ProfileResponse(ProfileBase):
     id: int
     user_id: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 # --- BODY METRICS ---
 
@@ -135,8 +133,7 @@ class BodyMetricResponse(BodyMetricBase):
     user_id: int
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 # --- TARGETS & PROGRESS SCHEMAS ---
 
@@ -155,8 +152,7 @@ class TargetResponse(TargetBase):
     user_id: int
     created_at: datetime
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class AchievementResponse(BaseModel):
     id: int
@@ -165,8 +161,7 @@ class AchievementResponse(BaseModel):
     icon: str
     unlocked_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class TrophyRoomResponse(BaseModel):
     level: int
@@ -275,6 +270,12 @@ class DashboardSummaryResponse(BaseModel):
     personal_bests: List[PersonalBestItem] = []
     recovery_estimate: Optional[str] = None
 
+# --- PASSWORD CHANGE ---
+
+class PasswordChangeRequest(BaseModel):
+    old_password: str = Field(..., min_length=1, description="Current password for verification")
+    new_password: str = Field(..., min_length=8, description="New password (must meet complexity rules)")
+
 # --- AUTH SCHEMAS ---
 
 class UserLogin(BaseModel):
@@ -308,8 +309,7 @@ class MeResponse(BaseModel):
     gender: Optional[str] = None
     fitness_goal: Optional[str] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class LeaderboardUser(BaseModel):
     id: int
