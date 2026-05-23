@@ -6,7 +6,6 @@ import Dashboard from './pages/Dashboard';
 import AuthPage from './pages/AuthPage';
 import UploadPredict from './pages/UploadPredict';
 import Analytics from './pages/Analytics';
-import PerformanceAnalytics from './pages/PerformanceAnalytics';
 import Targets from './pages/Targets';
 import TrophyRoom from './pages/TrophyRoom';
 import SessionHistory from './pages/SessionHistory';
@@ -656,7 +655,6 @@ function AppShell() {
       case '/signup': return 'Create Account';
       case '/upload': return 'AI Dataset Upload';
       case '/analytics': return 'Workout Analytics';
-      case '/performance-analytics': return 'Performance Analytics';
       case '/comparison': return 'Cohort Benchmarking';
       case '/targets': return 'Target Monitoring';
       case '/history': return 'Workout History';
@@ -705,7 +703,6 @@ function AppShell() {
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/upload"    element={<UploadPredict />} />
                 <Route path="/analytics" element={<Analytics />} />
-                <Route path="/performance-analytics" element={<PerformanceAnalytics />} />
                 <Route path="/comparison" element={<CohortComparison />} />
                 <Route path="/targets"   element={<Targets />} />
                 <Route path="/history"   element={<SessionHistory />} />
