@@ -222,16 +222,61 @@ async def predict_exercise(file: UploadFile = File(...), current_user: models.Us
 
 @router.get("/metrics")
 async def model_metrics():
-    """Returns model accuracy, class list, feature count, and confusion matrix."""
+    """
+    Returns real model evaluation metrics sourced from model_meta.json,
+    which is written during training by train_model.py.
+
+    Includes:
+      - Overall accuracy
+      - Per-class precision, recall, F1, and support
+      - Macro and weighted averages
+      - Confusion matrix
+      - Total test samples evaluated
+    """
     try:
         info = get_metrics()
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Could not load model info: {e}")
 
+    report: dict = info.get("report") or {}
+
+    # Pull macro/weighted averages out of the report for convenience
+    macro_avg    = report.get("macro avg", {})
+    weighted_avg = report.get("weighted avg", {})
+
+    # Total test samples = sum of per-class support values
+    total_samples = int(weighted_avg.get("support", 0))
+
+    # Build clean per-class metrics (exclude the aggregate keys)
+    aggregate_keys = {"accuracy", "macro avg", "weighted avg"}
+    per_class = {
+        cls: {
+            "precision": round(vals.get("precision", 0.0), 4),
+            "recall":    round(vals.get("recall", 0.0), 4),
+            "f1_score":  round(vals.get("f1-score", 0.0), 4),
+            "support":   int(vals.get("support", 0)),
+        }
+        for cls, vals in report.items()
+        if cls not in aggregate_keys and isinstance(vals, dict)
+    }
+
     return JSONResponse(content={
         "status":           "success",
-        "accuracy":         info["accuracy"],
+        "accuracy":         round(info["accuracy"], 6),
+        "accuracy_pct":     round(info["accuracy"] * 100, 4),
         "classes":          info["classes"],
         "feature_count":    info["feature_count"],
+        "total_test_samples": total_samples,
         "confusion_matrix": info["confusion_matrix"],
+        "per_class_metrics": per_class,
+        "macro_avg": {
+            "precision": round(macro_avg.get("precision", 0.0), 4),
+            "recall":    round(macro_avg.get("recall", 0.0), 4),
+            "f1_score":  round(macro_avg.get("f1-score", 0.0), 4),
+        },
+        "weighted_avg": {
+            "precision": round(weighted_avg.get("precision", 0.0), 4),
+            "recall":    round(weighted_avg.get("recall", 0.0), 4),
+            "f1_score":  round(weighted_avg.get("f1-score", 0.0), 4),
+        },
     })

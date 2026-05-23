@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EvoFit — Activity Diagrams</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #0d0f17;
+      --surface: #161926;
+      --border: #252a3a;
+      --accent: #7c3aed;
+      --accent2: #06b6d4;
+      --accent3: #10b981;
+      --text: #e2e8f0;
+      --muted: #64748b;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    header h1 {
+      font-size: 2.4rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #7c3aed, #06b6d4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    header p {
+      color: var(--muted);
+      margin-top: .5rem;
+      font-size: .95rem;
+    }
+    .badge-row {
+      display: flex;
+      gap: .6rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+    .badge {
+      background: #1e2235;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: .3rem .9rem;
+      font-size: .78rem;
+      color: var(--accent2);
+      font-weight: 600;
+    }
+    .diagrams-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+    @media (max-width: 1100px) {
+      .diagrams-grid { grid-template-columns: 1fr; }
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0,0,0,.4);
+      transition: transform .2s, box-shadow .2s;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 48px rgba(124,58,237,.15);
+    }
+    .card-header {
+      padding: 1.2rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: .8rem;
+    }
+    .card-num {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      font-size: .85rem; font-weight: 700; color: #fff; flex-shrink: 0;
+    }
+    .card-title { font-size: 1rem; font-weight: 700; color: var(--text); }
+    .card-sub { font-size: .78rem; color: var(--muted); margin-top: .15rem; }
+    .card-body {
+      padding: 1.5rem;
+      overflow-x: auto;
+    }
+    .mermaid {
+      display: flex;
+      justify-content: center;
+    }
+    .mermaid svg {
+      max-width: 100%;
+      height: auto;
+    }
+    footer {
+      text-align: center;
+      margin-top: 3rem;
+      color: var(--muted);
+      font-size: .8rem;
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>⚡ EvoFit Activity Diagrams</h1>
+  <p>End-to-end system behaviour flows for the AI-Powered Fitness Tracking Platform</p>
+  <div class="badge-row">
+    <span class="badge">FastAPI Backend</span>
+    <span class="badge">React Frontend</span>
+    <span class="badge">Random Forest ML</span>
+    <span class="badge">RAG AI Coach</span>
+    <span class="badge">RBAC Security</span>
+  </div>
+</header>
+
+<div class="diagrams-grid">
+
+  <!-- Diagram 1 -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-num">1</div>
+      <div>
+        <div class="card-title">🧑 User Registration & Onboarding</div>
+        <div class="card-sub">Password validation → bcrypt hashing → profile creation → dashboard redirect</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="mermaid">
+flowchart TD
+    Start([User visits EvoFit]) --> OpenAuth[Open Auth Page]
+    OpenAuth --> FillForm[Fill in: username · email · password · profile]
+    FillForm --> Submit[Submit Registration Form]
+    Submit --> ValidPwd{Password meets complexity?\nMin 8 · Uppercase · Digit · Special}
+    ValidPwd -- No --> ErrPwd[Show password error toast]
+    ErrPwd --> FillForm
+    ValidPwd -- Yes --> CheckDup{Username or email\nalready exists?}
+    CheckDup -- Yes --> ErrDup[Show duplicate warning]
+    ErrDup --> FillForm
+    CheckDup -- No --> Hash[Hash password with bcrypt]
+    Hash --> InsertUser[INSERT User record\nxp=0 · level=1 · is_admin=false]
+    InsertUser --> InsertProfile[INSERT UserProfile\nage · height · weight · goal]
+    InsertProfile --> Return201[201 Created]
+    Return201 --> Redirect[Redirect to Dashboard]
+    Redirect --> End([User lands on Dashboard ✅])
+      </div>
+    </div>
+  </div>
+
+  <!-- Diagram 2 -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-num">2</div>
+      <div>
+        <div class="card-title">🏋️ Workout Upload, ML Classification & XP Award</div>
+        <div class="card-sub">CSV upload → Random Forest → rep count → form score → XP → level-up → badges</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="mermaid">
+flowchart TD
+    Start([User opens Upload page]) --> Select[Select IMU sensor CSV file]
+    Select --> Click[Click Predict and Log]
+    Click --> TokenOk{JWT Token valid?}
+    TokenOk -- No --> E401[401 Unauthorized → redirect login]
+    TokenOk -- Yes --> Parse[Parse CSV: columns · row count]
+    Parse --> FmtOk{Format valid?}
+    FmtOk -- No --> E400[400 Bad Request]
+    E400 --> Select
+    FmtOk -- Yes --> Filter[Apply Butterworth Low-Pass Filter]
+    Filter --> Features[Extract PCA + Fourier features]
+    Features --> RF[Random Forest Classifier\n98.51% accuracy]
+    RF --> Label[Classify: bench / dead / ohp / row / squat]
+    Label --> Reps[Count Reps via peak detection]
+    Reps --> Form[Score Form via signal deviation]
+    Form --> Save[Save WorkoutSession to DB]
+    Save --> CalcXP[Calculate XP = reps × level multiplier]
+    CalcXP --> AddXP[Add XP to user account]
+    AddXP --> LvlUp{XP exceeds\nlevel threshold?}
+    LvlUp -- Yes --> Increment[Increment User Level]
+    Increment --> Badges[Evaluate badge criteria]
+    Badges --> NewBadge{New badges\nunlocked?}
+    NewBadge -- Yes --> SaveBadge[INSERT Achievements to DB]
+    SaveBadge --> Toast[Celebration modal + toast 🎉]
+    Toast --> Return
+    NewBadge -- No --> Return
+    LvlUp -- No --> Return[Return 200 JSON payload]
+    Return --> UpdateUI[Update Dashboard UI]
+    UpdateUI --> End([Workout logged & gamified ✅])
+      </div>
+    </div>
+  </div>
+
+  <!-- Diagram 3 -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-num">3</div>
+      <div>
+        <div class="card-title">🎯 Target Management & Progress Tracking</div>
+        <div class="card-sub">Create target → live progress monitoring → completion notification</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="mermaid">
+flowchart TD
+    Start([User opens Targets page]) --> Load[GET /targets/ — Load active targets]
+    Load --> HasTargets{Active targets exist?}
+    HasTargets -- Yes --> ShowCards[Display target cards\nexercise · goal · date range]
+    HasTargets -- No --> ShowEmpty[Empty state with Create prompt]
+    ShowEmpty --> Create
+    ShowCards --> Create[Click + Create New Target]
+    Create --> FillTarget[Select Exercise + Weekly Rep Goal + Date Range]
+    FillTarget --> Submit[POST /targets/]
+    Submit --> Valid{Date range &\ngoal valid?}
+    Valid -- No --> ErrTarget[Show validation error]
+    ErrTarget --> FillTarget
+    Valid -- Yes --> SaveTarget[INSERT Target record to DB]
+    SaveTarget --> Show[Show new target card]
+    Show --> Workout{New workout\nuploaded?}
+    Workout -- Yes --> Classify[Workout classified & saved]
+    Classify --> Progress[GET /targets/progress\nSum reps this week]
+    Progress --> Update[Update progress bars\ncompleted / target × 100%]
+    Update --> Met{Target met?}
+    Met -- Yes --> FireToast[Toast: Target Achieved! 🎯]
+    FireToast --> Workout
+    Met -- No --> Workout
+    Workout -- No --> Delete{Delete a target?}
+    Delete -- Yes --> Confirm[Confirm deletion]
+    Confirm --> DelReq[DELETE /targets/id]
+    DelReq --> Remove[Remove card from UI]
+    Remove --> End([Targets reflect live progress ✅])
+    Delete -- No --> End
+      </div>
+    </div>
+  </div>
+
+  <!-- Diagram 4 -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-num">4</div>
+      <div>
+        <div class="card-title">🔐 Admin User Management</div>
+        <div class="card-sub">RBAC gate → platform stats → toggle status → token limits → audit log</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="mermaid">
+flowchart TD
+    Start([Admin logs in & opens Admin Panel]) --> RBACCheck{is_admin\nin JWT?}
+    RBACCheck -- No --> E403[403 Forbidden → access denied]
+    RBACCheck -- Yes --> Stats[GET /admin/stats\ntotal_users · avg_form · predictions]
+    Stats --> Users[GET /admin/users\nFull user list with status & XP]
+    Users --> Panel[Render Admin Dashboard]
+    Panel --> Action{Admin selects action}
+
+    Action --> ToggleStatus[Toggle User Active / Inactive]
+    ToggleStatus --> PutStatus[PUT /admin/users/id/status]
+    PutStatus --> LogStatus[INSERT audit_log\naction: toggle_status]
+    LogStatus --> RefreshA[Refresh user row + toast]
+    RefreshA --> Action
+
+    Action --> AdjustTokens[Adjust RAG Token Limit]
+    AdjustTokens --> Input[Enter new token cap]
+    Input --> PutToken[PUT /admin/users/id/token-limit]
+    PutToken --> LogToken[INSERT audit_log\naction: set_token_limit]
+    LogToken --> RefreshB[Update display + toast]
+    RefreshB --> Action
+
+    Action --> ViewLogs[View Audit Logs]
+    ViewLogs --> GetLogs[GET /admin/audit-logs]
+    GetLogs --> ShowLogs[Render chronological log table]
+    ShowLogs --> Action
+
+    Action --> Health[Check System Health]
+    Health --> Status[GET /admin/system-status]
+    Status --> ShowHealth[DB ✅ Cache ✅ Errors ✅]
+    ShowHealth --> Flush{Cache flush\nneeded?}
+    Flush -- Yes --> FlushCache[POST /admin/system/flush-cache]
+    FlushCache --> LogFlush[INSERT audit_log: flush_cache]
+    LogFlush --> Action
+    Flush -- No --> Action
+
+    Action --> End([Admin tasks complete ✅])
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>EvoFit · AI-Powered Fitness Tracking System · Activity Diagrams</footer>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'dark',
+    themeVariables: {
+      primaryColor: '#7c3aed',
+      primaryTextColor: '#e2e8f0',
+      primaryBorderColor: '#9d5cf5',
+      lineColor: '#06b6d4',
+      secondaryColor: '#1e2235',
+      tertiaryColor: '#161926',
+      background: '#161926',
+      mainBkg: '#1e2235',
+      nodeBorder: '#9d5cf5',
+      clusterBkg: '#1e2235',
+      titleColor: '#e2e8f0',
+      edgeLabelBackground: '#252a3a',
+      fontFamily: 'Inter, sans-serif',
+    },
+    flowchart: { curve: 'basis', useMaxWidth: true }
+  });
+</script>
+</body>
+</html>
