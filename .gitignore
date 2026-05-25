@@ -69,3 +69,4 @@ logs/
 # ─── Misc scratch files ──────────────────────────────
 scratch/
 master
+.env
